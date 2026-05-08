@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WoW Class Colors Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Light theme (default) ── */
+    :root,
+    [data-theme="light"] {
+      --bg:           #f0ece2;
+      --surface:      #faf7f2;
+      --surface2:     #e8e3d8;
+      --border:       #cfc9bc;
+      --text:         #2c2416;
+      --text-muted:   #7a6e5c;
+      --gold:         #7a5a10;
+      --gold-dim:     #a07828;
+      --correct:      #d4edda;
+      --correct-text: #1a6b2e;
+      --wrong:        #f8d7da;
+      --wrong-text:   #8b1a1a;
+      --invalid:      #fff3cd;
+      --invalid-text: #7a5800;
+      --swatch-ring:  rgba(0,0,0,0.15);
+      --shadow:       rgba(0,0,0,0.08);
+      --radius: 8px;
+      --font: 'Georgia', serif;
+      --font-ui: system-ui, sans-serif;
+    }
+
+    /* ── Dark theme ── */
+    [data-theme="dark"] {
+      --bg:           #0e0e12;
+      --surface:      #1a1a24;
+      --surface2:     #23232f;
+      --border:       #33334a;
+      --text:         #d4c4a8;
+      --text-muted:   #7a7090;
+      --gold:         #c8a84b;
+      --gold-dim:     #8a7232;
+      --correct:      #3a7d44;
+      --correct-text: #6fcf80;
+      --wrong:        #7d3a3a;
+      --wrong-text:   #cf6f6f;
+      --invalid:      #4a3800;
+      --invalid-text: #f0c040;
+      --swatch-ring:  rgba(255,255,255,0.12);
+      --shadow:       rgba(0,0,0,0.5);
+    }
+
+    /* ── OS theme: follow system preference ── */
+    @media (prefers-color-scheme: dark) {
+      [data-theme="os"] {
+        --bg:           #0e0e12;
+        --surface:      #1a1a24;
+        --surface2:     #23232f;
+        --border:       #33334a;
+        --text:         #d4c4a8;
+        --text-muted:   #7a7090;
+        --gold:         #c8a84b;
+        --gold-dim:     #8a7232;
+        --correct:      #3a7d44;
+        --correct-text: #6fcf80;
+        --wrong:        #7d3a3a;
+        --wrong-text:   #cf6f6f;
+        --invalid:      #4a3800;
+        --invalid-text: #f0c040;
+        --swatch-ring:  rgba(255,255,255,0.12);
+        --shadow:       rgba(0,0,0,0.5);
+      }
+    }
+    @media (prefers-color-scheme: light) {
+      [data-theme="os"] {
+        --bg:           #f0ece2;
+        --surface:      #faf7f2;
+        --surface2:     #e8e3d8;
+        --border:       #cfc9bc;
+        --text:         #2c2416;
+        --text-muted:   #7a6e5c;
+        --gold:         #7a5a10;
+        --gold-dim:     #a07828;
+        --correct:      #d4edda;
+        --correct-text: #1a6b2e;
+        --wrong:        #f8d7da;
+        --wrong-text:   #8b1a1a;
+        --invalid:      #fff3cd;
+        --invalid-text: #7a5800;
+        --swatch-ring:  rgba(0,0,0,0.15);
+        --shadow:       rgba(0,0,0,0.08);
+      }
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      margin-top: 0.35rem;
+    }
+
+    /* ── Theme toggle ── */
+    #theme-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-top: 0.9rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.25rem;
+      display: inline-flex;
+    }
+
+    #theme-bar button {
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      border-radius: 16px;
+      padding: 0.3rem 0.75rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    #theme-bar button.active {
+      background: var(--gold);
+      color: var(--surface);
+    }
+
+    /* ── Mode selector ── */
+    #mode-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.4rem;
+      box-shadow: 0 1px 4px var(--shadow);
+    }
+
+    #mode-bar button {
+      font-family: var(--font-ui);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      border-radius: calc(var(--radius) - 2px);
+      padding: 0.45rem 1rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    #mode-bar button.active {
+      background: var(--gold);
+      color: var(--surface);
+    }
+
+    /* ── Score bar ── */
+    #score-bar {
+      font-family: var(--font-ui);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 1.8rem;
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    #score-bar span b { color: var(--text); }
+
+    /* ── Card ── */
+    #card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.6rem;
+      min-height: 340px;
+      box-shadow: 0 2px 12px var(--shadow);
+    }
+
+    #question-label {
+      font-family: var(--font-ui);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    /* Color swatch (color→class mode) */
+    #color-swatch {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 3px var(--swatch-ring), 0 4px 20px var(--shadow);
+      display: none;
+    }
+
+    /* Class name (class→color mode) */
+    #class-name {
+      font-size: 2.2rem;
+      font-weight: bold;
+      letter-spacing: 0.04em;
+      text-align: center;
+      color: var(--text);
+      display: none;
+    }
+
+    /* Type answer (color→class mode) */
+    #type-area {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.7rem;
+      width: 100%;
+    }
+
+    #type-area input {
+      font-family: var(--font-ui);
+      font-size: 1rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      padding: 0.6rem 1rem;
+      width: 100%;
+      max-width: 300px;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    #type-area input:focus { border-color: var(--gold-dim); }
+    #type-area input::placeholder { color: var(--text-muted); }
+
+    /* Color picker grid (class→color mode) */
+    #color-grid {
+      display: none;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+      width: 100%;
+    }
+
+    .swatch-btn {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
+      outline: none;
+      /* subtle ring so white/light swatches are visible on light bg */
+      box-shadow: inset 0 0 0 1px var(--swatch-ring);
+    }
+
+    .swatch-btn:hover { transform: scale(1.12); }
+
+    .swatch-btn.correct-pick {
+      border-color: var(--correct-text) !important;
+      box-shadow: 0 0 12px var(--correct-text);
+    }
+
+    .swatch-btn.wrong-pick {
+      border-color: var(--wrong-text) !important;
+      box-shadow: 0 0 12px var(--wrong-text);
+    }
+
+    .swatch-btn.reveal-correct {
+      border-color: var(--correct-text) !important;
+      box-shadow: 0 0 12px var(--correct-text);
+    }
+
+    /* Feedback */
+    #feedback {
+      font-family: var(--font-ui);
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 0.5rem 1.2rem;
+      border-radius: var(--radius);
+      display: none;
+    }
+
+    #feedback.correct { background: var(--correct); color: var(--correct-text); }
+    #feedback.wrong   { background: var(--wrong);   color: var(--wrong-text);   }
+    #feedback.invalid { background: var(--invalid); color: var(--invalid-text); font-weight: 500; }
+
+    /* Buttons */
+    .btn-row { display: flex; gap: 0.75rem; }
+
+    .btn {
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: var(--radius);
+      padding: 0.55rem 1.4rem;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn:active  { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+
+    .btn-primary   { background: var(--gold); color: var(--surface); }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+
+    /* Hint */
+    #hint-toggle {
+      font-family: var(--font-ui);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    #hint-box {
+      font-family: var(--font-ui);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.5rem 1rem;
+      text-align: center;
+      display: none;
+    }
+
+    /* Reference table */
+    #reference {
+      margin-top: 3rem;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    #ref-toggle {
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.4rem 1rem;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+    }
+
+    #ref-toggle:hover { border-color: var(--gold-dim); color: var(--text); }
+
+    #ref-table {
+      display: none;
+      margin-top: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .ref-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.55rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+    }
+
+    .ref-row:last-child { border-bottom: none; }
+
+    .ref-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: inset 0 0 0 1px var(--swatch-ring);
+    }
+
+    .ref-class { flex: 1; font-weight: 600; }
+    .ref-meta  { color: var(--text-muted); font-size: 0.78rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>WoW Class Colors</h1>
+  <p>Flash-card quiz — learn the class color palette by heart</p>
+  <div id="theme-bar">
+    <button data-theme="light" class="active">Light</button>
+    <button data-theme="dark">Dark</button>
+    <button data-theme="os">OS</button>
+  </div>
+</header>
+
+<div id="mode-bar">
+  <button data-mode="color-to-class" class="active">Color → Class</button>
+  <button data-mode="class-to-color">Class → Color</button>
+  <button data-mode="mixed">Mixed</button>
+</div>
+
+<div id="score-bar">
+  <span>Correct: <b id="score-correct">0</b></span>
+  <span>Wrong: <b id="score-wrong">0</b></span>
+  <span>Streak: <b id="score-streak">0</b></span>
+</div>
+
+<div id="card">
+  <div id="question-label"></div>
+
+  <div id="color-swatch"></div>
+  <div id="class-name"></div>
+
+  <div id="type-area">
+    <input type="text" id="class-input" placeholder="Type the class name…" autocomplete="off" spellcheck="false">
+    <div class="btn-row">
+      <button class="btn btn-primary" id="submit-btn">Submit</button>
+      <button class="btn btn-secondary" id="skip-btn">Skip</button>
+    </div>
+    <button id="hint-toggle">Show hint</button>
+    <div id="hint-box"></div>
+  </div>
+
+  <div id="color-grid"></div>
+
+  <div id="feedback"></div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" id="next-btn" style="display:none">Next →</button>
+    <button class="btn btn-secondary" id="reset-btn">Reset Score</button>
+  </div>
+</div>
+
+<div id="reference">
+  <button id="ref-toggle">▼ Show full reference table</button>
+  <div id="ref-table"></div>
+</div>
+
+<script>
+const CLASSES = [
+  { name: 'Death Knight', color: '#C41E3A', colorName: 'Red'          },
+  { name: 'Demon Hunter', color: '#A330C9', colorName: 'Dark Magenta' },
+  { name: 'Druid',        color: '#FF7C0A', colorName: 'Orange'       },
+  { name: 'Evoker',       color: '#33937F', colorName: 'Dark Emerald' },
+  { name: 'Hunter',       color: '#AAD372', colorName: 'Pistachio'    },
+  { name: 'Mage',         color: '#3FC7EB', colorName: 'Light Blue'   },
+  { name: 'Monk',         color: '#00FF98', colorName: 'Spring Green' },
+  { name: 'Paladin',      color: '#F48CBA', colorName: 'Pink'         },
+  { name: 'Priest',       color: '#FFFFFF', colorName: 'White'        },
+  { name: 'Rogue',        color: '#FFF468', colorName: 'Yellow'       },
+  { name: 'Shaman',       color: '#0070DD', colorName: 'Blue'         },
+  { name: 'Warlock',      color: '#8788EE', colorName: 'Purple'       },
+  { name: 'Warrior',      color: '#C69B6D', colorName: 'Tan'          },
+];
+
+// ── State ─────────────────────────────────────────────────────────────────
+let mode         = 'color-to-class';
+let current      = null;
+let qtype        = null;
+let answered     = false;
+let invalidCount = 0;
+let correct      = 0;
+let wrong        = 0;
+let streak       = 0;
+let deck         = [];
+
+// ── Elements ──────────────────────────────────────────────────────────────
+const modeButtons  = document.querySelectorAll('#mode-bar button');
+const themeButtons = document.querySelectorAll('#theme-bar button');
+const scoreCorrect = document.getElementById('score-correct');
+const scoreWrong   = document.getElementById('score-wrong');
+const scoreStreak  = document.getElementById('score-streak');
+const qLabel       = document.getElementById('question-label');
+const colorSwatch  = document.getElementById('color-swatch');
+const classNameEl  = document.getElementById('class-name');
+const typeArea     = document.getElementById('type-area');
+const classInput   = document.getElementById('class-input');
+const submitBtn    = document.getElementById('submit-btn');
+const skipBtn      = document.getElementById('skip-btn');
+const hintToggle   = document.getElementById('hint-toggle');
+const hintBox      = document.getElementById('hint-box');
+const colorGrid    = document.getElementById('color-grid');
+const feedbackEl   = document.getElementById('feedback');
+const nextBtn      = document.getElementById('next-btn');
+const resetBtn     = document.getElementById('reset-btn');
+const refToggle    = document.getElementById('ref-toggle');
+const refTable     = document.getElementById('ref-table');
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function normalize(s) {
+  return s.trim().toLowerCase().replace(/[^a-z]/g, '');
+}
+
+function refillDeck() {
+  deck = shuffle(CLASSES.map(c => ({ ...c })));
+}
+
+function pickQuestion() {
+  if (!deck.length) refillDeck();
+  current = deck.pop();
+  qtype = mode === 'mixed'
+    ? (Math.random() < 0.5 ? 'color-to-class' : 'class-to-color')
+    : mode;
+}
+
+// ── Theme ─────────────────────────────────────────────────────────────────
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  localStorage.setItem('gpg-wow-theme', theme);
+  themeButtons.forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
+}
+
+themeButtons.forEach(btn => {
+  btn.addEventListener('click', () => setTheme(btn.dataset.theme));
+});
+
+// Apply saved theme on load (default: light)
+setTheme(localStorage.getItem('gpg-wow-theme') || 'light');
+
+// ── Render ────────────────────────────────────────────────────────────────
+function showQuestion() {
+  answered     = false;
+  invalidCount = 0;
+  feedbackEl.style.display = 'none';
+  feedbackEl.className = '';
+  nextBtn.style.display = 'none';
+  hintBox.style.display = 'none';
+  hintBox.textContent = '';
+  hintToggle.textContent = 'Show hint';
+
+  pickQuestion();
+
+  if (qtype === 'color-to-class') {
+    qLabel.textContent = 'Which class uses this color?';
+    colorSwatch.style.background = current.color;
+    colorSwatch.style.display = 'block';
+    classNameEl.style.display = 'none';
+    typeArea.style.display = 'flex';
+    colorGrid.style.display = 'none';
+    classInput.value = '';
+    classInput.disabled = false;
+    submitBtn.disabled = false;
+    setTimeout(() => classInput.focus(), 50);
+  } else {
+    qLabel.textContent = 'Which color belongs to this class?';
+    colorSwatch.style.display = 'none';
+    classNameEl.textContent = current.name;
+    classNameEl.style.display = 'block';
+    typeArea.style.display = 'none';
+    renderColorGrid();
+    colorGrid.style.display = 'grid';
+  }
+}
+
+function renderColorGrid() {
+  colorGrid.innerHTML = '';
+  shuffle(CLASSES).forEach(cls => {
+    const btn = document.createElement('button');
+    btn.className = 'swatch-btn';
+    btn.style.background = cls.color;
+    btn.dataset.name = cls.name;
+    btn.addEventListener('click', () => handleColorPick(btn, cls));
+    colorGrid.appendChild(btn);
+  });
+}
+
+function handleColorPick(btn, cls) {
+  if (answered) return;
+  answered = true;
+  disableGrid();
+
+  if (cls.name === current.name) {
+    btn.classList.add('correct-pick');
+    showFeedback('correct', '✓ Correct!');
+    recordResult(true);
+  } else {
+    btn.classList.add('wrong-pick');
+    colorGrid.querySelectorAll('.swatch-btn').forEach(b => {
+      if (b.dataset.name === current.name) b.classList.add('reveal-correct');
+    });
+    showFeedback('wrong', `✗ Nope — it's ${current.name} (${current.colorName})`);
+    recordResult(false);
+  }
+  nextBtn.style.display = 'inline-block';
+}
+
+function disableGrid() {
+  colorGrid.querySelectorAll('.swatch-btn').forEach(b => {
+    b.style.cursor = 'default';
+    b.style.pointerEvents = 'none';
+  });
+}
+
+function handleTypeSubmit() {
+  if (answered) { showQuestion(); return; }
+  const raw = classInput.value.trim();
+  if (!raw) return;
+
+  const guess      = normalize(raw);
+  if (!guess) return;
+
+  const isAnyClass = CLASSES.some(c => normalize(c.name) === guess);
+
+  if (!isAnyClass) {
+    invalidCount++;
+    if (invalidCount >= 3) {
+      answered = true;
+      classInput.disabled = true;
+      submitBtn.disabled = true;
+      showFeedback('wrong', `✗ Nope — it's ${current.name}`);
+      recordResult(false);
+      nextBtn.style.display = 'inline-block';
+    } else {
+      const left = 3 - invalidCount;
+      showFeedback('invalid', `"${raw}" isn't a class name — try again (${left} attempt${left === 1 ? '' : 's'} left)`);
+      classInput.value = '';
+      setTimeout(() => classInput.focus(), 50);
+    }
+    return;
+  }
+
+  // Valid class name entered
+  invalidCount = 0;
+  answered = true;
+  classInput.disabled = true;
+  submitBtn.disabled = true;
+
+  const isRight = guess === normalize(current.name);
+  if (isRight) {
+    showFeedback('correct', '✓ Correct!');
+  } else {
+    showFeedback('wrong', `✗ Nope — it's ${current.name}`);
+  }
+  recordResult(isRight);
+  nextBtn.style.display = 'inline-block';
+}
+
+function showFeedback(type, message) {
+  feedbackEl.style.display = 'block';
+  feedbackEl.className = type;
+  feedbackEl.textContent = message;
+}
+
+function recordResult(isCorrect) {
+  if (isCorrect) { correct++; streak++; }
+  else           { wrong++;   streak = 0; }
+  scoreCorrect.textContent = correct;
+  scoreWrong.textContent   = wrong;
+  scoreStreak.textContent  = streak;
+}
+
+// ── Input filtering: letters and spaces only ──────────────────────────────
+classInput.addEventListener('input', () => {
+  classInput.value = classInput.value.replace(/[^a-zA-Z\s]/g, '');
+});
+
+classInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleTypeSubmit();
+});
+
+// ── Hint ──────────────────────────────────────────────────────────────────
+hintToggle.addEventListener('click', () => {
+  if (hintBox.style.display === 'block') {
+    hintBox.style.display = 'none';
+    hintToggle.textContent = 'Show hint';
+  } else {
+    const n = current.name;
+    hintBox.textContent = `Starts with "${n[0]}" · ${n.length} characters`;
+    hintBox.style.display = 'block';
+    hintToggle.textContent = 'Hide hint';
+  }
+});
+
+// ── Mode buttons ──────────────────────────────────────────────────────────
+modeButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    mode = btn.dataset.mode;
+    modeButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    refillDeck();
+    showQuestion();
+  });
+});
+
+// ── Skip / Next / Reset ───────────────────────────────────────────────────
+submitBtn.addEventListener('click', handleTypeSubmit);
+
+skipBtn.addEventListener('click', () => {
+  if (answered) return;
+  answered = true;
+  classInput.disabled = true;
+  submitBtn.disabled = true;
+  showFeedback('wrong', `Skipped — answer was ${current.name}`);
+  recordResult(false);
+  nextBtn.style.display = 'inline-block';
+});
+
+nextBtn.addEventListener('click', showQuestion);
+
+resetBtn.addEventListener('click', () => {
+  correct = wrong = streak = 0;
+  scoreCorrect.textContent = scoreWrong.textContent = scoreStreak.textContent = 0;
+  refillDeck();
+  showQuestion();
+});
+
+// ── Reference table ───────────────────────────────────────────────────────
+refToggle.addEventListener('click', () => {
+  const open = refTable.style.display === 'block';
+  refTable.style.display = open ? 'none' : 'block';
+  refToggle.textContent  = open ? '▼ Show full reference table' : '▲ Hide reference table';
+});
+
+function buildRefTable() {
+  CLASSES.forEach(cls => {
+    const row = document.createElement('div');
+    row.className = 'ref-row';
+    row.innerHTML = `
+      <div class="ref-dot" style="background:${cls.color}"></div>
+      <div class="ref-class" style="color:${cls.color}">${cls.name}</div>
+      <div class="ref-meta">${cls.colorName} &nbsp;·&nbsp; ${cls.color}</div>
+    `;
+    refTable.appendChild(row);
+  });
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+buildRefTable();
+refillDeck();
+showQuestion();
+</script>
+</body>
+</html>
