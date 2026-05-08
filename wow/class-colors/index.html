@@ -419,6 +419,56 @@
 
     .ref-class { flex: 1; font-weight: 600; }
     .ref-meta  { color: var(--text-muted); font-size: 0.78rem; }
+
+    /* ── Instructions ── */
+    #instructions {
+      width: 100%;
+      max-width: 560px;
+      margin-bottom: 1.5rem;
+    }
+
+    #instructions-toggle {
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.4rem 1rem;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+    }
+
+    #instructions-toggle:hover { border-color: var(--gold-dim); color: var(--text); }
+
+    #instructions-body {
+      display: none;
+      margin-top: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem 1.4rem;
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    #instructions-body h3 {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      margin-top: 1rem;
+      margin-bottom: 0.3rem;
+    }
+
+    #instructions-body h3:first-child { margin-top: 0; }
+
+    #instructions-body p { color: var(--text-muted); margin-bottom: 0.2rem; }
+
+    #instructions-body strong { color: var(--text); font-weight: 600; }
   </style>
 </head>
 <body>
@@ -437,6 +487,27 @@
   <button data-mode="color-to-class" class="active">Color → Class</button>
   <button data-mode="class-to-color">Class → Color</button>
   <button data-mode="mixed">Mixed</button>
+</div>
+
+<div id="instructions">
+  <button id="instructions-toggle">▼ How to play</button>
+  <div id="instructions-body">
+    <h3>Modes</h3>
+    <p><strong>Color → Class:</strong> A color swatch is shown. Type the name of the WoW class that uses it and press Enter or Submit.</p>
+    <p><strong>Class → Color:</strong> A class name is shown. Click the swatch in the grid that matches its color.</p>
+    <p><strong>Mixed:</strong> Both question types are shuffled together randomly.</p>
+
+    <h3>Typing answers</h3>
+    <p>Only letters and spaces are accepted — no numbers or special characters. If you type something that isn't a class name at all, you'll get a warning and a chance to try again. After <strong>3 invalid entries in a row</strong> the question is marked wrong.</p>
+    <p>The <strong>Hint</strong> button reveals the first letter and total character count of the answer.</p>
+    <p><strong>Skip</strong> reveals the answer and counts as a wrong answer.</p>
+
+    <h3>Scoring</h3>
+    <p>Correct and wrong answers are tracked across the session. <strong>Streak</strong> counts consecutive correct answers and resets on any wrong answer or skip. <strong>Reset Score</strong> clears all counts and reshuffles the deck.</p>
+
+    <h3>Reference table</h3>
+    <p>A full list of all 13 classes and their colors is available at the bottom of the page — but opening it will spoil the answers.</p>
+  </div>
 </div>
 
 <div id="score-bar">
@@ -753,11 +824,19 @@ resetBtn.addEventListener('click', () => {
   showQuestion();
 });
 
+// ── Instructions ──────────────────────────────────────────────────────────
+document.getElementById('instructions-toggle').addEventListener('click', function() {
+  const body = document.getElementById('instructions-body');
+  const open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  this.textContent = open ? '▼ How to play' : '▲ Hide instructions';
+});
+
 // ── Reference table ───────────────────────────────────────────────────────
 refToggle.addEventListener('click', () => {
   const open = refTable.style.display === 'block';
   refTable.style.display = open ? 'none' : 'block';
-  refToggle.textContent  = open ? '▼ Show full reference table' : '▲ Hide reference table';
+  refToggle.textContent  = open ? '▼ Show full reference table (spoilers — all answers)' : '▲ Hide reference table (spoilers — all answers)';
 });
 
 function buildRefTable() {
