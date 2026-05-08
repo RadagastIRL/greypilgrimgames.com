@@ -778,6 +778,13 @@ classInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') handleTypeSubmit();
 });
 
+document.addEventListener('keydown', e => {
+  if (e.key === ' ' && answered && document.activeElement !== classInput) {
+    e.preventDefault();
+    showQuestion();
+  }
+});
+
 // ── Hint ──────────────────────────────────────────────────────────────────
 hintToggle.addEventListener('click', () => {
   if (hintBox.style.display === 'block') {
