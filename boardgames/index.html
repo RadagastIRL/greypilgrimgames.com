@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Board Games — Grey Pilgrim Games</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root,
+    [data-theme="light"] {
+      --bg:           #f0ece2;
+      --surface:      #faf7f2;
+      --surface2:     #e8e3d8;
+      --border:       #cfc9bc;
+      --text:         #2c2416;
+      --text-muted:   #7a6e5c;
+      --gold:         #7a5a10;
+      --gold-dim:     #a07828;
+      --shadow:       rgba(0,0,0,0.08);
+      --radius: 8px;
+      --font: 'Georgia', serif;
+      --font-ui: system-ui, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg:           #0e0e12;
+      --surface:      #1a1a24;
+      --surface2:     #23232f;
+      --border:       #33334a;
+      --text:         #d4c4a8;
+      --text-muted:   #7a7090;
+      --gold:         #c8a84b;
+      --gold-dim:     #8a7232;
+      --shadow:       rgba(0,0,0,0.5);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      [data-theme="os"] {
+        --bg:           #0e0e12;
+        --surface:      #1a1a24;
+        --surface2:     #23232f;
+        --border:       #33334a;
+        --text:         #d4c4a8;
+        --text-muted:   #7a7090;
+        --gold:         #c8a84b;
+        --gold-dim:     #8a7232;
+        --shadow:       rgba(0,0,0,0.5);
+      }
+    }
+    @media (prefers-color-scheme: light) {
+      [data-theme="os"] {
+        --bg:           #f0ece2;
+        --surface:      #faf7f2;
+        --surface2:     #e8e3d8;
+        --border:       #cfc9bc;
+        --text:         #2c2416;
+        --text-muted:   #7a6e5c;
+        --gold:         #7a5a10;
+        --gold-dim:     #a07828;
+        --shadow:       rgba(0,0,0,0.08);
+      }
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    nav {
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+    }
+
+    nav a {
+      font-family: var(--font-ui);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    nav a:hover { color: var(--gold); }
+
+    #theme-bar {
+      display: inline-flex;
+      gap: 0.25rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.25rem;
+    }
+
+    #theme-bar button {
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      border-radius: 16px;
+      padding: 0.3rem 0.75rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    #theme-bar button.active { background: var(--gold); color: var(--surface); }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      width: 100%;
+      max-width: 640px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: var(--gold);
+      letter-spacing: 0.05em;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-family: var(--font-ui);
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      line-height: 1.5;
+    }
+
+    /* ── Game section ── */
+    .game-section {
+      width: 100%;
+      max-width: 640px;
+      margin-bottom: 2.5rem;
+    }
+
+    .game-header {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      margin-bottom: 0.6rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .game-title {
+      font-family: var(--font-ui);
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .game-tag {
+      font-family: var(--font-ui);
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.3rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1.1rem;
+      box-shadow: 0 1px 4px var(--shadow);
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    a.card:hover {
+      border-color: var(--gold-dim);
+      box-shadow: 0 2px 10px var(--shadow);
+    }
+
+    .card-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      width: 2rem;
+      text-align: center;
+      padding-top: 0.05rem;
+    }
+
+    .card-body { flex: 1; }
+
+    .card-title {
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+
+    .card-desc {
+      font-family: var(--font-ui);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .card-arrow {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    .card.soon {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    .card.soon .card-title::after {
+      content: 'Coming soon';
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--gold-dim);
+      margin-left: 0.55rem;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/">← Grey Pilgrim Games</a>
+  <div id="theme-bar">
+    <button data-theme="light" class="active">Light</button>
+    <button data-theme="dark">Dark</button>
+    <button data-theme="os">OS</button>
+  </div>
+</nav>
+
+<header>
+  <h1>Board Games</h1>
+  <p>Trackers, references, and tools for your tabletop sessions — at the table or on a video call.</p>
+</header>
+
+<!-- ── General Purpose ── -->
+<div class="game-section">
+  <div class="game-header">
+    <div class="game-title">General Purpose</div>
+    <div class="game-tag">Works with any game</div>
+  </div>
+  <div class="card-list">
+    <div class="card soon">
+      <div class="card-icon">🏆</div>
+      <div class="card-body">
+        <div class="card-title">Score Tracker</div>
+        <div class="card-desc">Add and remove players, track scores round by round, preserve turn order, and see a running total — works for any points-based game.</div>
+      </div>
+    </div>
+    <div class="card soon">
+      <div class="card-icon">⏱️</div>
+      <div class="card-body">
+        <div class="card-title">Game Timer</div>
+        <div class="card-desc">Quickly set, start, pause, and reset a countdown timer. Keeps a history of all your splits so you can review session pacing.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Wingspan ── -->
+<div class="game-section">
+  <div class="game-header">
+    <div class="game-title">Wingspan</div>
+    <div class="game-tag">Engine-building · 1–5 players</div>
+  </div>
+  <div class="card-list">
+    <div class="card soon">
+      <div class="card-icon">🐦</div>
+      <div class="card-body">
+        <div class="card-title">Round Goals Tracker</div>
+        <div class="card-desc">Track each player's progress toward the end-of-round goals so everyone can see where they stand without passing the goal tiles around.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Star Realms ── -->
+<div class="game-section">
+  <div class="game-header">
+    <div class="game-title">Star Realms</div>
+    <div class="game-tag">Deck-building · 2–6 players</div>
+  </div>
+  <div class="card-list">
+    <div class="card soon">
+      <div class="card-icon">❤️</div>
+      <div class="card-body">
+        <div class="card-title">Authority Tracker</div>
+        <div class="card-desc">Fast-tap +/– authority tracking for 2–6 players, starting at 50. Handles the rapid back-and-forth swings of a typical game without fumbling with counters.</div>
+      </div>
+    </div>
+    <div class="card soon">
+      <div class="card-icon">🃏</div>
+      <div class="card-body">
+        <div class="card-title">Card Reference</div>
+        <div class="card-desc">Searchable, filterable database of all base set and expansion cards — by faction, cost, card type, and ability keyword.</div>
+      </div>
+    </div>
+    <div class="card soon">
+      <div class="card-icon">🚀</div>
+      <div class="card-body">
+        <div class="card-title">Faction Guide</div>
+        <div class="card-desc">Quick reference for what each faction does — Blob, Trade Federation, Star Empire, and Machine Cult — ideal for newer players learning faction synergies.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── D&D ── -->
+<div class="game-section">
+  <div class="game-header">
+    <div class="game-title">Dungeons &amp; Dragons</div>
+    <div class="game-tag">TTRPG · any group size</div>
+  </div>
+  <div class="card-list">
+    <div class="card soon">
+      <div class="card-icon">⚔️</div>
+      <div class="card-body">
+        <div class="card-title">Initiative Tracker</div>
+        <div class="card-desc">Dual-view tracker with a public player screen and a private DM view. The DM can keep enemies hidden until revealed; both views stay in sync in real time — works at the table or shared over a video call.</div>
+      </div>
+    </div>
+    <div class="card soon">
+      <div class="card-icon">🎲</div>
+      <div class="card-body">
+        <div class="card-title">Dice Roller</div>
+        <div class="card-desc">True-random rolls for any die — d4, d6, d8, d10, d12, d20, d100 — with support for multi-dice expressions (e.g. 3d6+2) and a roll history log.</div>
+      </div>
+    </div>
+    <div class="card soon">
+      <div class="card-icon">📜</div>
+      <div class="card-body">
+        <div class="card-title">Character Sheet Builder</div>
+        <div class="card-desc">Build and save full character sheets in the browser. Export to JSON for re-import later, or generate a print-ready PDF to bring to the table.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const themeButtons = document.querySelectorAll('#theme-bar button');
+
+  function setTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('gpg-wow-theme', theme);
+    themeButtons.forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
+  }
+
+  themeButtons.forEach(btn => btn.addEventListener('click', () => setTheme(btn.dataset.theme)));
+  setTheme(localStorage.getItem('gpg-wow-theme') || 'light');
+</script>
+</body>
+</html>
