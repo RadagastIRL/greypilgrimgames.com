@@ -97,6 +97,14 @@
     .btn-danger { background: transparent; color: #c02020; border-color: #c02020; }
     .btn-danger:hover { background: rgba(192,32,32,0.08); }
 
+    /* ── Save indicator ── */
+    #save-indicator {
+      font-size: 0.7rem; color: var(--text-muted);
+      opacity: 0; transition: opacity 0.4s;
+      white-space: nowrap;
+    }
+    #save-indicator.flash { opacity: 1; }
+
     /* ── Header ── */
     header { text-align: center; padding: 1.75rem 1rem 1rem; }
     header h1 { font-size: 2rem; color: var(--gold); letter-spacing: 0.05em; font-family: var(--font); }
@@ -153,6 +161,7 @@
       color: var(--text-muted); padding-bottom: 0.4rem; border-bottom: 1px solid var(--border);
     }
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+    .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.7rem; }
     .field { display: flex; flex-direction: column; gap: 0.3rem; }
     label {
       font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
@@ -176,10 +185,7 @@
       padding: 0.1rem 0.25rem; height: 36px; width: 48px; cursor: pointer; flex-shrink: 0;
     }
     .colour-hex-input { font-family: monospace !important; width: 90px !important; flex-shrink: 0; }
-    .colour-dot {
-      width: 26px; height: 26px; border-radius: 50%;
-      border: 2px solid var(--border); flex-shrink: 0;
-    }
+    .colour-dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; }
 
     /* ── Icon field ── */
     .icon-field { display: flex; gap: 0.5rem; align-items: center; }
@@ -192,21 +198,31 @@
     }
     .icon-pick-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
 
+    /* ── Icon picker popup ── */
     #icon-picker-popup {
       position: fixed; z-index: 600;
       background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
       padding: 0.75rem; box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-      display: none; width: 310px; max-height: 290px; overflow-y: auto;
+      display: none; width: 360px;
     }
-    .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; }
+    .icon-search {
+      width: 100%; margin-bottom: 0.6rem;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-family: var(--font-ui); font-size: 0.82rem;
+      padding: 0.38rem 0.65rem; outline: none;
+    }
+    .icon-search:focus { border-color: var(--gold-dim); }
+    .icon-grid-wrap { max-height: 280px; overflow-y: auto; scrollbar-width: thin; }
+    .icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.3rem; }
     .icon-swatch {
-      display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
-      padding: 0.45rem 0.2rem; border: 1px solid var(--border); border-radius: 6px;
+      display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
+      padding: 0.35rem 0.1rem; border: 1px solid var(--border); border-radius: 6px;
       cursor: pointer; background: var(--surface2); transition: border-color 0.15s, background 0.15s;
     }
     .icon-swatch:hover { border-color: var(--gold-dim); background: var(--surface); }
-    .icon-swatch .ig { font-size: 1.3rem; line-height: 1; }
-    .icon-swatch .il { font-size: 0.58rem; color: var(--text-muted); text-align: center; line-height: 1.2; }
+    .icon-swatch img { width: 32px; height: 32px; border-radius: 3px; display: block; }
+    .icon-swatch .il { font-size: 0.5rem; color: var(--text-muted); text-align: center; line-height: 1.2; word-break: break-all; }
+    .icon-empty { font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 1rem; }
 
     /* ── Personality sliders ── */
     .slider-list { display: flex; flex-direction: column; gap: 0.6rem; }
@@ -231,33 +247,69 @@
       padding: 0.9rem; display: flex; flex-direction: column; gap: 0.55rem;
     }
     .section-hdr { display: flex; gap: 0.5rem; align-items: center; }
-    .section-num {
-      font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
-      color: var(--text-muted); flex-shrink: 0;
-    }
+    .section-num { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); flex-shrink: 0; }
     .section-hdr input { flex: 1; font-weight: 600; }
     .section-actions { display: flex; gap: 0.3rem; flex-shrink: 0; }
 
+    /* ── Custom Fields (Additional Info) ── */
+    .ai-list { display: flex; flex-direction: column; gap: 0.6rem; }
+    .ai-row {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.75rem; display: flex; flex-direction: column; gap: 0.45rem;
+    }
+    .ai-row-hdr { display: flex; gap: 0.5rem; align-items: center; }
+    .ai-row-hdr input.ai-name { flex: 1; font-weight: 600; font-size: 0.85rem; }
+    .ai-row-body { display: flex; gap: 0.5rem; align-items: center; }
+    .ai-row-body input.ai-value { flex: 1; }
+    .ai-actions { display: flex; gap: 0.3rem; flex-shrink: 0; }
+    .ai-preset-bar { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.2rem; }
+    .ai-preset-btn {
+      font-size: 0.65rem; padding: 0.18rem 0.5rem; border: 1px solid var(--border);
+      border-radius: 12px; background: var(--surface); color: var(--text-muted);
+      cursor: pointer; font-family: var(--font-ui); transition: border-color 0.15s, color 0.15s;
+    }
+    .ai-preset-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+    /* ── Markup toolbar ── */
     .markup-toolbar {
-      display: flex; gap: 0.3rem; flex-wrap: wrap;
+      display: flex; gap: 0.25rem; flex-wrap: wrap;
       padding: 0.3rem 0.5rem;
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 6px 6px 0 0; border-bottom: none;
     }
     .markup-toolbar + textarea { border-top-left-radius: 0; border-top-right-radius: 0; }
     .mark-btn {
-      font-size: 0.66rem; padding: 0.18rem 0.45rem;
+      font-size: 0.64rem; padding: 0.16rem 0.42rem;
       border: 1px solid var(--border); border-radius: 4px;
       background: var(--surface2); color: var(--text-muted); cursor: pointer;
-      font-family: var(--font-ui); transition: color 0.15s, border-color 0.15s;
+      font-family: var(--font-ui); transition: color 0.15s, border-color 0.15s; white-space: nowrap;
     }
     .mark-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
-    .mark-color-btn {
-      display: inline-flex; align-items: center; gap: 0.25rem;
+    .mark-color-btn { display: inline-flex; align-items: center; gap: 0.22rem; }
+    .mark-color-swatch { display: inline-block; width: 8px; height: 8px; border-radius: 2px; }
+    .mark-sep { width: 1px; background: var(--border); margin: 0.15rem 0.05rem; flex-shrink: 0; }
+
+    /* ── Install guide ── */
+    .install-guide {
+      border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; margin-top: 0.75rem;
     }
-    .mark-color-swatch {
-      display: inline-block; width: 8px; height: 8px; border-radius: 2px;
+    .install-guide-toggle {
+      width: 100%; display: flex; justify-content: space-between; align-items: center;
+      padding: 0.6rem 0.9rem; background: var(--surface2); border: none;
+      color: var(--text-muted); font-family: var(--font-ui); font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; text-align: left; transition: color 0.15s;
     }
+    .install-guide-toggle:hover { color: var(--gold); }
+    .install-guide-body {
+      display: none; padding: 0.85rem 1rem; font-size: 0.8rem; line-height: 1.7; color: var(--text-muted);
+      background: var(--surface);
+    }
+    .install-guide.open .install-guide-body { display: block; }
+    .install-guide.open .install-guide-toggle { color: var(--gold); }
+    .install-guide code { font-size: 0.74rem; background: var(--surface2); padding: 0.1rem 0.3rem; border-radius: 4px; border: 1px solid var(--border); }
+    .install-guide ol { padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.35rem; }
+    .install-path { font-family: monospace; font-size: 0.7rem; background: var(--surface2); padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid var(--border); display: block; margin-top: 0.25rem; word-break: break-all; }
 
     /* ── Preview panel ── */
     .preview-panel {
@@ -290,9 +342,10 @@
       background: rgba(255,255,255,0.03); border: 1px solid rgba(180,140,50,0.25);
       margin: 0 auto 0.55rem;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.5rem; color: rgba(180,140,50,0.4);
-      text-align: center; padding: 0.2rem; line-height: 1.3; word-break: break-all;
+      overflow: hidden;
     }
+    .pv-icon img { width: 52px; height: 52px; border-radius: 6px; display: block; }
+    .pv-icon-fallback { font-size: 0.48rem; color: rgba(180,140,50,0.4); text-align: center; padding: 0.2rem; line-height: 1.3; word-break: break-all; }
     .pv-title { font-size: 0.7rem; color: rgba(200,175,90,0.65); font-style: italic; margin-bottom: 0.1rem; }
     .pv-name { font-size: 1.35rem; font-weight: bold; line-height: 1.1; }
     .pv-sub { font-size: 0.7rem; color: rgba(200,180,130,0.5); margin-top: 0.2rem; }
@@ -311,49 +364,77 @@
     .pv-status.dnd { background: rgba(160,30,30,0.2);  color: #ee5555; border: 1px solid rgba(160,30,30,0.35); }
     .pv-currently { font-style: italic; font-weight: 400; font-family: 'Georgia', serif; }
 
-    /* Characteristics */
+    /* Section titles */
     .pv-section-title {
       font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
       color: rgba(200,168,75,0.7); margin-bottom: 0.45rem; padding-bottom: 0.3rem;
       border-bottom: 1px solid rgba(180,140,50,0.18); font-family: system-ui, sans-serif;
     }
+
+    /* Characteristics */
     .pv-chars { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem 0.8rem; }
     .pv-char { display: flex; gap: 0.35rem; font-size: 0.74rem; }
     .pv-ck { color: rgba(200,168,75,0.55); white-space: nowrap; flex-shrink: 0; }
     .pv-cv { color: #c4b89a; }
 
-    /* Personality bars */
+    /* Additional Info */
+    .pv-ai-grid { display: flex; flex-direction: column; gap: 0.25rem; }
+    .pv-ai-row { display: flex; gap: 0.5rem; align-items: center; font-size: 0.74rem; }
+    .pv-ai-icon { width: 18px; height: 18px; border-radius: 3px; flex-shrink: 0; }
+    .pv-ai-name { color: rgba(200,168,75,0.55); flex-shrink: 0; }
+    .pv-ai-val { color: #c4b89a; }
+
+    /* Personality bars — dot style */
     .pv-bars { display: flex; flex-direction: column; gap: 0.5rem; }
     .pv-bar-row { display: flex; flex-direction: column; gap: 0.18rem; }
     .pv-bar-labels { display: flex; justify-content: space-between; font-size: 0.63rem; color: rgba(200,180,130,0.55); }
-    .pv-bar-track { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
-    .pv-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, rgba(80,150,255,0.55), rgba(255,155,55,0.55)); }
+    .pv-bar-track { height: 4px; background: rgba(255,255,255,0.08); border-radius: 3px; position: relative; margin: 4px 0; }
+    .pv-bar-dot {
+      position: absolute; width: 10px; height: 10px; border-radius: 50%;
+      background: rgba(200,168,75,0.75); border: 1px solid rgba(200,168,75,0.4);
+      top: 50%; transform: translate(-50%, -50%);
+      box-shadow: 0 0 4px rgba(200,168,75,0.4);
+    }
 
-    /* About */
+    /* About — markup rendering */
     .pv-about-sec { margin-bottom: 0.65rem; }
-    .pv-about-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(200,168,75,0.7); margin-bottom: 0.25rem; font-family: system-ui, sans-serif; }
+    .pv-about-hdr { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.25rem; }
+    .pv-about-hdr img { width: 18px; height: 18px; border-radius: 3px; }
+    .pv-about-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(200,168,75,0.7); font-family: system-ui, sans-serif; }
     .pv-about-body { font-size: 0.79rem; line-height: 1.65; color: #c4b89a; }
+    .pv-about-body h1 { font-size: 1rem; color: rgba(200,168,75,0.9); font-family: Georgia, serif; margin: 0.35rem 0 0.2rem; border-bottom: 1px solid rgba(180,140,50,0.25); padding-bottom: 0.15rem; }
+    .pv-about-body h2 { font-size: 0.88rem; color: rgba(200,168,75,0.8); font-family: Georgia, serif; margin: 0.3rem 0 0.15rem; }
+    .pv-about-body h3 { font-size: 0.8rem; color: rgba(200,168,75,0.7); font-family: Georgia, serif; margin: 0.25rem 0 0.1rem; }
+    .pv-about-body a { color: rgba(100,160,255,0.8); }
     .pv-empty { font-size: 0.74rem; color: rgba(200,180,130,0.25); font-style: italic; }
 
-    /* ── Import modal ── */
+    /* ── Help modal ── */
     .modal-bd {
       display: none; position: fixed; inset: 0; z-index: 500;
       background: rgba(0,0,0,0.72); align-items: center; justify-content: center;
+      padding: 1rem;
     }
     .modal-bd.visible { display: flex; }
     .modal-card {
       background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-      padding: 1.5rem; max-width: 420px; width: 90%;
+      padding: 1.5rem; max-width: 520px; width: 100%;
       box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+      max-height: 90vh; overflow-y: auto;
     }
-    .modal-card h2 { font-family: var(--font); color: var(--gold); font-size: 1.1rem; margin-bottom: 1rem; }
+    .modal-card h2 { font-family: var(--font); color: var(--gold); font-size: 1.2rem; margin-bottom: 1rem; }
+    .modal-card h3 { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold-dim); margin: 0.9rem 0 0.35rem; }
+    .modal-card p, .modal-card li { font-size: 0.82rem; line-height: 1.6; color: var(--text-muted); }
+    .modal-card ul { padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.25rem; }
+    .modal-card code { font-size: 0.74rem; background: var(--surface2); padding: 0.1rem 0.3rem; border-radius: 4px; border: 1px solid var(--border); }
+    .modal-foot { display: flex; justify-content: flex-end; margin-top: 1rem; gap: 0.5rem; }
+
+    /* Profile picker (import) */
     .profile-opt {
       padding: 0.6rem 0.85rem; border: 1px solid var(--border); border-radius: 6px;
       margin-bottom: 0.45rem; cursor: pointer; font-size: 0.88rem;
       background: var(--surface2); transition: border-color 0.15s;
     }
     .profile-opt:hover { border-color: var(--gold-dim); }
-    .modal-foot { display: flex; justify-content: flex-end; margin-top: 0.75rem; }
 
     /* ── Ko-fi footer ── */
     .kofi-footer { text-align: center; padding: 1rem 1rem 1.5rem; font-size: 0.72rem; }
@@ -366,8 +447,11 @@
 <nav>
   <a href="/wow/">← World of Warcraft</a>
   <div class="nav-right">
+    <span id="save-indicator">✓ Saved</span>
+    <button class="btn btn-secondary btn-sm" id="reset-btn">↺ Reset</button>
     <button class="btn btn-secondary btn-sm" id="import-btn">⬆ Import .lua</button>
     <button class="btn btn-primary btn-sm" id="export-btn">⬇ Export .lua</button>
+    <button class="btn btn-secondary btn-sm" id="help-btn">? Help</button>
     <div id="theme-bar">
       <button data-theme="light" class="active">Light</button>
       <button data-theme="dark">Dark</button>
@@ -378,7 +462,7 @@
 
 <header>
   <h1>TotalRP3 Profile Builder</h1>
-  <p>Build your TRP3 profile and export a <code>totalRP3.lua</code> to drop straight into your SavedVariables folder.<br>Or import your existing file to edit it here.</p>
+  <p>Build your TRP3 profile and export a <code>totalRP3.lua</code> to drop straight into your SavedVariables folder.<br>Or import your existing file to edit it here. Changes are saved automatically.</p>
 </header>
 
 <input type="file" id="file-input" accept=".lua" style="display:none">
@@ -391,6 +475,7 @@
       <button class="tab-btn active" data-tab="basics">Basics</button>
       <button class="tab-btn" data-tab="personality">Personality</button>
       <button class="tab-btn" data-tab="about">About</button>
+      <button class="tab-btn" data-tab="custom">Custom Fields</button>
       <button class="tab-btn" data-tab="misc">Misc / OOC</button>
     </div>
 
@@ -403,11 +488,12 @@
           <div class="field">
             <label for="f-profile-name">Profile Name</label>
             <input type="text" id="f-profile-name" placeholder="My Character" data-key="profileName">
+            <div class="field-hint">An internal label for this profile. Not shown in-game.</div>
           </div>
           <div class="field">
             <label for="f-player-string">Character–Realm</label>
             <input type="text" id="f-player-string" placeholder="Charname-Realm" data-key="playerString">
-            <div class="field-hint">Exact in-game name and realm, e.g. <em>Sylvanas-Silvermoon</em></div>
+            <div class="field-hint">Your exact character name + realm with <strong>no space</strong>, e.g. <em>Sylvanas-Silvermoon</em>. Must match exactly or the profile won't attach to your character.</div>
           </div>
         </div>
       </div>
@@ -431,7 +517,7 @@
         </div>
         <div class="field">
           <label for="f-tagline">Short Description / Tagline</label>
-          <input type="text" id="f-tagline" placeholder="Shown when others hover your portrait" data-key="tagline">
+          <input type="text" id="f-tagline" placeholder="One line shown when others hover your portrait" data-key="tagline">
         </div>
       </div>
 
@@ -486,7 +572,7 @@
             <input type="text" id="f-icon" data-key="icon" placeholder="Interface\Icons\INV_Misc_QuestionMark">
             <button class="icon-pick-btn" id="icon-pick-main">Browse…</button>
           </div>
-          <div class="field-hint">WoW icon path — use Browse or type it in. Find more on Wowhead.</div>
+          <div class="field-hint">WoW icon path — use Browse or paste from <a href="https://www.wowhead.com/icons" target="_blank" rel="noopener" style="color:var(--gold)">Wowhead Icons</a></div>
         </div>
       </div>
 
@@ -503,7 +589,8 @@
         </div>
         <div class="field">
           <label for="f-currently-text">Currently Doing</label>
-          <input type="text" id="f-currently-text" placeholder="What your character is doing right now" data-key="currentlyText">
+          <input type="text" id="f-currently-text" placeholder="e.g. Brooding at the Wyvern's Tail" data-key="currentlyText">
+          <div class="field-hint">Keep this updated — players use it to gauge whether you're approachable right now</div>
         </div>
       </div>
 
@@ -512,7 +599,7 @@
     <!-- ── Personality ── -->
     <div class="tab-panel hidden" id="tab-personality">
       <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.5">
-        Each trait is a slider between two opposing labels (0 = fully left, 100 = fully right). These appear as bars in your TRP3 profile.
+        Each trait is a slider between two opposing labels. The dot shows where your character falls. These appear as bars in your TRP3 profile.
       </p>
       <div class="slider-list" id="slider-list"></div>
       <button class="btn btn-secondary" id="add-slider-btn" style="align-self:flex-start">+ Add Trait</button>
@@ -521,21 +608,39 @@
     <!-- ── About ── -->
     <div class="tab-panel hidden" id="tab-about">
       <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.5">
-        Each section appears as a titled block in your About tab. Supports TRP3 colour markup:
-        <code style="font-size:0.74rem;background:var(--surface2);padding:0.1rem 0.3rem;border-radius:3px;border:1px solid var(--border)">{col:ff7c0a}orange text{/col}</code>
-        and WoW colour codes:
-        <code style="font-size:0.74rem;background:var(--surface2);padding:0.1rem 0.3rem;border-radius:3px;border:1px solid var(--border)">|cffff7c0aorange|r</code>
+        Each section is a titled block in your About tab. Use the toolbar to add headers, colours, and links.
       </p>
       <div class="section-list" id="section-list"></div>
       <button class="btn btn-secondary" id="add-section-btn" style="align-self:flex-start">+ Add Section</button>
     </div>
 
-    <!-- ── Misc ── -->
+    <!-- ── Custom Fields ── -->
+    <div class="tab-panel hidden" id="tab-custom">
+      <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.5">
+        Custom fields appear in your TRP3 "Additional Information" section. Use quick-adds below or create your own.
+      </p>
+      <div class="ai-preset-bar">
+        <button class="ai-preset-btn" data-preset="Pronouns">+ Pronouns</button>
+        <button class="ai-preset-btn" data-preset="Nickname">+ Nickname</button>
+        <button class="ai-preset-btn" data-preset="Occupation">+ Occupation</button>
+        <button class="ai-preset-btn" data-preset="House / Clan">+ House / Clan</button>
+        <button class="ai-preset-btn" data-preset="Relationship">+ Relationship</button>
+        <button class="ai-preset-btn" data-preset="Birthplace">+ Birthplace</button>
+        <button class="ai-preset-btn" data-preset="Status">+ Status</button>
+        <button class="ai-preset-btn" data-preset="Voice">+ Voice</button>
+      </div>
+      <div class="ai-list" id="ai-list"></div>
+      <button class="btn btn-secondary" id="add-ai-btn" style="align-self:flex-start;margin-top:0.3rem">+ Add Custom Field</button>
+    </div>
+
+    <!-- ── Misc / OOC ── -->
     <div class="tab-panel hidden" id="tab-misc">
+      <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.5">
+        This appears in the Misc tab of your TRP3 profile. Use it for OOC notes: RP preferences, walk-up availability, content limits, contact info.
+      </p>
       <div class="field">
-        <label for="f-misc">Miscellaneous / OOC Notes</label>
-        <textarea id="f-misc" rows="10" placeholder="OOC notes, player preferences, contact info, content limits…&#10;&#10;Supports the same colour markup as the About sections."></textarea>
-        <div class="field-hint">This appears in the Misc tab of your TRP3 profile.</div>
+        <div id="misc-toolbar" class="markup-toolbar"></div>
+        <textarea id="f-misc" rows="12" placeholder="OOC notes, RP preferences, content limits, contact info…&#10;&#10;e.g. Walk-up RP welcome · Mature themes: ask first · DMs open"></textarea>
       </div>
     </div>
 
@@ -549,12 +654,40 @@
 
 </div><!-- /layout -->
 
-<!-- Icon picker popup -->
-<div id="icon-picker-popup">
-  <div class="icon-grid" id="icon-grid"></div>
+<!-- Export install guide (rendered below layout) -->
+<div style="max-width:1180px;margin:0 auto;padding:0 1rem 2rem">
+  <div class="install-guide" id="install-guide">
+    <button class="install-guide-toggle" id="install-toggle">
+      <span>📁 Where does the exported file go?</span>
+      <span id="install-caret">▸</span>
+    </button>
+    <div class="install-guide-body">
+      <ol>
+        <li><strong>Close World of Warcraft completely</strong> — if WoW is running when you replace the file, it will overwrite your changes on logout.</li>
+        <li>Find your SavedVariables folder. The path depends on your OS and game version:<br>
+          <strong>Windows (Retail):</strong>
+          <span class="install-path">C:\Program Files (x86)\World of Warcraft\_retail_\WTF\Account\YOUR_ACCOUNT\SavedVariables\</span>
+          <strong>Windows (Classic):</strong>
+          <span class="install-path">C:\Program Files (x86)\World of Warcraft\_classic_\WTF\Account\YOUR_ACCOUNT\SavedVariables\</span>
+          <strong>Mac (Retail):</strong>
+          <span class="install-path">/Applications/World of Warcraft/_retail_/WTF/Account/YOUR_ACCOUNT/SavedVariables/</span>
+        </li>
+        <li>Drop the exported <code>totalRP3.lua</code> into that folder, replacing the existing file. Back up the original first if you have other profiles you want to keep.</li>
+        <li>Launch WoW and log in. TRP3 will load your profile automatically. If you had other profiles in the old file and replaced it, you'll need to re-export with those profiles included — or use the Import button here to bring them in first.</li>
+      </ol>
+    </div>
+  </div>
 </div>
 
-<!-- Import modal -->
+<!-- Icon picker popup -->
+<div id="icon-picker-popup">
+  <input type="text" class="icon-search" id="icon-search" placeholder="Filter icons…">
+  <div class="icon-grid-wrap">
+    <div class="icon-grid" id="icon-grid"></div>
+  </div>
+</div>
+
+<!-- Import profile picker modal -->
 <div class="modal-bd" id="import-modal">
   <div class="modal-card">
     <h2>Select a Profile to Import</h2>
@@ -565,41 +698,163 @@
   </div>
 </div>
 
+<!-- Help modal -->
+<div class="modal-bd" id="help-modal">
+  <div class="modal-card">
+    <h2>TRP3 Profile Builder — Help</h2>
+
+    <h3>Getting started</h3>
+    <p>Fill in the <strong>Basics</strong> tab, then add your story in <strong>About</strong> sections. Click <strong>Export .lua</strong> when done and follow the install guide below the editor to put the file in the right place.</p>
+
+    <h3>Tabs</h3>
+    <ul>
+      <li><strong>Basics</strong> — name, title, physical traits, icon, colour, RP status</li>
+      <li><strong>Personality</strong> — trait sliders (e.g. Cheerful ↔ Melancholic)</li>
+      <li><strong>About</strong> — freeform sections with titled blocks and colour markup</li>
+      <li><strong>Custom Fields</strong> — pronouns, nickname, occupation, house/clan and any other custom key/value pairs</li>
+      <li><strong>Misc / OOC</strong> — out-of-character notes, RP preferences, content limits</li>
+    </ul>
+
+    <h3>Markup / formatting</h3>
+    <p>Use the toolbar in About and Misc sections to insert tags:</p>
+    <ul>
+      <li><code>{h1}Heading{/h1}</code> — large heading (add <code>:c</code> or <code>:r</code> for centre/right)</li>
+      <li><code>{h2}Subheading{/h2}</code> — medium heading</li>
+      <li><code>{h3}Small heading{/h3}</code></li>
+      <li><code>{col:ff7c0a}orange text{/col}</code> — coloured text</li>
+      <li><code>|cffFF7C0Aorange|r</code> — WoW-style colour code (same result)</li>
+      <li><code>{link*https://example.com*Link text}</code> — hyperlink</li>
+      <li><code>{icon:inv_misc_book_09:20}</code> — inline icon at 20px</li>
+    </ul>
+    <p>All tags must be properly opened and closed or the text may break for other viewers.</p>
+
+    <h3>Character–Realm field</h3>
+    <p>This must exactly match your in-game character name and realm with <strong>no space</strong> between name and hyphen — e.g. <code>Aelindra-Silvermoon</code>. Case matters. This is how TRP3 links the profile to your character.</p>
+
+    <h3>Import &amp; Export</h3>
+    <ul>
+      <li>Click <strong>Import .lua</strong> to load an existing <code>totalRP3.lua</code> from your computer</li>
+      <li>If the file has multiple profiles you'll be asked to pick one</li>
+      <li>Click <strong>Export .lua</strong> to download the file and drop it into your SavedVariables folder (see the install guide)</li>
+    </ul>
+
+    <h3>Tips from the community</h3>
+    <ul>
+      <li>Keep the About sections scannable — bullet points beat walls of text</li>
+      <li>The OOC section is expected etiquette on RP realms — state your preferences</li>
+      <li>Keep "Currently" updated; it's how people know you're approachable right now</li>
+    </ul>
+
+    <div class="modal-foot">
+      <button class="btn btn-primary" id="help-close-btn">Got it</button>
+    </div>
+  </div>
+</div>
+
 <footer class="kofi-footer">
   <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener">☕ Support me on Ko-fi</a>
 </footer>
 
 <script>
 // ═══════════════════════════════════════════════════════════
-// CONSTANTS
+// ICONS
 // ═══════════════════════════════════════════════════════════
 
 const ICONS = [
-  { label:'Question', emoji:'❓', path:'Interface\\Icons\\INV_Misc_QuestionMark' },
-  { label:'Book',     emoji:'📖', path:'Interface\\Icons\\INV_Misc_Book_09' },
-  { label:'Scroll',   emoji:'📜', path:'Interface\\Icons\\INV_Scroll_03' },
-  { label:'Note',     emoji:'📝', path:'Interface\\Icons\\INV_Misc_Note_01' },
-  { label:'Map',      emoji:'🗺️', path:'Interface\\Icons\\INV_Misc_Map01' },
-  { label:'Sword',    emoji:'⚔️', path:'Interface\\Icons\\INV_Sword_04' },
-  { label:'Shield',   emoji:'🛡️', path:'Interface\\Icons\\INV_Shield_06' },
-  { label:'Dagger',   emoji:'🗡️', path:'Interface\\Icons\\INV_Weapon_ShortBlade_05' },
-  { label:'Bow',      emoji:'🏹', path:'Interface\\Icons\\INV_Weapon_Bow_05' },
-  { label:'Staff',    emoji:'🪄', path:'Interface\\Icons\\INV_Staff_13' },
-  { label:'Holy',     emoji:'✨', path:'Interface\\Icons\\Spell_Holy_Resurrection' },
-  { label:'Shadow',   emoji:'🌑', path:'Interface\\Icons\\Spell_Shadow_SoulLeech_3' },
-  { label:'Fire',     emoji:'🔥', path:'Interface\\Icons\\Spell_Fire_Flamebolt' },
-  { label:'Frost',    emoji:'❄️', path:'Interface\\Icons\\Spell_Frost_FrostBolt02' },
-  { label:'Nature',   emoji:'🌿', path:'Interface\\Icons\\Spell_Nature_FaerieFire' },
-  { label:'Arcane',   emoji:'💫', path:'Interface\\Icons\\Spell_Arcane_ArcaneBolt' },
-  { label:'Rose',     emoji:'🌹', path:'Interface\\Icons\\INV_Misc_Flower_01' },
-  { label:'Ring',     emoji:'💍', path:'Interface\\Icons\\INV_Jewelry_Ring_08' },
-  { label:'Gem',      emoji:'💎', path:'Interface\\Icons\\INV_Misc_Gem_Diamond_01' },
-  { label:'Potion',   emoji:'⚗️', path:'Interface\\Icons\\INV_Potion_01' },
-  { label:'Heart',    emoji:'❤️', path:'Interface\\Icons\\Spell_Holy_PrayerOfHealing02' },
-  { label:'Skull',    emoji:'💀', path:'Interface\\Icons\\Ability_Creature_Cursed_03' },
-  { label:'Star',     emoji:'⭐', path:'Interface\\Icons\\Achievement_Reputation_08' },
-  { label:'Person',   emoji:'🧍', path:'Interface\\Icons\\Achievement_Character_Human_Male' },
+  // Identity
+  { label:'Question',      path:'Interface\\Icons\\INV_Misc_QuestionMark' },
+  { label:'Human M',       path:'Interface\\Icons\\Achievement_Character_Human_Male' },
+  { label:'Human F',       path:'Interface\\Icons\\Achievement_Character_Human_Female' },
+  { label:'Night Elf M',   path:'Interface\\Icons\\Achievement_Character_NightElf_Male' },
+  { label:'Night Elf F',   path:'Interface\\Icons\\Achievement_Character_NightElf_Female' },
+  { label:'Blood Elf M',   path:'Interface\\Icons\\Achievement_Character_BloodElf_Male' },
+  { label:'Blood Elf F',   path:'Interface\\Icons\\Achievement_Character_BloodElf_Female' },
+  { label:'Undead M',      path:'Interface\\Icons\\Achievement_Character_Undead_Male' },
+  { label:'Undead F',      path:'Interface\\Icons\\Achievement_Character_Undead_Female' },
+  { label:'Orc M',         path:'Interface\\Icons\\Achievement_Character_Orc_Male' },
+  { label:'Orc F',         path:'Interface\\Icons\\Achievement_Character_Orc_Female' },
+  { label:'Tauren M',      path:'Interface\\Icons\\Achievement_Character_Tauren_Male' },
+  { label:'Dwarf M',       path:'Interface\\Icons\\Achievement_Character_Dwarf_Male' },
+  { label:'Gnome M',       path:'Interface\\Icons\\Achievement_Character_Gnome_Male' },
+  { label:'Troll M',       path:'Interface\\Icons\\Achievement_Character_Troll_Male' },
+  { label:'Draenei M',     path:'Interface\\Icons\\Achievement_Character_Draenei_Male' },
+  { label:'Worgen M',      path:'Interface\\Icons\\Achievement_Character_Worgen_Male' },
+  { label:'Goblin M',      path:'Interface\\Icons\\Achievement_Character_Goblin_Male' },
+  // Writing
+  { label:'Book',          path:'Interface\\Icons\\INV_Misc_Book_09' },
+  { label:'Scroll',        path:'Interface\\Icons\\INV_Scroll_03' },
+  { label:'Note',          path:'Interface\\Icons\\INV_Misc_Note_01' },
+  { label:'Map',           path:'Interface\\Icons\\INV_Misc_Map01' },
+  // Weapons
+  { label:'Sword',         path:'Interface\\Icons\\INV_Sword_04' },
+  { label:'Longsword',     path:'Interface\\Icons\\INV_Sword_39' },
+  { label:'Dagger',        path:'Interface\\Icons\\INV_Weapon_ShortBlade_05' },
+  { label:'Axe',           path:'Interface\\Icons\\INV_Axe_01' },
+  { label:'Mace',          path:'Interface\\Icons\\INV_Mace_01' },
+  { label:'Staff',         path:'Interface\\Icons\\INV_Staff_13' },
+  { label:'Bow',           path:'Interface\\Icons\\INV_Weapon_Bow_05' },
+  { label:'Shield',        path:'Interface\\Icons\\INV_Shield_06' },
+  // Magic
+  { label:'Holy',          path:'Interface\\Icons\\Spell_Holy_Resurrection' },
+  { label:'Shadow',        path:'Interface\\Icons\\Spell_Shadow_SoulLeech_3' },
+  { label:'Fire',          path:'Interface\\Icons\\Spell_Fire_Flamebolt' },
+  { label:'Frost',         path:'Interface\\Icons\\Spell_Frost_FrostBolt02' },
+  { label:'Arcane',        path:'Interface\\Icons\\Spell_Arcane_ArcaneBolt' },
+  { label:'Nature',        path:'Interface\\Icons\\Spell_Nature_FaerieFire' },
+  { label:'Fel',           path:'Interface\\Icons\\Spell_Fel_Incinerate01' },
+  { label:'Death',         path:'Interface\\Icons\\Spell_DeathKnight_RaiseDead2' },
+  { label:'Life',          path:'Interface\\Icons\\Spell_Nature_WispHeal' },
+  { label:'Light',         path:'Interface\\Icons\\Spell_Holy_HolyBolt' },
+  { label:'Void',          path:'Interface\\Icons\\Spell_Priest_VoidBlast' },
+  { label:'Moon',          path:'Interface\\Icons\\Ability_Druid_Moonfire' },
+  { label:'Storm',         path:'Interface\\Icons\\Spell_Nature_CallLightning' },
+  // Professions
+  { label:'Blacksmith',    path:'Interface\\Icons\\Trade_BlackSmithing' },
+  { label:'Tailoring',     path:'Interface\\Icons\\Trade_Tailoring' },
+  { label:'Alchemy',       path:'Interface\\Icons\\Trade_Alchemy' },
+  { label:'Herbalism',     path:'Interface\\Icons\\Spell_Nature_Thorns' },
+  { label:'Mining',        path:'Interface\\Icons\\Trade_Mining' },
+  { label:'Engineering',   path:'Interface\\Icons\\Trade_Engineering' },
+  { label:'Enchanting',    path:'Interface\\Icons\\Trade_Engraving' },
+  { label:'Cooking',       path:'Interface\\Icons\\INV_Misc_Food_15' },
+  { label:'Fishing',       path:'Interface\\Icons\\Trade_Fishing' },
+  { label:'Inscription',   path:'Interface\\Icons\\INV_Inscription_Tradeskill01' },
+  { label:'Jewelcraft',    path:'Interface\\Icons\\INV_Misc_Gem_Diamond_01' },
+  // Items
+  { label:'Potion',        path:'Interface\\Icons\\INV_Potion_01' },
+  { label:'Ring',          path:'Interface\\Icons\\INV_Jewelry_Ring_08' },
+  { label:'Rose',          path:'Interface\\Icons\\INV_Misc_Flower_01' },
+  { label:'Coin',          path:'Interface\\Icons\\INV_Misc_Coin_01' },
+  { label:'Key',           path:'Interface\\Icons\\INV_Misc_Key_01' },
+  { label:'Lantern',       path:'Interface\\Icons\\INV_Misc_Lantern_01' },
+  { label:'Bag',           path:'Interface\\Icons\\INV_Misc_Bag_11' },
+  { label:'Rune',          path:'Interface\\Icons\\INV_Misc_Rune_01' },
+  { label:'Herb',          path:'Interface\\Icons\\INV_Misc_Herb_02' },
+  { label:'Feather',       path:'Interface\\Icons\\INV_Feather_01' },
+  { label:'Drink',         path:'Interface\\Icons\\INV_Drink_09' },
+  { label:'Orb',           path:'Interface\\Icons\\INV_Misc_Orb_01' },
+  { label:'Gear',          path:'Interface\\Icons\\INV_Misc_Gear_01' },
+  // Symbols
+  { label:'Heart',         path:'Interface\\Icons\\Spell_Holy_PrayerOfHealing02' },
+  { label:'Skull',         path:'Interface\\Icons\\Ability_Creature_Cursed_03' },
+  { label:'Star',          path:'Interface\\Icons\\Achievement_Reputation_08' },
+  { label:'Eye',           path:'Interface\\Icons\\Ability_EyeOfTheOwl' },
+  { label:'Paw',           path:'Interface\\Icons\\Ability_Druid_SurvivalInstincts' },
+  { label:'Anchor',        path:'Interface\\Icons\\INV_Misc_Anchor' },
+  { label:'Crown',         path:'Interface\\Icons\\INV_Crown_01' },
+  { label:'Music',         path:'Interface\\Icons\\INV_Misc_Drum_01' },
+  { label:'Compass',       path:'Interface\\Icons\\Achievement_Exploration_Northrend' },
 ];
+
+function iconUrl(path) {
+  const name = String(path || '').split('\\').pop().split('/').pop();
+  if (!name) return '';
+  return `https://wow.zamimg.com/images/wow/icons/medium/${name.toLowerCase()}.jpg`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════
 
 const STATUS_META = {
   1: { label:'Out of Character', cls:'ooc', dot:'⚫' },
@@ -609,13 +864,26 @@ const STATUS_META = {
 };
 
 const MARKUP_COLORS = [
-  { label:'Gold',   hex:'ffd100' },
-  { label:'Silver', hex:'c0c0c0' },
-  { label:'Red',    hex:'ff4444' },
-  { label:'Blue',   hex:'6699ff' },
-  { label:'Green',  hex:'55cc55' },
-  { label:'Orange', hex:'ff7c0a' },
+  { label:'Gold',    hex:'ffd100' },
+  { label:'Silver',  hex:'c0c0c0' },
+  { label:'Red',     hex:'ff4444' },
+  { label:'Blue',    hex:'6699ff' },
+  { label:'Green',   hex:'55cc55' },
+  { label:'Orange',  hex:'ff7c0a' },
+  { label:'Purple',  hex:'cc88ff' },
+  { label:'Teal',    hex:'44ccbb' },
 ];
+
+const AI_PRESET_ICONS = {
+  'Pronouns':    'Interface\\Icons\\Achievement_GuildPerk_EverybodysFriend',
+  'Nickname':    'Interface\\Icons\\Achievement_Character_Human_Female',
+  'Occupation':  'Interface\\Icons\\Trade_Engineering',
+  'House / Clan':'Interface\\Icons\\Achievement_Reputation_08',
+  'Relationship':'Interface\\Icons\\Spell_Holy_PrayerOfHealing02',
+  'Birthplace':  'Interface\\Icons\\INV_Misc_Map01',
+  'Status':      'Interface\\Icons\\Spell_Holy_Resurrection',
+  'Voice':       'Interface\\Icons\\INV_Misc_Drum_01',
+};
 
 const DEFAULT_SLIDERS = [
   { id:'s1', left:'Cheerful',  right:'Melancholic', value:50 },
@@ -626,12 +894,13 @@ const DEFAULT_SLIDERS = [
 ];
 
 const DEFAULT_SECTIONS = [
-  { id:'a1', icon:'Interface\\Icons\\INV_Misc_Book_09',                     title:'History',     body:'' },
-  { id:'a2', icon:'Interface\\Icons\\Achievement_Character_Human_Male',     title:'Appearance',  body:'' },
-  { id:'a3', icon:'Interface\\Icons\\Spell_Holy_Resurrection',              title:'Personality', body:'' },
+  { id:'a1', icon:'Interface\\Icons\\INV_Misc_Book_09',                 title:'History',     body:'' },
+  { id:'a2', icon:'Interface\\Icons\\Achievement_Character_Human_Male', title:'Appearance',  body:'' },
+  { id:'a3', icon:'Interface\\Icons\\Spell_Holy_Resurrection',          title:'Personality', body:'' },
 ];
 
 const STORAGE_KEY = 'gpg-trp3-builder';
+const HELP_KEY    = 'gpg-trp3-builder-help-seen';
 
 // ═══════════════════════════════════════════════════════════
 // STATE
@@ -656,6 +925,7 @@ let state = {
   currentlyText:   '',
   sliders:         JSON.parse(JSON.stringify(DEFAULT_SLIDERS)),
   sections:        JSON.parse(JSON.stringify(DEFAULT_SECTIONS)),
+  additionalInfo:  [],
   misc:            '',
 };
 
@@ -665,8 +935,10 @@ function setState(patch) {
   Object.assign(state, patch);
   saveState();
   renderPreview();
+  flashSaved();
 }
 
+let _saveTimer = null;
 function saveState() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, nextId })); } catch(e) {}
 }
@@ -677,8 +949,16 @@ function loadState() {
     if (!raw) return;
     const saved = JSON.parse(raw);
     if (saved.state) state = Object.assign(state, saved.state);
+    if (!state.additionalInfo) state.additionalInfo = [];
     if (saved.nextId) nextId = saved.nextId;
   } catch(e) {}
+}
+
+function flashSaved() {
+  const el = document.getElementById('save-indicator');
+  el.classList.add('flash');
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => el.classList.remove('flash'), 1800);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -692,11 +972,34 @@ function escHtml(s) {
 function parseMarkup(text) {
   if (!text) return '';
   let h = String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  // Headings — {h1}, {h1:c}, {h1:r}
+  h = h.replace(/\{h([123])(?::([lcrLCR]))?\}/gi, (_, n, a) => {
+    const align = a ? ({l:'left',c:'center',r:'right'}[a.toLowerCase()]||'left') : 'left';
+    return `<h${n} style="text-align:${align}">`;
+  });
+  h = h.replace(/\{\/h([123])\}/gi, (_, n) => `</h${n}>`);
+
+  // Links — {link*url*text}
+  h = h.replace(/\{link\*([^*}]+)\*([^}]*)\}/gi,
+    (_, url, txt) => `<a href="${escHtml(url)}" target="_blank" rel="noopener">${txt || url}</a>`);
+
+  // Inline icons — {icon:name:size}
+  h = h.replace(/\{icon:([^:}]+)(?::(\d+))?\}/gi, (_, name, size) => {
+    const px = Math.max(10, Math.min(64, parseInt(size||20,10)));
+    const url = `https://wow.zamimg.com/images/wow/icons/medium/${name.toLowerCase()}.jpg`;
+    return `<img src="${url}" style="width:${px}px;height:${px}px;border-radius:3px;vertical-align:middle;display:inline-block" onerror="this.style.display='none'">`;
+  });
+
+  // Colour tags
   h = h.replace(/\{col:([0-9a-fA-F]{6})\}/gi, '<span style="color:#$1">');
   h = h.replace(/\{\/col\}/gi, '</span>');
   h = h.replace(/\|cff([0-9a-fA-F]{6})/gi, '<span style="color:#$1">');
   h = h.replace(/\|r/gi, '</span>');
-  h = h.replace(/\{icon:[^}]+\}/gi, '');
+
+  // Remove any remaining unknown tags
+  h = h.replace(/\{[^}]{0,40}\}/g, '');
+
   h = h.replace(/\n/g, '<br>');
   return h;
 }
@@ -728,6 +1031,67 @@ document.querySelectorAll('.tab-btn').forEach(b =>
   b.addEventListener('click', () => showTab(b.dataset.tab)));
 
 // ═══════════════════════════════════════════════════════════
+// MARKUP TOOLBAR BUILDER
+// ═══════════════════════════════════════════════════════════
+
+function buildToolbar(containerId, textareaId) {
+  const bar = document.getElementById(containerId);
+  if (!bar) return;
+
+  function ins(open, close) {
+    const ta = document.getElementById(textareaId);
+    if (!ta) return;
+    const s = ta.selectionStart, e = ta.selectionEnd;
+    const sel = ta.value.slice(s, e);
+    const insert = sel ? open + sel + close : open;
+    ta.setRangeText(insert, s, e, 'end');
+    ta.dispatchEvent(new Event('input'));
+    ta.focus();
+  }
+
+  function btn(label, open, close, title) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mark-btn';
+    b.textContent = label;
+    if (title) b.title = title;
+    b.addEventListener('click', () => ins(open, close));
+    return b;
+  }
+
+  function sep() {
+    const s = document.createElement('div');
+    s.className = 'mark-sep';
+    return s;
+  }
+
+  // Headings
+  bar.appendChild(btn('H1', '{h1}', '{/h1}', 'Large heading'));
+  bar.appendChild(btn('H1·C', '{h1:c}', '{/h1}', 'Large heading, centred'));
+  bar.appendChild(btn('H2', '{h2}', '{/h2}', 'Medium heading'));
+  bar.appendChild(btn('H3', '{h3}', '{/h3}', 'Small heading'));
+  bar.appendChild(sep());
+
+  // Colours
+  MARKUP_COLORS.forEach(c => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mark-btn mark-color-btn';
+    b.title = c.label;
+    b.innerHTML = `<span class="mark-color-swatch" style="background:#${c.hex}"></span>${c.label}`;
+    b.addEventListener('click', () => ins(`{col:${c.hex}}`, '{/col}'));
+    bar.appendChild(b);
+  });
+  bar.appendChild(btn('End color', '{/col}', '', 'Close colour tag'));
+  bar.appendChild(btn('|r', '|r', '', 'End WoW colour code'));
+  bar.appendChild(sep());
+
+  // Link & icon
+  bar.appendChild(btn('{link}', '{link*https://example.com*', '}', 'Insert hyperlink — edit the URL'));
+  bar.appendChild(btn('{icon}', '{icon:', ':20}', 'Inline icon — put icon name before :20'));
+}
+
+// ═══════════════════════════════════════════════════════════
 // BASICS FORM BINDINGS
 // ═══════════════════════════════════════════════════════════
 
@@ -742,15 +1106,14 @@ function bindBasics() {
     el.addEventListener('change', handler);
   });
 
-  const picker  = document.getElementById('colour-picker');
-  const hexIn   = document.getElementById('colour-hex');
-  const dot     = document.getElementById('colour-dot');
+  const picker = document.getElementById('colour-picker');
+  const hexIn  = document.getElementById('colour-hex');
+  const dot    = document.getElementById('colour-dot');
 
   function syncColour(hex6) {
     const safe = hex6.replace(/[^0-9a-fA-F]/g,'').slice(0,6).toLowerCase();
     state.colour = safe;
-    saveState();
-    renderPreview();
+    saveState(); renderPreview(); flashSaved();
     dot.style.background = '#' + (safe || 'ff7c0a');
     if (safe.length === 6) picker.value = '#' + safe;
     if (hexIn !== document.activeElement) hexIn.value = safe;
@@ -796,13 +1159,29 @@ function populateForm() {
 
 const iconPopup = document.getElementById('icon-picker-popup');
 let iconTargetCb = null;
+let iconFilter = '';
 
 function buildIconGrid() {
+  renderIconGrid();
+  document.getElementById('icon-search').addEventListener('input', e => {
+    iconFilter = e.target.value.trim().toLowerCase();
+    renderIconGrid();
+  });
+}
+
+function renderIconGrid() {
   const grid = document.getElementById('icon-grid');
-  ICONS.forEach(icon => {
+  grid.innerHTML = '';
+  const filtered = ICONS.filter(ic => !iconFilter || ic.label.toLowerCase().includes(iconFilter));
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="icon-empty" style="grid-column:1/-1">No icons match</div>';
+    return;
+  }
+  filtered.forEach(icon => {
     const sw = document.createElement('div');
     sw.className = 'icon-swatch';
-    sw.innerHTML = `<span class="ig">${icon.emoji}</span><span class="il">${icon.label}</span>`;
+    const url = iconUrl(icon.path);
+    sw.innerHTML = `<img src="${url}" alt="${icon.label}" onerror="this.parentNode.querySelector('.il').style.fontSize='0.7rem'"><span class="il">${icon.label}</span>`;
     sw.addEventListener('click', () => {
       if (iconTargetCb) iconTargetCb(icon.path);
       closeIconPicker();
@@ -813,11 +1192,14 @@ function buildIconGrid() {
 
 function openIconPicker(nearEl, cb) {
   iconTargetCb = cb;
+  iconFilter = '';
+  document.getElementById('icon-search').value = '';
+  renderIconGrid();
   const rect = nearEl.getBoundingClientRect();
   const top  = rect.bottom + window.scrollY + 4;
-  const left = Math.min(rect.left + window.scrollX, window.innerWidth - 320);
-  iconPopup.style.top  = top  + 'px';
-  iconPopup.style.left = left + 'px';
+  const left = Math.min(rect.left + window.scrollX, window.innerWidth - 370);
+  iconPopup.style.top  = top + 'px';
+  iconPopup.style.left = Math.max(8, left) + 'px';
   iconPopup.style.display = 'block';
 }
 function closeIconPicker() { iconPopup.style.display = 'none'; iconTargetCb = null; }
@@ -826,7 +1208,7 @@ document.getElementById('icon-pick-main').addEventListener('click', e => {
   openIconPicker(e.currentTarget, path => {
     state.icon = path;
     document.getElementById('f-icon').value = path;
-    saveState(); renderPreview();
+    saveState(); renderPreview(); flashSaved();
   });
 });
 document.addEventListener('click', e => {
@@ -863,19 +1245,19 @@ function renderSliders() {
     row.querySelector('.sl-range').addEventListener('input', e => {
       sl.value = +e.target.value;
       valBadge.textContent = sl.value;
-      saveState(); renderPreview();
+      saveState(); renderPreview(); flashSaved();
     });
-    row.querySelector('.sl-left').addEventListener('input',  e => { sl.left  = e.target.value; saveState(); renderPreview(); });
-    row.querySelector('.sl-right').addEventListener('input', e => { sl.right = e.target.value; saveState(); renderPreview(); });
-    row.querySelector('.sl-up')?.addEventListener('click',   () => moveSlider(idx, -1));
-    row.querySelector('.sl-down')?.addEventListener('click', () => moveSlider(idx,  1));
-    row.querySelector('.sl-remove').addEventListener('click',() => removeSlider(sl.id));
+    row.querySelector('.sl-left').addEventListener('input',  e => { sl.left  = e.target.value; saveState(); renderPreview(); flashSaved(); });
+    row.querySelector('.sl-right').addEventListener('input', e => { sl.right = e.target.value; saveState(); renderPreview(); flashSaved(); });
+    row.querySelector('.sl-up')?.addEventListener('click',    () => moveSlider(idx, -1));
+    row.querySelector('.sl-down')?.addEventListener('click',  () => moveSlider(idx,  1));
+    row.querySelector('.sl-remove').addEventListener('click', () => removeSlider(sl.id));
     list.appendChild(row);
   });
 }
 
-function addSlider()          { state.sliders.push({ id:'s'+(nextId++), left:'Left', right:'Right', value:50 }); saveState(); renderSliders(); renderPreview(); }
-function removeSlider(id)     { state.sliders = state.sliders.filter(s => s.id !== id); saveState(); renderSliders(); renderPreview(); }
+function addSlider()          { state.sliders.push({ id:'s'+(nextId++), left:'Left', right:'Right', value:50 }); saveState(); renderSliders(); renderPreview(); flashSaved(); }
+function removeSlider(id)     { state.sliders = state.sliders.filter(s => s.id !== id); saveState(); renderSliders(); renderPreview(); flashSaved(); }
 function moveSlider(idx, dir) {
   const n = idx + dir;
   if (n < 0 || n >= state.sliders.length) return;
@@ -888,6 +1270,52 @@ document.getElementById('add-slider-btn').addEventListener('click', addSlider);
 // ABOUT SECTIONS
 // ═══════════════════════════════════════════════════════════
 
+function makeToolbarButtons(bodyId) {
+  const bar = document.createElement('div');
+  bar.className = 'markup-toolbar';
+
+  function ins(open, close) {
+    const ta = document.getElementById(bodyId);
+    if (!ta) return;
+    const s = ta.selectionStart, e = ta.selectionEnd;
+    const sel = ta.value.slice(s, e);
+    const insert = sel ? open + sel + close : open;
+    ta.setRangeText(insert, s, e, 'end');
+    ta.dispatchEvent(new Event('input'));
+    ta.focus();
+  }
+
+  function btn(label, open, close, title) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'mark-btn';
+    b.textContent = label; if (title) b.title = title;
+    b.addEventListener('click', () => ins(open, close));
+    return b;
+  }
+  function sep() { const s = document.createElement('div'); s.className = 'mark-sep'; return s; }
+
+  bar.appendChild(btn('H1', '{h1}', '{/h1}', 'Large heading'));
+  bar.appendChild(btn('H1·C', '{h1:c}', '{/h1}', 'Large heading, centred'));
+  bar.appendChild(btn('H2', '{h2}', '{/h2}', 'Medium heading'));
+  bar.appendChild(btn('H3', '{h3}', '{/h3}', 'Small heading'));
+  bar.appendChild(sep());
+
+  MARKUP_COLORS.forEach(c => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'mark-btn mark-color-btn'; b.title = c.label;
+    b.innerHTML = `<span class="mark-color-swatch" style="background:#${c.hex}"></span>${c.label}`;
+    b.addEventListener('click', () => ins(`{col:${c.hex}}`, '{/col}'));
+    bar.appendChild(b);
+  });
+  bar.appendChild(btn('End color', '{/col}', '', 'Close colour tag'));
+  bar.appendChild(btn('|r', '|r', '', 'End WoW colour code'));
+  bar.appendChild(sep());
+  bar.appendChild(btn('{link}', '{link*https://example.com*', '}', 'Hyperlink — edit URL'));
+  bar.appendChild(btn('{icon}', '{icon:', ':20}', 'Inline icon'));
+
+  return bar;
+}
+
 function renderSections() {
   const list = document.getElementById('section-list');
   list.innerHTML = '';
@@ -896,12 +1324,6 @@ function renderSections() {
     row.className = 'section-row';
     const iconInputId = 'sec-icon-' + sec.id;
     const bodyId      = 'sec-body-' + sec.id;
-
-    const colorBtns = MARKUP_COLORS.map(c =>
-      `<button class="mark-btn mark-color-btn" data-open="{col:${c.hex}}" data-close="{/col}" data-ta="${bodyId}" title="${c.label}">
-        <span class="mark-color-swatch" style="background:#${c.hex}"></span>${c.label}
-      </button>`
-    ).join('');
 
     row.innerHTML = `
       <div class="section-hdr">
@@ -917,38 +1339,26 @@ function renderSections() {
         <label style="flex-shrink:0;font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em">Icon</label>
         <input type="text" id="${iconInputId}" class="sec-icon" value="${escHtml(sec.icon)}" placeholder="Interface\\Icons\\...">
         <button class="icon-pick-btn sec-icon-pick">Browse…</button>
-      </div>
-      <div class="markup-toolbar">
-        ${colorBtns}
-        <button class="mark-btn" data-open="{/col}" data-close="" data-ta="${bodyId}">End color</button>
-        <button class="mark-btn" data-open="|r" data-close="" data-ta="${bodyId}">|r</button>
-      </div>
-      <textarea id="${bodyId}" class="sec-body" rows="5" placeholder="Section body. Supports {col:ff7c0a}colour markup{/col}.">${escHtml(sec.body)}</textarea>`;
+      </div>`;
 
-    row.querySelector('.sec-title').addEventListener('input', e => { sec.title = e.target.value; saveState(); renderPreview(); });
-    row.querySelector('.sec-icon').addEventListener('input',  e => { sec.icon  = e.target.value; saveState(); renderPreview(); });
-    row.querySelector('.sec-body').addEventListener('input',  e => { sec.body  = e.target.value; saveState(); renderPreview(); });
+    const toolbar = makeToolbarButtons(bodyId);
+    const ta = document.createElement('textarea');
+    ta.id = bodyId; ta.className = 'sec-body'; ta.rows = 5;
+    ta.placeholder = 'Section body. Use toolbar above for formatting.';
+    ta.value = sec.body;
+
+    row.appendChild(toolbar);
+    row.appendChild(ta);
+
+    row.querySelector('.sec-title').addEventListener('input', e => { sec.title = e.target.value; saveState(); renderPreview(); flashSaved(); });
+    row.querySelector('.sec-icon').addEventListener('input',  e => { sec.icon  = e.target.value; saveState(); renderPreview(); flashSaved(); });
+    ta.addEventListener('input', e => { sec.body = e.target.value; saveState(); renderPreview(); flashSaved(); });
 
     row.querySelector('.sec-icon-pick').addEventListener('click', e => {
       openIconPicker(e.currentTarget, path => {
         sec.icon = path;
         row.querySelector('.sec-icon').value = path;
-        saveState(); renderPreview();
-      });
-    });
-
-    row.querySelectorAll('.mark-btn[data-ta]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const ta    = document.getElementById(btn.dataset.ta);
-        if (!ta) return;
-        const open  = btn.dataset.open  || '';
-        const close = btn.dataset.close || '';
-        const s = ta.selectionStart, e2 = ta.selectionEnd;
-        const selected = ta.value.slice(s, e2);
-        const insert = selected ? open + selected + close : open;
-        ta.setRangeText(insert, s, e2, 'end');
-        ta.dispatchEvent(new Event('input'));
-        ta.focus();
+        saveState(); renderPreview(); flashSaved();
       });
     });
 
@@ -959,8 +1369,8 @@ function renderSections() {
   });
 }
 
-function addSection()          { state.sections.push({ id:'a'+(nextId++), icon:'Interface\\Icons\\INV_Misc_QuestionMark', title:'New Section', body:'' }); saveState(); renderSections(); renderPreview(); }
-function removeSection(id)     { state.sections = state.sections.filter(s => s.id !== id); saveState(); renderSections(); renderPreview(); }
+function addSection()          { state.sections.push({ id:'a'+(nextId++), icon:'Interface\\Icons\\INV_Misc_QuestionMark', title:'New Section', body:'' }); saveState(); renderSections(); renderPreview(); flashSaved(); }
+function removeSection(id)     { state.sections = state.sections.filter(s => s.id !== id); saveState(); renderSections(); renderPreview(); flashSaved(); }
 function moveSection(idx, dir) {
   const n = idx + dir;
   if (n < 0 || n >= state.sections.length) return;
@@ -968,6 +1378,76 @@ function moveSection(idx, dir) {
   saveState(); renderSections(); renderPreview();
 }
 document.getElementById('add-section-btn').addEventListener('click', addSection);
+
+// ═══════════════════════════════════════════════════════════
+// CUSTOM FIELDS (Additional Info)
+// ═══════════════════════════════════════════════════════════
+
+function renderAdditionalInfo() {
+  const list = document.getElementById('ai-list');
+  list.innerHTML = '';
+  state.additionalInfo.forEach((ai, idx) => {
+    const row = document.createElement('div');
+    row.className = 'ai-row';
+    const iconId = 'ai-icon-' + ai.id;
+
+    row.innerHTML = `
+      <div class="ai-row-hdr">
+        <input type="text" class="ai-name" value="${escHtml(ai.name)}" placeholder="Field name (e.g. Pronouns)">
+        <div class="ai-actions">
+          ${idx > 0 ? `<button class="btn btn-secondary btn-sm ai-up">↑</button>` : ''}
+          ${idx < state.additionalInfo.length - 1 ? `<button class="btn btn-secondary btn-sm ai-down">↓</button>` : ''}
+          <button class="btn btn-danger btn-sm ai-remove">✕</button>
+        </div>
+      </div>
+      <div class="ai-row-body">
+        <div class="icon-field" style="flex:0 0 auto;min-width:0">
+          <input type="text" id="${iconId}" class="ai-icon" value="${escHtml(ai.icon)}" placeholder="Icon path" style="width:160px;font-size:0.72rem;font-family:monospace">
+          <button class="icon-pick-btn ai-icon-pick">Browse…</button>
+        </div>
+        <input type="text" class="ai-value" value="${escHtml(ai.value)}" placeholder="Value (e.g. She/Her)">
+      </div>`;
+
+    row.querySelector('.ai-name').addEventListener('input', e => { ai.name = e.target.value; saveState(); renderPreview(); flashSaved(); });
+    row.querySelector('.ai-value').addEventListener('input', e => { ai.value = e.target.value; saveState(); renderPreview(); flashSaved(); });
+    row.querySelector('.ai-icon').addEventListener('input', e => { ai.icon = e.target.value; saveState(); renderPreview(); flashSaved(); });
+    row.querySelector('.ai-icon-pick').addEventListener('click', ev => {
+      openIconPicker(ev.currentTarget, path => {
+        ai.icon = path;
+        row.querySelector('.ai-icon').value = path;
+        saveState(); renderPreview(); flashSaved();
+      });
+    });
+    row.querySelector('.ai-up')?.addEventListener('click',    () => moveAI(idx, -1));
+    row.querySelector('.ai-down')?.addEventListener('click',  () => moveAI(idx,  1));
+    row.querySelector('.ai-remove').addEventListener('click', () => removeAI(ai.id));
+    list.appendChild(row);
+  });
+}
+
+function addAI(name, icon) {
+  state.additionalInfo.push({ id:'ai'+(nextId++), name: name||'Field', icon: icon||'Interface\\Icons\\INV_Misc_QuestionMark', value:'' });
+  saveState(); renderAdditionalInfo(); renderPreview(); flashSaved();
+}
+function removeAI(id)     { state.additionalInfo = state.additionalInfo.filter(a => a.id !== id); saveState(); renderAdditionalInfo(); renderPreview(); flashSaved(); }
+function moveAI(idx, dir) {
+  const n = idx + dir;
+  if (n < 0 || n >= state.additionalInfo.length) return;
+  [state.additionalInfo[idx], state.additionalInfo[n]] = [state.additionalInfo[n], state.additionalInfo[idx]];
+  saveState(); renderAdditionalInfo(); renderPreview();
+}
+
+document.getElementById('add-ai-btn').addEventListener('click', () => addAI());
+
+document.querySelectorAll('.ai-preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const name = btn.dataset.preset;
+    const icon = AI_PRESET_ICONS[name] || 'Interface\\Icons\\INV_Misc_QuestionMark';
+    // Don't add duplicates
+    if (!state.additionalInfo.find(a => a.name === name)) addAI(name, icon);
+    else showTab('custom');
+  });
+});
 
 // ═══════════════════════════════════════════════════════════
 // PREVIEW
@@ -979,10 +1459,13 @@ function renderPreview() {
   const fullName  = [s.firstName, s.lastName].filter(Boolean).join(' ') || '<span style="opacity:0.3">No name set</span>';
   const raceClass = [s.race, s.class].filter(Boolean).join(' · ');
   const sm        = STATUS_META[s.currentlyStatus] || STATUS_META[2];
-  const iconLabel = (s.icon || '').split('\\').pop() || '?';
+  const iconSrc   = iconUrl(s.icon);
 
   let h = `<div class="pv-nameplate">
-    <div class="pv-icon">${escHtml(iconLabel)}</div>
+    <div class="pv-icon">
+      ${iconSrc ? `<img src="${iconSrc}" alt="icon" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : ''}
+      <span class="pv-icon-fallback" style="${iconSrc?'display:none':''}">${escHtml((s.icon||'').split('\\').pop()||'?')}</span>
+    </div>
     ${s.title ? `<div class="pv-title">${escHtml(s.title)}</div>` : ''}
     <div class="pv-name" style="color:${col}">${fullName.includes('<') ? fullName : escHtml(fullName)}</div>
     ${raceClass ? `<div class="pv-sub">${escHtml(raceClass)}</div>` : ''}
@@ -1002,13 +1485,27 @@ function renderPreview() {
     </div></div>`;
   }
 
+  const activeAI = (s.additionalInfo || []).filter(a => a.name && a.value);
+  if (activeAI.length) {
+    h += `<div><div class="pv-section-title">Additional Info</div><div class="pv-ai-grid">
+      ${activeAI.map(a => {
+        const aUrl = iconUrl(a.icon);
+        return `<div class="pv-ai-row">
+          ${aUrl ? `<img class="pv-ai-icon" src="${aUrl}" onerror="this.style.display='none'">` : ''}
+          <span class="pv-ai-name">${escHtml(a.name)}:</span>
+          <span class="pv-ai-val">${escHtml(a.value)}</span>
+        </div>`;
+      }).join('')}
+    </div></div>`;
+  }
+
   const activeSliders = s.sliders.filter(sl => sl.left || sl.right);
   if (activeSliders.length) {
     h += `<div><div class="pv-section-title">Personality</div><div class="pv-bars">
       ${activeSliders.map(sl => `
         <div class="pv-bar-row">
           <div class="pv-bar-labels"><span>${escHtml(sl.left)}</span><span>${escHtml(sl.right)}</span></div>
-          <div class="pv-bar-track"><div class="pv-bar-fill" style="width:${sl.value}%"></div></div>
+          <div class="pv-bar-track"><div class="pv-bar-dot" style="left:${sl.value}%"></div></div>
         </div>`).join('')}
     </div></div>`;
   }
@@ -1016,11 +1513,16 @@ function renderPreview() {
   const activeSections = s.sections.filter(sec => sec.title || sec.body);
   if (activeSections.length) {
     h += `<div><div class="pv-section-title">About</div>
-      ${activeSections.map(sec => `
-        <div class="pv-about-sec">
-          ${sec.title ? `<div class="pv-about-title">${escHtml(sec.title)}</div>` : ''}
+      ${activeSections.map(sec => {
+        const sUrl = iconUrl(sec.icon);
+        return `<div class="pv-about-sec">
+          <div class="pv-about-hdr">
+            ${sUrl ? `<img src="${sUrl}" onerror="this.style.display='none'">` : ''}
+            ${sec.title ? `<div class="pv-about-title">${escHtml(sec.title)}</div>` : ''}
+          </div>
           <div class="pv-about-body">${parseMarkup(sec.body) || '<span class="pv-empty">(empty)</span>'}</div>
-        </div>`).join('')}
+        </div>`;
+      }).join('')}
     </div>`;
   }
 
@@ -1043,23 +1545,34 @@ function luaStr(v) {
 function serializeToLua(s) {
   const pn = (s.profileName || 'My Character').trim();
 
-  const ps = s.sliders.map(sl =>
-    `\t\t\t\t\t\t{\n` +
-    `\t\t\t\t\t\t\t["LF"] = ${luaStr(sl.left)},\n` +
-    `\t\t\t\t\t\t\t["RF"] = ${luaStr(sl.right)},\n` +
-    `\t\t\t\t\t\t\t["VA"] = ${Math.max(0,Math.min(100,Math.round(sl.value||50)))},\n` +
-    `\t\t\t\t\t\t\t["ID"] = ${luaStr(sl.id)},\n` +
-    `\t\t\t\t\t\t},`
+  const ps = s.sliders.map((sl, i) =>
+    `\t\t\t\t\t\t\t[${i+1}] = {\n` +
+    `\t\t\t\t\t\t\t\t["LF"] = ${luaStr(sl.left)},\n` +
+    `\t\t\t\t\t\t\t\t["RF"] = ${luaStr(sl.right)},\n` +
+    `\t\t\t\t\t\t\t\t["VA"] = ${Math.max(0,Math.min(100,Math.round(sl.value||50)))},\n` +
+    `\t\t\t\t\t\t\t\t["ID"] = ${luaStr(sl.id)},\n` +
+    `\t\t\t\t\t\t\t},`
   ).join('\n');
 
-  const t1 = s.sections.map(sec =>
-    `\t\t\t\t\t\t{\n` +
-    `\t\t\t\t\t\t\t["ID"] = ${luaStr(sec.id)},\n` +
-    `\t\t\t\t\t\t\t["TT"] = ${luaStr(sec.title)},\n` +
-    `\t\t\t\t\t\t\t["TX"] = ${luaStr(sec.body)},\n` +
-    `\t\t\t\t\t\t\t["IC"] = ${luaStr(sec.icon)},\n` +
-    `\t\t\t\t\t\t},`
+  const t1 = s.sections.map((sec, i) =>
+    `\t\t\t\t\t\t\t[${i+1}] = {\n` +
+    `\t\t\t\t\t\t\t\t["ID"] = ${luaStr(sec.id)},\n` +
+    `\t\t\t\t\t\t\t\t["TT"] = ${luaStr(sec.title)},\n` +
+    `\t\t\t\t\t\t\t\t["TX"] = ${luaStr(sec.body)},\n` +
+    `\t\t\t\t\t\t\t\t["IC"] = ${luaStr(sec.icon)},\n` +
+    `\t\t\t\t\t\t\t},`
   ).join('\n');
+
+  const ai = (s.additionalInfo || []).map((a, i) =>
+    `\t\t\t\t\t\t\t[${i+1}] = {\n` +
+    `\t\t\t\t\t\t\t\t["NA"] = ${luaStr(a.name)},\n` +
+    `\t\t\t\t\t\t\t\t["IC"] = ${luaStr(a.icon)},\n` +
+    `\t\t\t\t\t\t\t\t["VA"] = ${luaStr(a.value)},\n` +
+    `\t\t\t\t\t\t\t\t["ID"] = ${luaStr(a.id)},\n` +
+    `\t\t\t\t\t\t\t},`
+  ).join('\n');
+
+  const miBlock = ai ? `\t\t\t\t\t\t["MI"] = {\n\t\t\t\t\t\t\t["AI"] = {\n${ai}\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t},\n` : '';
 
   return `TotalRP3_DB = {
 \t["player"] = {
@@ -1085,7 +1598,7 @@ function serializeToLua(s) {
 \t\t\t\t\t\t["PS"] = {
 ${ps}
 \t\t\t\t\t\t},
-\t\t\t\t\t},
+${miBlock}\t\t\t\t\t},
 \t\t\t\t\t["about"] = {
 \t\t\t\t\t\t["TE"] = 1,
 \t\t\t\t\t\t["T1"] = {
@@ -1119,7 +1632,6 @@ function parseLuaFile(src) {
       if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') { pos++; continue; }
       if (src[pos] === '-' && src[pos+1] === '-') {
         if (src[pos+2] === '[') {
-          // Possibly long comment — scan for level
           let lvl = 0, i = pos + 3;
           while (i < len && src[i] === '=') { lvl++; i++; }
           if (src[i] === '[') {
@@ -1137,10 +1649,9 @@ function parseLuaFile(src) {
   }
 
   function readLongString() {
-    // pos is at opening [
     let lvl = 0; pos++;
     while (pos < len && src[pos] === '=') { lvl++; pos++; }
-    pos++; // second [
+    pos++;
     if (src[pos] === '\n') pos++;
     const close = ']' + '='.repeat(lvl) + ']';
     const e = src.indexOf(close, pos);
@@ -1172,7 +1683,7 @@ function parseLuaFile(src) {
         s += src[pos++];
       }
     }
-    pos++; // closing quote
+    pos++;
     return s;
   }
 
@@ -1183,7 +1694,6 @@ function parseLuaFile(src) {
     if (ch === '{') return parseTable();
     if (ch === '"' || ch === "'") return readString(ch);
     if (ch === '[') {
-      // Long string if followed by [ or =
       if (src[pos+1] === '[' || src[pos+1] === '=') return readLongString();
       return null;
     }
@@ -1201,19 +1711,18 @@ function parseLuaFile(src) {
   }
 
   function parseTable() {
-    pos++; // {
+    pos++;
     const result = {};
     let ai = 1;
     while (true) {
       skip();
       if (pos >= len || src[pos] === '}') { if (pos < len) pos++; break; }
       if (src[pos] === ',') { pos++; continue; }
-
       if (src[pos] === '[') {
-        pos++; // [
+        pos++;
         const key = parseValue();
-        skip(); pos++; // ]
-        skip(); pos++; // =
+        skip(); pos++;
+        skip(); pos++;
         const val = parseValue();
         if (key !== null) result[key] = val;
       } else {
@@ -1222,7 +1731,7 @@ function parseLuaFile(src) {
         if (im) {
           const after = src.slice(pos + im[0].length).replace(/^[\s\t\n\r]+/, '');
           if (after[0] === '=') {
-            pos += im[0].length; skip(); pos++; // =
+            pos += im[0].length; skip(); pos++;
             const val = parseValue();
             result[im[0]] = val;
             continue;
@@ -1251,7 +1760,6 @@ function parseLuaFile(src) {
 
 function extractProfiles(parsed) {
   try {
-    // Handle possible trailing space in key name
     const db = parsed['TotalRP3_DB'] || Object.values(parsed).find(v => v && typeof v === 'object' && v.player);
     const player = db?.player;
     return { profiles: player?.profiles || {}, playerStr: player?.player || '' };
@@ -1277,6 +1785,15 @@ function profileToState(data, playerStr, profileName) {
     sections.push({ id:String(sec.ID||sec.id||'a'+i), title:String(sec.TT||sec.tt||''), body:String(sec.TX||sec.tx||''), icon:String(sec.IC||sec.ic||'Interface\\Icons\\INV_Misc_QuestionMark') });
   }
 
+  // Additional Info (MI.AI table)
+  const miRaw = chars?.MI || {};
+  const aiRaw = miRaw?.AI || {};
+  const additionalInfo = [];
+  for (let i = 1; ; i++) {
+    const ai = aiRaw[i]; if (!ai) break;
+    additionalInfo.push({ id:String(ai.ID||ai.id||'ai'+i), name:String(ai.NA||ai.na||''), icon:String(ai.IC||ai.ic||'Interface\\Icons\\INV_Misc_QuestionMark'), value:String(ai.VA||ai.va||'') });
+  }
+
   return {
     profileName:     profileName,
     playerString:    playerStr,
@@ -1296,6 +1813,7 @@ function profileToState(data, playerStr, profileName) {
     currentlyText:   String(chars.CO || ''),
     sliders:         sliders.length ? sliders : JSON.parse(JSON.stringify(DEFAULT_SLIDERS)),
     sections:        sections.length ? sections : JSON.parse(JSON.stringify(DEFAULT_SECTIONS)),
+    additionalInfo,
     misc:            String(misc.TT || ''),
   };
 }
@@ -1338,6 +1856,7 @@ function applyImport(name) {
   populateForm();
   renderSliders();
   renderSections();
+  renderAdditionalInfo();
   renderPreview();
   showTab('basics');
   document.getElementById('import-modal').classList.remove('visible');
@@ -1375,6 +1894,73 @@ document.getElementById('export-btn').addEventListener('click', () => {
   const a    = document.createElement('a');
   a.href = url; a.download = 'totalRP3.lua'; a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+  // Feedback + open install guide
+  const btn = document.getElementById('export-btn');
+  const orig = btn.textContent;
+  btn.textContent = '✓ Downloaded!';
+  setTimeout(() => { btn.textContent = orig; }, 2200);
+  const guide = document.getElementById('install-guide');
+  if (!guide.classList.contains('open')) {
+    guide.classList.add('open');
+    document.getElementById('install-caret').textContent = '▾';
+    guide.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// RESET
+// ═══════════════════════════════════════════════════════════
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (!confirm('Reset everything and start a new profile? This cannot be undone.')) return;
+  state = {
+    profileName: 'My Character', playerString: '',
+    firstName: '', lastName: '', title: '',
+    race: '', class: '', age: '', height: '', weight: '', eyeColour: '', tagline: '',
+    colour: 'ff7c0a', icon: 'Interface\\Icons\\INV_Misc_QuestionMark',
+    currentlyStatus: 2, currentlyText: '',
+    sliders: JSON.parse(JSON.stringify(DEFAULT_SLIDERS)),
+    sections: JSON.parse(JSON.stringify(DEFAULT_SECTIONS)),
+    additionalInfo: [],
+    misc: '',
+  };
+  nextId = 100;
+  saveState();
+  populateForm();
+  renderSliders();
+  renderSections();
+  renderAdditionalInfo();
+  renderPreview();
+  showTab('basics');
+});
+
+// ═══════════════════════════════════════════════════════════
+// HELP MODAL
+// ═══════════════════════════════════════════════════════════
+
+function openHelp() {
+  document.getElementById('help-modal').classList.add('visible');
+}
+function closeHelp() {
+  document.getElementById('help-modal').classList.remove('visible');
+  localStorage.setItem(HELP_KEY, '1');
+}
+
+document.getElementById('help-btn').addEventListener('click', openHelp);
+document.getElementById('help-close-btn').addEventListener('click', closeHelp);
+document.getElementById('help-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeHelp();
+});
+
+// ═══════════════════════════════════════════════════════════
+// INSTALL GUIDE
+// ═══════════════════════════════════════════════════════════
+
+document.getElementById('install-toggle').addEventListener('click', () => {
+  const guide = document.getElementById('install-guide');
+  const open  = guide.classList.toggle('open');
+  document.getElementById('install-caret').textContent = open ? '▾' : '▸';
 });
 
 // ═══════════════════════════════════════════════════════════
@@ -1386,9 +1972,13 @@ loadState();
 setTheme(localStorage.getItem('gpg-wow-theme') || 'light');
 populateForm();
 bindBasics();
+buildToolbar('misc-toolbar', 'f-misc');
 renderSliders();
 renderSections();
+renderAdditionalInfo();
 renderPreview();
+
+if (!localStorage.getItem(HELP_KEY)) openHelp();
 </script>
 </body>
 </html>
