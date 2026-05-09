@@ -776,6 +776,43 @@
       margin-top: 0.15rem;
       opacity: 0.75;
     }
+
+    /* ── History stats ── */
+    .history-stats {
+      margin-top: 0.75rem;
+      padding-top: 0.65rem;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.5rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .stat-value {
+      font-family: var(--font);
+      font-size: 1.35rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .stat-value.nat20-val { color: var(--nat20); }
+    .stat-value.avg-val   { color: var(--accent); }
+    .stat-value.nat1-val  { color: var(--nat1); }
+    .stat-value.empty     { color: var(--text-muted); opacity: 0.45; }
+    .stat-label {
+      font-family: var(--font-ui);
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
   </style>
 </head>
 <body>
@@ -861,6 +898,7 @@
       <button class="history-clear" id="history-clear">Clear</button>
     </div>
     <div id="history-list"></div>
+    <div class="history-stats" id="history-stats"></div>
   </aside>
 
 </main>
@@ -1290,8 +1328,34 @@ function renderResult(r) {
 // HISTORY
 // ═══════════════════════════════════════════════════════════
 
+function renderHistoryStats() {
+  const el = document.getElementById('history-stats');
+  const h  = state.history;
+  const nat20s = h.filter(r => r.critType === 'nat20').length;
+  const nat1s  = h.filter(r => r.critType === 'nat1').length;
+  const avg    = h.length ? h.reduce((s, r) => s + r.total, 0) / h.length : null;
+  const avgStr = avg === null ? '—' : (Number.isInteger(avg) ? avg : avg.toFixed(1));
+  const empty  = h.length === 0;
+
+  el.innerHTML = `
+    <div class="stat-item">
+      <div class="stat-value nat20-val${empty ? ' empty' : ''}">${empty ? '—' : nat20s}</div>
+      <div class="stat-label">Nat 20s</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value avg-val${empty ? ' empty' : ''}">${avgStr}</div>
+      <div class="stat-label">Avg Roll</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value nat1-val${empty ? ' empty' : ''}">${empty ? '—' : nat1s}</div>
+      <div class="stat-label">Nat 1s</div>
+    </div>
+  `;
+}
+
 function renderHistory() {
   const list = document.getElementById('history-list');
+  renderHistoryStats();
   if (state.history.length === 0) {
     list.innerHTML = '<div class="history-empty">No rolls yet. Roll some dice!</div>';
     return;
@@ -1456,7 +1520,7 @@ document.addEventListener('keydown', e => {
 loadState();
 renderDiceGrid();
 renderBonusGrid();
-renderHistory();
+renderHistory();   // also calls renderHistoryStats()
 renderPresets();
 syncAdvRow();
 syncRollButton();
