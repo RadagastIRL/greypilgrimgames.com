@@ -397,6 +397,33 @@
       display: block; text-align: center; width: 100%;
     }
     .danger-link:hover { text-decoration: underline; }
+
+    /* ══════════════════════════════════════════════════════════
+       HELP MODAL
+    ══════════════════════════════════════════════════════════ */
+    .help-card {
+      max-width: 520px;
+      max-height: 88dvh;
+      overflow-y: auto;
+    }
+    .help-section {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-muted); margin: 1.1rem 0 0.35rem;
+      padding-bottom: 0.3rem; border-bottom: 1px solid var(--border);
+    }
+    .help-p {
+      font-size: 0.84rem; color: var(--text-muted); line-height: 1.6;
+    }
+    .help-p strong { color: var(--text); }
+    .help-p em     { color: var(--text); font-style: normal; font-weight: 600; }
+    .help-pip {
+      color: var(--member); font-size: 1rem; vertical-align: middle;
+    }
+    .help-badges {
+      display: flex; gap: 1.2rem; align-items: center;
+      font-size: 0.82rem; color: var(--text-muted); margin-top: 0.35rem;
+    }
+    .help-badges span { display: flex; align-items: center; gap: 0.35rem; }
   </style>
 </head>
 <body>
@@ -491,6 +518,7 @@
     </div>
     <div class="header-actions">
       <button class="btn-secondary" id="add-report-btn">＋ Add Report</button>
+      <button class="btn-secondary" id="help-btn">? Help</button>
       <button class="btn-secondary" id="settings-btn">⚙ Settings</button>
       <button class="btn-primary" id="sync-btn">↻ Sync</button>
     </div>
@@ -550,6 +578,49 @@
       <button class="btn-primary" id="add-report-confirm" style="flex:1">Fetch &amp; Add</button>
     </div>
     <div id="manual-report-list" style="margin-top:1.2rem;"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     HELP MODAL
+══════════════════════════════════════════════════════════ -->
+<div id="help-modal" class="settings-overlay" style="display:none">
+  <div class="settings-card help-card">
+    <button class="modal-close" id="help-close" style="float:right;margin-bottom:0.5rem">✕</button>
+    <div class="settings-title">How to use this tracker</div>
+
+    <div class="help-section">The table</div>
+    <p class="help-p">Each <strong>column</strong> is a raid session pulled from your WarcraftLogs guild profile, newest on the left. Each <strong>row</strong> is a player who appeared in at least one of those sessions. The <strong>Att%</strong> column on the right shows what percentage of the visible sessions that player attended.</p>
+
+    <div class="help-section">Pips <span class="help-pip">●</span></div>
+    <p class="help-p">A filled dot means the player was present. Clicking it opens their WarcraftLogs summary for that specific report, jumped to the <strong>last kill</strong> of the night — or the last pull if the boss wasn't killed — with that player pre-selected as the source.</p>
+
+    <div class="help-section">Difficulty badges</div>
+    <p class="help-p">Each column header shows a badge for the highest raid difficulty in that log:</p>
+    <div class="help-badges">
+      <span><span class="sh-diff diff-n">N</span> Normal</span>
+      <span><span class="sh-diff diff-hc">HC</span> Heroic</span>
+      <span><span class="sh-diff diff-m">M</span> Mythic</span>
+    </div>
+    <p class="help-p" style="margin-top:0.5rem">Mythic+ runs and other non-raid content are automatically excluded from the table during sync.</p>
+
+    <div class="help-section">Manually added reports <span class="sh-manual" style="opacity:1">⊕</span></div>
+    <p class="help-p">A <strong>⊕</strong> under the date means you added that log manually via <em>＋ Add Report</em>. Use this for nights when someone other than an officer uploaded the log, so it didn't appear under the guild. The column header and border are tinted amber to distinguish these from auto-synced reports.</p>
+
+    <div class="help-section">Guild members vs. pugs</div>
+    <p class="help-p">Player rows are labelled <span class="pbadge pbadge-member" style="display:inline-block">Guild</span> or <span class="pbadge pbadge-pug" style="display:inline-block">Pug</span> based on your guild's roster from Raider.IO, fetched every time you sync. Guild members sort to the top. If the roster can't be reached, everyone shows as unknown.</p>
+
+    <div class="help-section">Player details panel</div>
+    <p class="help-p">Click any player's name to open a side panel with their full attendance history (each session as a pill, clickable to WCL), links to their Raider.IO and WarcraftLogs profiles, and — for pugs — a notes area where you can save their Battle.net tag, Discord handle, freeform notes, and an <em>invite back</em> flag. Notes are saved locally in your browser.</p>
+
+    <div class="help-section">Filters</div>
+    <p class="help-p"><strong>Show:</strong> toggle between all players, guild members only, or pugs only.<br>
+    <strong>Sessions:</strong> limit the table to the most recent 8, 16, or all sessions. Attendance percentages always reflect only the sessions currently visible.</p>
+
+    <div class="help-section">Syncing</div>
+    <p class="help-p">Click <strong>↻ Sync</strong> to re-pull the latest logs and roster from WarcraftLogs and Raider.IO. Your credentials, reports, and pug notes are stored only in your browser's local storage — nothing is sent anywhere except the WCL and Raider.IO APIs.</p>
+
+    <button class="btn-primary" id="help-close-btn" style="width:100%;margin-top:1.2rem">Got it</button>
   </div>
 </div>
 
@@ -1188,6 +1259,18 @@ document.getElementById('disconnect-btn').addEventListener('click', () => {
 });
 document.getElementById('settings-modal').addEventListener('click', e => {
   if (e.target === e.currentTarget) document.getElementById('settings-modal').style.display = 'none';
+});
+
+// ════════════════════════════════════════════════════════
+// HELP MODAL
+// ════════════════════════════════════════════════════════
+function openHelp()  { document.getElementById('help-modal').style.display = 'flex'; }
+function closeHelp() { document.getElementById('help-modal').style.display = 'none'; }
+document.getElementById('help-btn').addEventListener('click', openHelp);
+document.getElementById('help-close').addEventListener('click', closeHelp);
+document.getElementById('help-close-btn').addEventListener('click', closeHelp);
+document.getElementById('help-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeHelp();
 });
 
 // ════════════════════════════════════════════════════════
