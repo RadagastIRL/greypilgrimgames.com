@@ -2033,9 +2033,53 @@ function parseLuaFile(src) {
 
 function extractProfiles(parsed) {
   try {
-    const db = parsed['TotalRP3_DB'] || Object.values(parsed).find(v => v && typeof v === 'object' && v.player);
-    const player = db?.player;
-    return { profiles: player?.profiles || {}, playerStr: player?.player || '' };
+    // ── Format 1: Builder's own export ── TotalRP3_DB.player.profiles
+    const db = parsed['TotalRP3_DB'];
+    if (db?.player?.profiles) {
+      return { profiles: db.player.profiles, playerStr: db.player.player || '' };
+    }
+
+    // ── Format 2: Real TRP3 save file ── TRP3_Profiles (flat dict keyed by random ID)
+    const trp3 = parsed['TRP3_Profiles'];
+    if (trp3 && typeof trp3 === 'object' && Object.keys(trp3).length) {
+      const profiles = {};
+      for (const [, prof] of Object.entries(trp3)) {
+        if (!prof || typeof prof !== 'object') continue;
+        const name      = String(prof.profileName || '(unnamed)');
+        const player    = prof.player    || {};
+        const chars     = Object.assign({}, player.characteristics || {});
+        const character = player.character || {};
+        const about     = Object.assign({}, player.about || {});
+        const misc      = player.misc || {};
+
+        // Real TRP3 stores "currently" in `character`, builder expects it in `characteristics`:
+        //   character.RP  = status int (1=IC, 2=OOC, 3=casual, 4=full-RP)
+        //   character.CU  = "Currently:" free-text
+        if (chars.CU === undefined && character.RP !== undefined) chars.CU = character.RP;
+        if (chars.CO === undefined && character.CU !== undefined) chars.CO = character.CU;
+
+        // Real TRP3 stores additional-info entries directly as MI[1..n].
+        // Builder expects MI.AI[1..n].
+        if (chars.MI && typeof chars.MI === 'object' && !chars.MI.AI) {
+          chars.MI = { AI: chars.MI };
+        }
+
+        // Real TRP3's TE=1 template stores a single text block as about.T1.TX.
+        // Builder expects numbered section entries about.T1[1..n].
+        const t1 = about.T1;
+        if (t1 && typeof t1 === 'object' && t1.TX !== undefined && t1[1] === undefined) {
+          about.T1 = { 1: { ID: 'sec1', TT: '', TX: t1.TX, IC: 'Interface\\Icons\\INV_Misc_QuestionMark' } };
+        }
+
+        profiles[name] = {
+          profileID: name,
+          Information: { characteristics: chars, about, misc },
+        };
+      }
+      if (Object.keys(profiles).length) return { profiles, playerStr: '' };
+    }
+
+    return { profiles: {}, playerStr: '' };
   } catch(e) { return { profiles:{}, playerStr:'' }; }
 }
 
