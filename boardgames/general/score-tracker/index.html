@@ -638,12 +638,48 @@
       cursor: pointer;
       font-size: 0.82rem;
     }
+
+    /* ── Help button ── */
+    #help-btn {
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.25rem 0.6rem;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    #help-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+    /* ── Help content ── */
+    .help-section { display: flex; flex-direction: column; gap: 0.3rem; }
+    .help-section-title {
+      font-family: var(--font);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .help-p {
+      font-family: var(--font-ui);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* ── Ko-fi footer ── */
+    .kofi-footer { text-align: center; padding: 1rem 1rem 0.75rem; font-family: var(--font-ui); font-size: 0.72rem; }
+    .kofi-footer a { color: var(--text-muted); text-decoration: none; opacity: 0.65; transition: opacity 0.15s, color 0.15s; }
+    .kofi-footer a:hover { opacity: 1; color: var(--gold); }
   </style>
 </head>
 <body>
 
 <div id="top-nav">
   <a href="/boardgames/">← Board Games</a>
+  <button id="help-btn">? Help</button>
   <div id="theme-bar">
     <button data-theme="light" class="active">Light</button>
     <button data-theme="dark">Dark</button>
@@ -739,6 +775,51 @@
     <div class="export-row">
       <button class="action-btn" id="export-png-btn" style="font-size:0.78rem">⬇ Save Chart</button>
       <button class="action-btn" id="export-csv-btn" style="font-size:0.78rem">⬇ Export CSV</button>
+    </div>
+  </div>
+</div>
+
+<!-- Help overlay -->
+<div class="overlay" id="help-overlay">
+  <div class="panel">
+    <div class="panel-header">
+      <h2>How to Use</h2>
+      <button class="panel-close" id="help-close">✕</button>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Tracking Scores</div>
+      <p class="help-p">Tap <strong>+</strong> or <strong>−</strong> on any player card to adjust their score. Hold either button down for rapid-fire changes — useful for large point swings. A flash animation confirms how much changed.</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Turn Order</div>
+      <p class="help-p">Each card shows the player's turn position. Tap <strong>Next Turn ▶</strong> to advance. When the last player finishes, the round counter increments and the order loops back to Player 1.</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Undo</div>
+      <p class="help-p">The <strong>↩</strong> button (top-left) undoes the last score change. Up to 50 steps are remembered. Keyboard shortcut: <strong>Ctrl+Z</strong> (or ⌘Z on Mac).</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Sort by Score</div>
+      <p class="help-p">Tap <strong>↕ Sort</strong> to reorder cards by current score. Sorting is visual only — turn order stays fixed regardless of how cards are displayed.</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Settings ⚙</div>
+      <p class="help-p">Configure the score step size (how much each +/− tap changes), starting score, highest- or lowest-score-wins mode, and an optional win target. Set a target and you'll get a winner announcement when any player hits it.</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Stats &amp; Export</div>
+      <p class="help-p">Tap <strong>📊 Stats</strong> to view a cumulative score chart, a per-round bar chart, or a round history table. Export the chart as a <strong>PNG</strong> or the full data as a <strong>CSV</strong>.</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Player Colors</div>
+      <p class="help-p">Tap the colored dot next to any player's name to pick a new color from the palette.</p>
     </div>
   </div>
 </div>
@@ -1394,6 +1475,24 @@ document.addEventListener('keydown', e => {
 });
 
 // ═══════════════════════════════════════════════════════════
+// HELP MODAL
+// ═══════════════════════════════════════════════════════════
+
+function openHelp() {
+  document.getElementById('help-overlay').classList.add('visible');
+}
+function closeHelp() {
+  document.getElementById('help-overlay').classList.remove('visible');
+  localStorage.setItem('gpg-score-tracker-help-seen', '1');
+}
+
+document.getElementById('help-btn').addEventListener('click', openHelp);
+document.getElementById('help-close').addEventListener('click', closeHelp);
+document.getElementById('help-overlay').addEventListener('click', e => {
+  if (e.target.id === 'help-overlay') closeHelp();
+});
+
+// ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
 
@@ -1410,6 +1509,12 @@ if (state.players.length === 0) {
   document.getElementById('undo-btn').disabled = state.undoStack.length === 0;
   document.getElementById('sort-btn').textContent = state.sortByScore ? '↕ Sorted' : '↕ Sort';
 }
+
+if (!localStorage.getItem('gpg-score-tracker-help-seen')) openHelp();
 </script>
+
+<footer class="kofi-footer">
+  <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener">☕ Support me on Ko-fi</a>
+</footer>
 </body>
 </html>

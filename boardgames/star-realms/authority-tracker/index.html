@@ -46,8 +46,15 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2rem 1.5rem 1.5rem;
+      padding: 0 1.5rem 1.5rem;
       overflow-y: auto;
+    }
+    /* Chrome bar escapes the parent's 1.5rem horizontal padding */
+    #setup-screen .chrome-bar {
+      width: calc(100% + 3rem);
+      margin-left: -1.5rem;
+      margin-right: -1.5rem;
+      margin-bottom: 1.5rem;
     }
     #setup-screen.hidden { display: none; }
 
@@ -552,6 +559,82 @@
       border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.07em;
     }
+
+    /* ── Shared chrome bar (setup + game) ── */
+    .chrome-bar {
+      width: 100%;
+      flex-shrink: 0;
+      height: 40px;
+      background: rgba(7,8,14,0.88);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: relative;
+      z-index: 20;
+    }
+    .chrome-bar a {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+      white-space: nowrap;
+    }
+    .chrome-bar a:hover { color: var(--accent); }
+    .chrome-bar .kofi-link { opacity: 0.6; }
+    .chrome-bar .kofi-link:hover { opacity: 1; }
+
+    /* ── Setup top nav (inside centered column, below chrome bar) ── */
+    .setup-top-nav { display: none; } /* handled by chrome-bar now */
+
+    /* ── Ko-fi links ── */
+    .setup-kofi-link { display: none; } /* handled by chrome-bar now */
+    .panel-kofi-link {
+      display: block;
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      opacity: 0.5;
+      padding-top: 0.25rem;
+      transition: opacity 0.15s, color 0.15s;
+    }
+    .panel-kofi-link:hover { opacity: 1; color: var(--accent); }
+
+    /* ── Help button (setup screen) ── */
+    #setup-help-btn {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.35rem 0.9rem;
+      cursor: pointer;
+      margin-top: 0.2rem;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    #setup-help-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ── Help content ── */
+    .help-section { display: flex; flex-direction: column; gap: 0.3rem; }
+    .help-section-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .help-p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* ── Ko-fi footer ── */
+    .kofi-footer { text-align: center; padding: 1rem 1rem 0.75rem; font-family: var(--font-ui); font-size: 0.72rem; }
+    .kofi-footer a { color: var(--text-muted); text-decoration: none; opacity: 0.65; transition: opacity 0.15s, color 0.15s; }
+    .kofi-footer a:hover { opacity: 1; color: var(--accent); }
   </style>
 </head>
 <body>
@@ -560,6 +643,10 @@
 
 <!-- ═══════ SETUP SCREEN ═══════ -->
 <div id="setup-screen">
+  <div class="chrome-bar">
+    <a href="/boardgames/">← Board Games</a>
+    <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener" class="kofi-link">☕ Ko-fi</a>
+  </div>
   <svg class="setup-emblem" viewBox="0 0 140 112" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <polygon points="0,18 52,18 36,62 0,62" opacity="0.8"/>
     <polygon points="140,18 88,18 104,62 140,62" opacity="0.8"/>
@@ -593,11 +680,16 @@
   </div>
 
   <button id="start-btn">START</button>
-  <a class="setup-back-link" href="/boardgames/">← Board Games</a>
+  <button id="setup-help-btn">? How to Play</button>
+  <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener" class="setup-kofi-link">☕ Support me on Ko-fi</a>
 </div>
 
 <!-- ═══════ GAME SCREEN ═══════ -->
 <div id="game-screen" class="hidden">
+  <div class="chrome-bar">
+    <a href="/boardgames/">← Board Games</a>
+    <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener" class="kofi-link">☕ Ko-fi</a>
+  </div>
   <div id="tile-container"></div>
   <div id="action-strip">
     <button class="strip-btn" id="undo-btn" disabled>
@@ -611,6 +703,9 @@
     </button>
     <button class="strip-btn" id="settings-btn">
       <span class="strip-icon">⚙</span>Settings
+    </button>
+    <button class="strip-btn" id="help-btn">
+      <span class="strip-icon">?</span>Help
     </button>
   </div>
 </div>
@@ -638,6 +733,7 @@
       <button class="action-btn" id="new-game-btn">New Game (Keep Players)</button>
       <button class="danger-btn" id="full-reset-btn">Full Reset — Setup Screen</button>
     </div>
+    <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener" class="panel-kofi-link">☕ Support me on Ko-fi</a>
   </div>
 </div>
 
@@ -660,6 +756,61 @@
     <div class="export-row">
       <button class="export-btn" id="export-png-btn">⬇ Save Chart</button>
       <button class="export-btn" id="export-csv-btn">⬇ Export CSV</button>
+    </div>
+  </div>
+</div>
+
+<!-- Help overlay -->
+<div class="overlay" id="help-overlay">
+  <div class="panel">
+    <div class="panel-header">
+      <h2>How to Play</h2>
+      <button class="panel-close" id="help-close">✕</button>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Setup</div>
+      <p class="help-p">Choose the number of players (1–4), select a faction color for each, and set the starting authority (default: 50). Tap <strong>START</strong> when you're ready.</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Adjusting Authority</div>
+      <p class="help-p">Each player's tile is split into two tap zones. Tap the <strong>left half to decrease</strong> authority and the <strong>right half to increase</strong> it. Hold either side down for rapid changes. A flash confirms each tap.</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">2-Player Mode</div>
+      <p class="help-p">In a 2-player game the second player's tile is rotated 180° so both players can read their score from across the table. The tap zones flip accordingly, so left/right always feels natural from each player's perspective.</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Authority Warnings</div>
+      <p class="help-p">When a player drops to <strong>50% or below</strong> their starting authority, their score turns yellow. At <strong>25% or below</strong> it turns red and blinks — a warning that elimination is near.</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">End Turn</div>
+      <p class="help-p">Tap <strong>▶ End Turn</strong> to advance to the next player. Eliminated players are automatically skipped. The turn counter increments with each active player change.</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Elimination &amp; Winning</div>
+      <p class="help-p">When a player's authority reaches <strong>0</strong> they're marked as eliminated. When only one player remains, the winner screen appears. Tap Continue to keep the board visible.</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Undo</div>
+      <p class="help-p">The <strong>↩ Undo</strong> button reverses the last authority change, including eliminations. Up to 50 changes can be undone. Keyboard shortcut: <strong>Ctrl+Z</strong> (or ⌘Z on Mac).</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Stats &amp; Export</div>
+      <p class="help-p">Tap <strong>📊 Stats</strong> to view an authority chart over time, a full change log, or a per-turn table. Export the chart as a <strong>PNG</strong> or the data as a <strong>CSV</strong>.</p>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">Settings ⚙</div>
+      <p class="help-p">Change the step size (how much each tap adjusts authority), start a new game keeping the same players and colors, or return to the full setup screen.</p>
     </div>
   </div>
 </div>
@@ -1265,27 +1416,121 @@ function syncSettingsUI() {
 function initStarfield() {
   const canvas = document.getElementById('starfield');
   const ctx    = canvas.getContext('2d');
-  const stars  = Array.from({ length: 160 }, () => ({
-    px: Math.random(), py: Math.random(),
-    r:  Math.random() < 0.07 ? 1.8 : Math.random() < 0.2 ? 1 : 0.45,
-    a:  0.15 + Math.random() * 0.5,
-  }));
-  function draw() {
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    const g = ctx.createRadialGradient(
-      canvas.width * 0.7, canvas.height * 0.28, 0,
-      canvas.width * 0.7, canvas.height * 0.28, canvas.width * 0.5);
-    g.addColorStop(0, 'rgba(20,45,100,0.14)');
-    g.addColorStop(1, 'transparent');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    stars.forEach(s => {
-      ctx.beginPath();
-      ctx.arc(s.px * canvas.width, s.py * canvas.height, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(200,220,255,${s.a})`; ctx.fill();
-    });
+
+  // 750 stars is the target at 1920×1080; scale by sqrt of area ratio
+  // so density stays consistent across screen sizes.
+  // sqrt (not linear) prevents huge screens from being overwhelming.
+  const REF_AREA = 1920 * 1080;
+  let W = 0, H = 0, lastTs = null;
+  let stars = [], brightStars = [];
+
+  function buildStars() {
+    const scale  = Math.sqrt((W * H) / REF_AREA);
+    const n      = Math.round(Math.max(240,  Math.min(2800, 1500 * scale)));
+    const bright = Math.round(Math.max(10,   Math.min(72,   36   * scale)));
+
+    stars = Array.from({ length: n }, () => ({
+      px:           Math.random(),
+      py:           Math.random(),
+      r:            Math.random() < 0.06 ? 1.9 : Math.random() < 0.22 ? 1.05 : 0.42,
+      baseA:        Math.min(1, 0.375 + Math.random() * 0.975),
+      twinkleSpeed: 0.25 + Math.random() * 1.1,
+      twinklePhase: Math.random() * Math.PI * 2,
+      driftX:       (Math.random() - 0.5) * 6e-6,
+      driftY:       (Math.random() - 0.5) * 3e-6,
+    }));
+
+    brightStars = Array.from({ length: bright }, () => ({
+      px:           Math.random(),
+      py:           Math.random(),
+      r:            2.2 + Math.random() * 1.2,
+      baseA:        Math.min(1, 0.825 + Math.random() * 0.6),
+      twinkleSpeed: 0.4 + Math.random() * 0.7,
+      twinklePhase: Math.random() * Math.PI * 2,
+      rgb:          ['200,220,255', '255,225,190', '190,215,255', '255,200,160'][Math.floor(Math.random() * 4)],
+    }));
   }
-  draw();
-  window.addEventListener('resize', draw);
+
+  let resizeTimer;
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function frame(ts) {
+    if (!lastTs) lastTs = ts;
+    const dt = Math.min(ts - lastTs, 50);   // cap so tab-switch doesn't jump
+    lastTs = ts;
+    const t = ts * 0.001;                   // seconds
+
+    ctx.clearRect(0, 0, W, H);
+
+    // ── Nebula 1: blue-indigo, top-right, gently drifting ──
+    const n1x = W * (0.68 + 0.06 * Math.sin(t * 0.047));
+    const n1y = H * (0.26 + 0.04 * Math.cos(t * 0.061));
+    const g1  = ctx.createRadialGradient(n1x, n1y, 0, n1x, n1y, W * 0.52);
+    g1.addColorStop(0,    'rgba(22,50,115,0.18)');
+    g1.addColorStop(0.45, 'rgba(12,24,70,0.07)');
+    g1.addColorStop(1,    'transparent');
+    ctx.fillStyle = g1;
+    ctx.fillRect(0, 0, W, H);
+
+    // ── Nebula 2: violet, bottom-left, breathing slowly ──
+    const n2x = W * (0.22 + 0.05 * Math.cos(t * 0.038));
+    const n2y = H * (0.72 + 0.04 * Math.sin(t * 0.053));
+    const n2r = W * (0.38 + 0.04 * Math.sin(t * 0.029));
+    const g2  = ctx.createRadialGradient(n2x, n2y, 0, n2x, n2y, n2r);
+    g2.addColorStop(0,   'rgba(55,12,95,0.13)');
+    g2.addColorStop(0.5, 'rgba(30,6,55,0.05)');
+    g2.addColorStop(1,   'transparent');
+    ctx.fillStyle = g2;
+    ctx.fillRect(0, 0, W, H);
+
+    // ── Field stars: twinkle + slow drift ──
+    for (const s of stars) {
+      s.px = (s.px + s.driftX * dt + 1) % 1;
+      s.py = (s.py + s.driftY * dt + 1) % 1;
+      const tw = 0.55 + 0.45 * Math.sin(t * s.twinkleSpeed + s.twinklePhase);
+      ctx.beginPath();
+      ctx.arc(s.px * W, s.py * H, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(205,222,255,${s.baseA * tw})`;
+      ctx.fill();
+    }
+
+    // ── Bright stars: glow halo + stronger twinkle ──
+    for (const s of brightStars) {
+      const tw = 0.45 + 0.55 * Math.sin(t * s.twinkleSpeed + s.twinklePhase);
+      const a  = s.baseA * tw;
+      const x  = s.px * W, y = s.py * H;
+      // soft halo
+      const halo = ctx.createRadialGradient(x, y, 0, x, y, s.r * 4.5);
+      halo.addColorStop(0,   `rgba(${s.rgb},${a * 0.35})`);
+      halo.addColorStop(0.5, `rgba(${s.rgb},${a * 0.08})`);
+      halo.addColorStop(1,   'transparent');
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(x, y, s.r * 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      // core
+      ctx.beginPath();
+      ctx.arc(x, y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${s.rgb},${a})`;
+      ctx.fill();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  resize();
+  buildStars();   // initial population based on actual screen size
+
+  window.addEventListener('resize', () => {
+    resize();
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(buildStars, 200);  // rebuild after resize settles
+  });
+
+  requestAnimationFrame(frame);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1330,6 +1575,25 @@ document.addEventListener('keydown', e => {
 });
 
 // ═══════════════════════════════════════════════════════════
+// HELP MODAL
+// ═══════════════════════════════════════════════════════════
+
+function openHelp() {
+  document.getElementById('help-overlay').classList.add('visible');
+}
+function closeHelp() {
+  document.getElementById('help-overlay').classList.remove('visible');
+  localStorage.setItem('gpg-star-realms-help-seen', '1');
+}
+
+document.getElementById('setup-help-btn').addEventListener('click', openHelp);
+document.getElementById('help-btn').addEventListener('click', openHelp);
+document.getElementById('help-close').addEventListener('click', closeHelp);
+document.getElementById('help-overlay').addEventListener('click', e => {
+  if (e.target.id === 'help-overlay') closeHelp();
+});
+
+// ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
 
@@ -1347,6 +1611,9 @@ if (state.screen === 'game' && state.players.length > 0) {
   state.screen = 'setup';
   renderSetupScreen();
 }
+
+if (!localStorage.getItem('gpg-star-realms-help-seen')) openHelp();
 </script>
+
 </body>
 </html>

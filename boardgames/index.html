@@ -233,6 +233,17 @@
       cursor: default;
     }
 
+    /* ── Ko-fi strip ── */
+    .kofi-strip {
+      width: 100%; max-width: 640px;
+      margin-top: 1.5rem; padding: 0.75rem 0;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.5rem;
+      font-family: var(--font-ui); font-size: 0.79rem; color: var(--text-muted);
+    }
+    .kofi-strip a { color: var(--gold); text-decoration: none; }
+    .kofi-strip a:hover { text-decoration: underline; }
+
     .card.soon .card-title::after {
       content: 'Coming soon';
       font-size: 0.65rem;
@@ -365,6 +376,11 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="kofi-strip">
+  <span>☕</span>
+  <span>Enjoying the tools? <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener">Buy me a coffee</a> — it helps with hosting and keeps new tools in development.</span>
 </div>
 
 <script>

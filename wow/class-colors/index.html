@@ -165,7 +165,7 @@
 
     #theme-bar button.active { background: var(--gold); color: var(--surface); }
 
-    /* ── Game-type bar (Marathon / Timed) ── */
+    /* ── Game-type bar (Zen Mode / Timed) ── */
     #gametype-bar {
       display: flex;
       margin-bottom: 0.6rem;
@@ -429,53 +429,103 @@
       display: none;
     }
 
-    /* ── Instructions ── */
-    #instructions {
-      width: 100%;
-      max-width: 560px;
-      margin-bottom: 1.5rem;
-    }
-
-    #instructions-toggle {
+    /* ── How to play button ── */
+    #how-to-btn {
       font-family: var(--font-ui);
-      font-size: 0.78rem;
+      font-size: 0.76rem;
+      font-weight: 600;
       color: var(--text-muted);
       background: none;
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 0.4rem 1rem;
+      padding: 0.35rem 0.85rem;
       cursor: pointer;
-      width: 100%;
-      text-align: center;
+      transition: border-color 0.15s, color 0.15s;
+      letter-spacing: 0.03em;
     }
+    #how-to-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
 
-    #instructions-toggle:hover { border-color: var(--gold-dim); color: var(--text); }
-
-    #instructions-body {
+    /* ── How to play modal ── */
+    #how-to-modal {
       display: none;
-      margin-top: 0.75rem;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0,0,0,0.65);
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    #how-to-modal.visible { display: flex; }
+
+    #how-to-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.2rem 1.4rem;
-      font-family: var(--font-ui);
-      font-size: 0.85rem;
-      line-height: 1.6;
-      color: var(--text);
+      border-radius: 16px;
+      padding: 1.8rem 1.8rem 1.5rem;
+      width: 100%;
+      max-width: 480px;
+      max-height: 88dvh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.45);
     }
 
-    #instructions-body h3 {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
+    #how-to-close {
+      position: absolute;
+      top: 0.9rem; right: 1rem;
+      font-size: 1.1rem; line-height: 1;
+      background: none; border: none;
+      color: var(--text-muted); cursor: pointer;
+      padding: 0.2rem 0.4rem; border-radius: var(--radius);
+    }
+    #how-to-close:hover { color: var(--text); }
+
+    #how-to-title {
+      font-family: var(--font);
+      font-size: 1.4rem;
       color: var(--gold);
-      margin-top: 1rem;
-      margin-bottom: 0.3rem;
+      letter-spacing: 0.04em;
+      margin-bottom: 1.2rem;
     }
 
-    #instructions-body h3:first-child { margin-top: 0; }
-    #instructions-body p { color: var(--text-muted); margin-bottom: 0.2rem; }
-    #instructions-body strong { color: var(--text); font-weight: 600; }
+    .htp-section {
+      font-size: 0.67rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text-muted);
+      margin: 1.1rem 0 0.4rem;
+      padding-bottom: 0.3rem; border-bottom: 1px solid var(--border);
+    }
+    .htp-p {
+      font-family: var(--font-ui); font-size: 0.84rem;
+      color: var(--text-muted); line-height: 1.6; margin-bottom: 0.3rem;
+    }
+    .htp-p strong { color: var(--text); }
+    .htp-p em { font-style: normal; color: var(--text); font-weight: 600; }
+
+    /* Timed mode callout */
+    .htp-timed-callout {
+      background: rgba(200,168,75,0.08);
+      border: 1px solid rgba(200,168,75,0.28);
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+      margin: 0.5rem 0 0.2rem;
+    }
+    .htp-timed-callout .htp-callout-title {
+      font-family: var(--font-ui); font-size: 0.78rem;
+      font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--gold);
+      margin-bottom: 0.35rem;
+    }
+    .htp-timed-callout .htp-p { margin-bottom: 0; }
+
+    /* Share preview box */
+    .htp-share-preview {
+      font-family: var(--font-ui); font-size: 0.78rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 0.65rem 0.9rem;
+      color: var(--text-muted); line-height: 1.75;
+      margin: 0.5rem 0; white-space: pre-wrap;
+    }
 
     /* ── Reference table ── */
     #reference {
@@ -634,6 +684,11 @@
     #splash-close:hover { color: var(--text); }
 
     #splash-card { position: relative; }
+
+    /* ── Ko-fi footer ── */
+    .kofi-footer { text-align: center; padding: 1rem 1rem 0.75rem; font-family: var(--font-ui); font-size: 0.72rem; }
+    .kofi-footer a { color: var(--text-muted); text-decoration: none; opacity: 0.65; transition: opacity 0.15s, color 0.15s; }
+    .kofi-footer a:hover { opacity: 1; color: var(--gold); }
   </style>
 </head>
 <body>
@@ -653,7 +708,7 @@
 </header>
 
 <div id="gametype-bar">
-  <button data-gametype="marathon" class="active">♾ Marathon</button>
+  <button data-gametype="zen" class="active">♾ Zen Mode</button>
   <button data-gametype="timed">⏱ Timed · 30s</button>
 </div>
 
@@ -668,29 +723,51 @@
   <div id="timer-bar-track"><div id="timer-bar-fill"></div></div>
 </div>
 
-<div id="instructions">
-  <button id="instructions-toggle">▼ How to play</button>
-  <div id="instructions-body">
-    <h3>Game modes</h3>
-    <p><strong>Marathon:</strong> Answer at your own pace, unlimited questions. Track your correct/wrong/streak score over time.</p>
-    <p><strong>Timed:</strong> Answer as many as you can in 30 seconds. Results and a shareable score card appear when time runs out.</p>
+<div style="width:100%;max-width:560px;display:flex;justify-content:flex-end;margin-bottom:0.9rem;">
+  <button id="how-to-btn">? How to play</button>
+</div>
 
-    <h3>Playstyles</h3>
-    <p><strong>Color → Class:</strong> A color swatch is shown. Type the name of the WoW class that uses it and press Enter or Submit.</p>
-    <p><strong>Class → Color:</strong> A class name is shown. Click the swatch in the grid that matches its color.</p>
-    <p><strong>Mixed:</strong> Both question types are shuffled together randomly.</p>
+<!-- How to play modal -->
+<div id="how-to-modal">
+  <div id="how-to-card">
+    <button id="how-to-close" title="Close">✕</button>
+    <div id="how-to-title">How to play</div>
 
-    <h3>Typing answers</h3>
-    <p>Only letters and spaces are accepted — no numbers or special characters. If you type something that isn't a class name at all, you'll get a warning and a chance to try again. After <strong>3 invalid entries in a row</strong> the question is marked wrong.</p>
-    <p>The <strong>Hint</strong> button reveals the first letter and total character count of the answer.</p>
-    <p><strong>Skip</strong> reveals the answer and counts as a wrong answer.</p>
-    <p>After answering, press <strong>Space</strong> or click <strong>Next</strong> to advance (Marathon mode).</p>
+    <div class="htp-timed-callout">
+      <div class="htp-callout-title">⭐ Recommended: Timed Mode — 30 seconds</div>
+      <p class="htp-p">Race the clock and answer as many questions as you can before time runs out. The timer turns orange at 15s and red at 10s. Questions auto-advance so you can keep your rhythm. When time's up, a results card shows your score — and you can <strong>share it Wordle-style</strong> (see Sharing below).</p>
+    </div>
 
-    <h3>Scoring</h3>
-    <p>Correct and wrong answers are tracked across the session. <strong>Streak</strong> counts consecutive correct answers and resets on any wrong answer or skip. <strong>Reset Score</strong> clears all counts and reshuffles the deck.</p>
+    <div class="htp-section">Game modes</div>
+    <p class="htp-p"><strong>Timed</strong> — 30 seconds, auto-advancing questions, shareable results. Select it in the bar above.</p>
+    <p class="htp-p"><strong>Zen Mode</strong> — no clock, unlimited questions, answer at your own pace. Your correct, wrong, and streak counts carry across the session.</p>
 
-    <h3>Reference table</h3>
-    <p>A full list of all 13 classes and their colors is available at the bottom of the page — but opening it will spoil the answers.</p>
+    <div class="htp-section">Playstyles</div>
+    <p class="htp-p"><strong>Color → Class</strong> — a color swatch appears. Type the name of the WoW class that uses it and press Enter or Submit.</p>
+    <p class="htp-p"><strong>Class → Color</strong> — a class name appears. Click the matching color swatch in the grid.</p>
+    <p class="htp-p"><strong>Mixed</strong> — both question types are shuffled together at random.</p>
+
+    <div class="htp-section">Typing answers</div>
+    <p class="htp-p">Only letters and spaces are accepted. If your input isn't a class name, you get a warning and another try — after <strong>3 invalid entries in a row</strong> the question is marked wrong.</p>
+    <p class="htp-p">The <strong>Hint</strong> button reveals the first letter and character count. <strong>Skip</strong> reveals the answer and counts as wrong. In Zen Mode mode, press <strong>Space</strong> or click <strong>Next</strong> to advance.</p>
+
+    <div class="htp-section">Scoring</div>
+    <p class="htp-p"><strong>Streak</strong> counts consecutive correct answers and resets on any wrong answer or skip. <strong>Reset Score</strong> clears everything and reshuffles the deck.</p>
+
+    <div class="htp-section">📊 Share your score</div>
+    <p class="htp-p">After a Timed round, hit <strong>Share Results</strong> to copy a Wordle-style scorecard to your clipboard — each question is a ✅ or ❌ in rows of five. Paste it anywhere to show off (or commiserate).</p>
+    <div class="htp-share-preview">WoW Class Colors — Timed (Color → Class)
+⏱️ 30s · 8/10 correct
+
+✅✅✅❌✅
+✅❌✅✅✅
+
+greypilgrimgames.com/wow/class-colors/</div>
+
+    <div class="htp-section">Reference table</div>
+    <p class="htp-p">A full list of all 13 classes and their colors is at the bottom of the page — but it spoils all the answers, so use it sparingly.</p>
+
+    <button class="btn btn-primary" id="how-to-dismiss" style="width:100%;margin-top:1.3rem">Got it — let's play</button>
   </div>
 </div>
 
@@ -772,7 +849,7 @@ const PLAYSTYLE_LABELS = {
 };
 
 // ── State ─────────────────────────────────────────────────────────────────
-let gameType     = 'marathon'; // 'marathon' | 'timed'
+let gameType     = 'zen'; // 'zen' | 'timed'
 let mode         = 'color-to-class';
 let current      = null;
 let qtype        = null;
@@ -1060,7 +1137,7 @@ function disableGrid() {
 
 function handleTypeSubmit() {
   if (answered) {
-    if (gameType === 'marathon') showQuestion();
+    if (gameType === 'zen') showQuestion();
     return;
   }
   const raw = classInput.value.trim();
@@ -1100,7 +1177,7 @@ function handleTypeSubmit() {
   scheduleAdvance();
 }
 
-// Advance to next question — immediately in timed mode, manually in marathon
+// Advance to next question — immediately in timed mode, manually in zen
 function scheduleAdvance() {
   if (gameType === 'timed') {
     // Only auto-advance if timer is still running
@@ -1142,9 +1219,9 @@ classInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') handleTypeSubmit();
 });
 
-// Space to advance (marathon only — timed auto-advances)
+// Space to advance (zen only — timed auto-advances)
 document.addEventListener('keydown', e => {
-  if (e.key === ' ' && gameType === 'marathon' && answered && document.activeElement !== classInput) {
+  if (e.key === ' ' && gameType === 'zen' && answered && document.activeElement !== classInput) {
     e.preventDefault();
     showQuestion();
   }
@@ -1203,12 +1280,17 @@ resetBtn.addEventListener('click', () => {
   showQuestion();
 });
 
-// ── Instructions ──────────────────────────────────────────────────────────
-document.getElementById('instructions-toggle').addEventListener('click', function() {
-  const body = document.getElementById('instructions-body');
-  const open = body.style.display === 'block';
-  body.style.display = open ? 'none' : 'block';
-  this.textContent = open ? '▼ How to play' : '▲ Hide instructions';
+// ── How to play modal ─────────────────────────────────────────────────────
+function openHowTo()  { document.getElementById('how-to-modal').classList.add('visible'); }
+function closeHowTo() {
+  document.getElementById('how-to-modal').classList.remove('visible');
+  localStorage.setItem('gpg-class-colors-help-seen', '1');
+}
+document.getElementById('how-to-btn').addEventListener('click', openHowTo);
+document.getElementById('how-to-close').addEventListener('click', closeHowTo);
+document.getElementById('how-to-dismiss').addEventListener('click', closeHowTo);
+document.getElementById('how-to-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeHowTo();
 });
 
 // ── Reference table ───────────────────────────────────────────────────────
@@ -1237,6 +1319,11 @@ function buildRefTable() {
 buildRefTable();
 refillDeck();
 showQuestion();
+if (!localStorage.getItem('gpg-class-colors-help-seen')) openHowTo();
 </script>
+
+<footer class="kofi-footer">
+  <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener">☕ Support me on Ko-fi</a>
+</footer>
 </body>
 </html>

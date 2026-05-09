@@ -242,6 +242,11 @@
       margin-left: 0.6rem;
       vertical-align: middle;
     }
+
+    /* ── Ko-fi footer ── */
+    .kofi-footer { text-align: center; padding: 1rem 1rem 0.75rem; font-family: var(--font-ui); font-size: 0.72rem; }
+    .kofi-footer a { color: var(--text-muted); text-decoration: none; opacity: 0.65; transition: opacity 0.15s, color 0.15s; }
+    .kofi-footer a:hover { opacity: 1; color: var(--gold); }
   </style>
 </head>
 <body>
@@ -304,5 +309,9 @@
   themeButtons.forEach(btn => btn.addEventListener('click', () => setTheme(btn.dataset.theme)));
   setTheme(localStorage.getItem('gpg-wow-theme') || 'light');
 </script>
+
+<footer class="kofi-footer">
+  <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener">☕ Support me on Ko-fi</a>
+</footer>
 </body>
 </html>

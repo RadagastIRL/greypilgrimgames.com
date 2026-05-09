@@ -398,6 +398,11 @@
     }
     .danger-link:hover { text-decoration: underline; }
 
+    /* ── Ko-fi footer ── */
+    .kofi-footer { text-align: center; padding: 0.7rem 1rem; font-family: var(--font-ui); font-size: 0.72rem; border-top: 1px solid var(--border); }
+    .kofi-footer a { color: var(--text-muted); text-decoration: none; opacity: 0.55; transition: opacity 0.15s, color 0.15s; }
+    .kofi-footer a:hover { opacity: 1; color: var(--accent); }
+
     /* ══════════════════════════════════════════════════════════
        HELP MODAL
     ══════════════════════════════════════════════════════════ */
@@ -545,6 +550,9 @@
   </div>
 
   <div class="summary-bar" id="summary-bar"></div>
+  <footer class="kofi-footer">
+    <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener">☕ Support me on Ko-fi</a>
+  </footer>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
