@@ -198,6 +198,49 @@
     }
     .icon-pick-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
 
+    /* ── Image / texture picker popup ── */
+    #img-picker-popup {
+      position: fixed; z-index: 600;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 0.75rem; box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      display: none; width: 500px;
+    }
+    .img-picker-cats {
+      display: flex; gap: 0.25rem; flex-wrap: wrap; margin-bottom: 0.55rem;
+    }
+    .img-cat-btn {
+      font-size: 0.62rem; padding: 0.15rem 0.48rem; border: 1px solid var(--border);
+      border-radius: 12px; background: var(--surface2); color: var(--text-muted);
+      cursor: pointer; font-family: var(--font-ui); transition: border-color 0.15s, color 0.15s;
+    }
+    .img-cat-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+    .img-cat-btn.active { color: var(--gold); border-color: var(--gold-dim); background: var(--surface); }
+    .img-picker-grid-wrap { max-height: 270px; overflow-y: auto; scrollbar-width: thin; }
+    .img-picker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; }
+    .img-swatch {
+      border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+      cursor: pointer; background: #0a0a12; transition: border-color 0.15s;
+      display: flex; flex-direction: column;
+    }
+    .img-swatch:hover { border-color: var(--gold-dim); }
+    .img-swatch img { width: 100%; height: 60px; object-fit: cover; display: block; }
+    .img-swatch .img-lbl {
+      font-size: 0.56rem; color: var(--text-muted); padding: 0.18rem 0.4rem;
+      background: var(--surface2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .img-swatch.no-preview { height: 80px; justify-content: center; align-items: center; background: var(--surface2); }
+    .img-swatch.no-preview img { display: none; }
+    .img-swatch.no-preview .img-lbl { font-size: 0.65rem; text-align: center; background: transparent; }
+    .img-picker-foot {
+      display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;
+      padding-top: 0.5rem; border-top: 1px solid var(--border);
+      font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-ui);
+    }
+    .img-picker-foot input[type="number"] {
+      width: 58px; padding: 0.22rem 0.4rem; font-size: 0.75rem; text-align: center;
+    }
+    .img-picker-foot label { display: flex; align-items: center; gap: 0.25rem; }
+
     /* ── Icon picker popup ── */
     #icon-picker-popup {
       position: fixed; z-index: 600;
@@ -679,6 +722,19 @@
   </div>
 </div>
 
+<!-- Image / texture picker popup -->
+<div id="img-picker-popup">
+  <div class="img-picker-cats" id="img-picker-cats"></div>
+  <div class="img-picker-grid-wrap">
+    <div class="img-picker-grid" id="img-picker-grid"></div>
+  </div>
+  <div class="img-picker-foot">
+    <label>W <input type="number" id="img-w" value="500" min="10" max="2048"></label>
+    <label>H <input type="number" id="img-h" value="100" min="10" max="2048"></label>
+    <span>px — click a texture to insert</span>
+  </div>
+</div>
+
 <!-- Icon picker popup -->
 <div id="icon-picker-popup">
   <input type="text" class="icon-search" id="icon-search" placeholder="Filter icons…">
@@ -852,6 +908,76 @@ function iconUrl(path) {
   return `https://wow.zamimg.com/images/wow/icons/medium/${name.toLowerCase()}.jpg`;
 }
 
+// Converts a WoW Interface\ texture path to a web-accessible PNG via Gethe's
+// wow-ui-textures repo (https://github.com/Gethe/wow-ui-textures, branch: live).
+// Coverage is good for classic UI textures; newer ones may 404 gracefully.
+function textureUrl(path) {
+  const clean = String(path || '').replace(/^Interface[\\\/]/i, '').replace(/\\/g, '/');
+  return `https://raw.githubusercontent.com/Gethe/wow-ui-textures/live/${clean}.PNG`;
+}
+
+// Textures available in TRP3's built-in background picker (UITools.lua).
+// Paths include the Interface\ prefix (required by TRP3's {img} tag).
+// textureUrl() strips the prefix to build Gethe repo preview URLs.
+// File-name casing matches the Gethe/wow-ui-textures repo exactly.
+const TEXTURES = [
+  // ── Expansion Art (Credits screens — Classic through Shadowlands only) ──
+  { label:'Classic WoW',        path:'Interface\\Credits\\CreditsScreenBackground0WOW',        cat:'Expansion Art' },
+  { label:'Burning Crusade',    path:'Interface\\Credits\\CreditsScreenBackground1BC',         cat:'Expansion Art' },
+  { label:'Wrath of the Lich King', path:'Interface\\Credits\\CreditsScreenBackground2WOTLK', cat:'Expansion Art' },
+  { label:'Cataclysm',          path:'Interface\\Credits\\CreditsScreenBackground3Cataclysm', cat:'Expansion Art' },
+  { label:'Mists of Pandaria',  path:'Interface\\Credits\\CreditsScreenBackground4MOP',       cat:'Expansion Art' },
+  { label:'Warlords of Draenor',path:'Interface\\Credits\\CreditsScreenBackground5WOD',       cat:'Expansion Art' },
+  { label:'Legion',             path:'Interface\\Credits\\CreditsScreenBackground6Legion',    cat:'Expansion Art' },
+  { label:'Battle for Azeroth', path:'Interface\\Credits\\CreditsScreenBackground7BFA',       cat:'Expansion Art' },
+  { label:'Shadowlands',        path:'Interface\\Credits\\CreditsScreenBackground8Shadowlands',cat:'Expansion Art' },
+  // ── Parchment & Paper ──
+  { label:'Dark Sandstone', path:'Interface\\HELPFRAME\\DarkSandstone-Tile',                   cat:'Parchment' },
+  { label:'Parchment',      path:'Interface\\HELPFRAME\\Tileable-Parchment',                   cat:'Parchment' },
+  { label:'Question Bg',    path:'Interface\\QuestionFrame\\question-background',               cat:'Parchment' },
+  { label:'Adventure Map',  path:'Interface\\AdventureMap\\AdventureMapParchmentTile',         cat:'Parchment' },
+  { label:'Ship Mission',   path:'Interface\\Garrison\\GarrisonShipMissionParchment',          cat:'Parchment' },
+  // ── Stationery ──
+  { label:'Auction House',  path:'Interface\\Stationery\\AuctionStationery1',                  cat:'Stationery' },
+  { label:'Ironforge',      path:'Interface\\Stationery\\Stationery_ill1',                     cat:'Stationery' },
+  { label:'Orgrimmar',      path:'Interface\\Stationery\\Stationery_OG1',                      cat:'Stationery' },
+  { label:'Thunder Bluff',  path:'Interface\\Stationery\\Stationery_TB1',                      cat:'Stationery' },
+  { label:'Undercity',      path:'Interface\\Stationery\\Stationery_UC1',                      cat:'Stationery' },
+  { label:'Stationery Test',path:'Interface\\Stationery\\StationeryTest1',                     cat:'Stationery' },
+  // ── UI Backgrounds (tileable) ──
+  { label:'Dialog Box',     path:'Interface\\DialogFrame\\UI-DialogBox-Background',             cat:'UI Tiles' },
+  { label:'Bank',           path:'Interface\\BankFrame\\Bank-Background',                       cat:'UI Tiles' },
+  { label:'Marble',         path:'Interface\\FrameGeneral\\UI-Background-Marble',               cat:'UI Tiles' },
+  { label:'Rock',           path:'Interface\\FrameGeneral\\UI-Background-Rock',                 cat:'UI Tiles' },
+  { label:'Guild Vault',    path:'Interface\\GuildBankFrame\\GuildVaultBG',                     cat:'UI Tiles' },
+  { label:'Collections',    path:'Interface\\Collections\\CollectionsBackgroundTile',           cat:'UI Tiles' },
+  { label:'Raid Frame',     path:'Interface\\RAIDFRAME\\UI-RaidFrame-GroupBg',                  cat:'UI Tiles' },
+  { label:'Achievement',    path:'Interface\\ACHIEVEMENTFRAME\\UI-Achievement-StatsBackground', cat:'UI Tiles' },
+  // ── Faction & Covenant (Shadowlands covenants + older faction frames) ──
+  { label:'Alliance',       path:'Interface\\FrameGeneral\\UIFrameAllianceBackground',         cat:'Faction' },
+  { label:'Horde',          path:'Interface\\FrameGeneral\\UIFrameHordeBackground',             cat:'Faction' },
+  { label:'Neutral',        path:'Interface\\FrameGeneral\\UIFrameNeutralBackground',           cat:'Faction' },
+  { label:'Kyrian',         path:'Interface\\FrameGeneral\\UIFrameKyrianBackground',           cat:'Faction' },
+  { label:'Night Fae',      path:'Interface\\FrameGeneral\\UIFrameNightFaeBackground',         cat:'Faction' },
+  { label:'Venthyr',        path:'Interface\\FrameGeneral\\UIFrameVenthyrBackground',          cat:'Faction' },
+  { label:'Necrolord',      path:'Interface\\FrameGeneral\\UIFrameNecrolordBackground',        cat:'Faction' },
+  { label:'Oribos',         path:'Interface\\FrameGeneral\\UIFrameOribosBackground',           cat:'Faction' },
+  { label:'Marine',         path:'Interface\\FrameGeneral\\UIFrameMarineBackground',           cat:'Faction' },
+  { label:'Mechagon',       path:'Interface\\FrameGeneral\\UIFrameMechagonBackground',         cat:'Faction' },
+  // ── Garrison & Class Hall ──
+  { label:'Garrison',         path:'Interface\\Garrison\\GarrisonUIBackground',                      cat:'Garrison' },
+  { label:'Garrison 2',       path:'Interface\\Garrison\\GarrisonUIBackground2',                     cat:'Garrison' },
+  { label:'Landing Page',     path:'Interface\\Garrison\\GarrisonLandingPageMiddleTile',              cat:'Garrison' },
+  { label:'Mission Info',     path:'Interface\\Garrison\\GarrisonMissionUIInfoBoxBackgroundTile',     cat:'Garrison' },
+  { label:'Class Hall',       path:'Interface\\Garrison\\ClassHallBackground',                        cat:'Garrison' },
+  { label:'Class Hall Int',   path:'Interface\\Garrison\\ClassHallInternalBackground',               cat:'Garrison' },
+  // ── Misc ──
+  { label:'World Map 1',  path:'Interface\\WorldMap\\UI-WorldMap-Middle1',                   cat:'Misc' },
+  { label:'World Map 2',  path:'Interface\\WorldMap\\UI-WorldMap-Middle2',                   cat:'Misc' },
+  { label:'Endscreen',    path:'Interface\\Destiny\\EndscreenBG',                            cat:'Misc' },
+  { label:'Glue Popup',   path:'Interface\\Glues\\CharacterSelect\\GlueAnnouncementPopupBackground', cat:'Misc' },
+];
+
 // ═══════════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════
@@ -991,6 +1117,12 @@ function parseMarkup(text) {
     return `<img src="${url}" style="width:${px}px;height:${px}px;border-radius:3px;vertical-align:middle;display:inline-block" onerror="this.style.display='none'">`;
   });
 
+  // Background images — {img:path:width:height}
+  h = h.replace(/\{img:([^:}]+):(\d+):(\d+)\}/gi, (_, path, w, ht) => {
+    const url = textureUrl(path);
+    return `<img src="${url}" style="width:${w}px;height:${ht}px;display:block;object-fit:cover;border-radius:4px;margin:2px 0" onerror="this.style.display='none'">`;
+  });
+
   // Colour tags
   h = h.replace(/\{col:([0-9a-fA-F]{6})\}/gi, '<span style="color:#$1">');
   h = h.replace(/\{\/col\}/gi, '</span>');
@@ -1091,7 +1223,7 @@ function buildToolbar(containerId, textareaId) {
   bar.appendChild(btn('|r', '|r', '', 'End WoW colour code'));
   bar.appendChild(sep());
 
-  // Link & icon
+  // Link, icon, image
   bar.appendChild(btn('{link}', '{link*https://example.com*', '}', 'Insert hyperlink — edit the URL'));
   (function() {
     const b = document.createElement('button');
@@ -1105,6 +1237,22 @@ function buildToolbar(containerId, textareaId) {
       openIconPicker(b, path => {
         const name = path.split('\\').pop().split('/').pop().toLowerCase();
         const tag  = `{icon:${name}:20}`;
+        if (ta) { ta.setRangeText(tag, savedStart, savedEnd, 'end'); ta.dispatchEvent(new Event('input')); ta.focus(); }
+      });
+    });
+    bar.appendChild(b);
+  })();
+  (function() {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'mark-btn img-pick-btn';
+    b.textContent = '{img}'; b.title = 'Insert background texture — opens image picker';
+    b.addEventListener('click', e => {
+      e.stopPropagation();
+      const ta = document.getElementById(textareaId);
+      const savedStart = ta ? ta.selectionStart : 0;
+      const savedEnd   = ta ? ta.selectionEnd   : 0;
+      openImgPicker(b, (path, w, h) => {
+        const tag = `{img:${path}:${w}:${h}}`;
         if (ta) { ta.setRangeText(tag, savedStart, savedEnd, 'end'); ta.dispatchEvent(new Event('input')); ta.focus(); }
       });
     });
@@ -1224,6 +1372,73 @@ function openIconPicker(nearEl, cb) {
   iconPopup.style.display = 'block';
 }
 function closeIconPicker() { iconPopup.style.display = 'none'; iconTargetCb = null; }
+
+// ═══════════════════════════════════════════════════════════
+// IMAGE / TEXTURE PICKER
+// ═══════════════════════════════════════════════════════════
+
+const imgPickerPopup = document.getElementById('img-picker-popup');
+let imgPickerCb  = null;
+let imgPickerCat = 'all';
+
+const TEXTURE_CATS = ['all', ...new Set(TEXTURES.map(t => t.cat))];
+
+function buildImgPickerCats() {
+  const bar = document.getElementById('img-picker-cats');
+  TEXTURE_CATS.forEach(cat => {
+    const b = document.createElement('button');
+    b.className = 'img-cat-btn' + (cat === 'all' ? ' active' : '');
+    b.textContent = cat === 'all' ? 'All' : cat;
+    b.addEventListener('click', () => {
+      imgPickerCat = cat;
+      document.querySelectorAll('.img-cat-btn').forEach(el => el.classList.toggle('active', el === b));
+      renderImgGrid();
+    });
+    bar.appendChild(b);
+  });
+}
+
+function renderImgGrid() {
+  const grid = document.getElementById('img-picker-grid');
+  grid.innerHTML = '';
+  const list = imgPickerCat === 'all' ? TEXTURES : TEXTURES.filter(t => t.cat === imgPickerCat);
+  list.forEach(tex => {
+    const sw = document.createElement('div');
+    sw.className = 'img-swatch';
+    const url = textureUrl(tex.path);
+    const img = document.createElement('img');
+    img.src = url; img.alt = tex.label;
+    img.addEventListener('error', () => sw.classList.add('no-preview'));
+    const lbl = document.createElement('span');
+    lbl.className = 'img-lbl'; lbl.textContent = tex.label;
+    sw.appendChild(img); sw.appendChild(lbl);
+    sw.addEventListener('click', () => {
+      const w  = parseInt(document.getElementById('img-w').value, 10) || 500;
+      const h  = parseInt(document.getElementById('img-h').value, 10) || 100;
+      if (imgPickerCb) imgPickerCb(tex.path, w, h);
+      closeImgPicker();
+    });
+    grid.appendChild(sw);
+  });
+}
+
+function openImgPicker(nearEl, cb) {
+  imgPickerCb = cb;
+  renderImgGrid();
+  const rect = nearEl.getBoundingClientRect();
+  const top  = rect.bottom + 4;
+  const left = Math.min(rect.left, window.innerWidth - 510);
+  imgPickerPopup.style.top  = top + 'px';
+  imgPickerPopup.style.left = Math.max(8, left) + 'px';
+  imgPickerPopup.style.display = 'block';
+}
+
+function closeImgPicker() { imgPickerPopup.style.display = 'none'; imgPickerCb = null; }
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#img-picker-popup') && !e.target.closest('.img-pick-btn'))
+    closeImgPicker();
+});
 
 document.getElementById('icon-pick-main').addEventListener('click', e => {
   openIconPicker(e.currentTarget, path => {
@@ -1349,6 +1564,22 @@ function makeToolbarButtons(bodyId) {
       openIconPicker(b, path => {
         const name = path.split('\\').pop().split('/').pop().toLowerCase();
         const tag  = `{icon:${name}:20}`;
+        if (ta) { ta.setRangeText(tag, savedStart, savedEnd, 'end'); ta.dispatchEvent(new Event('input')); ta.focus(); }
+      });
+    });
+    bar.appendChild(b);
+  })();
+  (function() {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'mark-btn img-pick-btn';
+    b.textContent = '{img}'; b.title = 'Insert background texture — opens image picker';
+    b.addEventListener('click', e => {
+      e.stopPropagation();
+      const ta = document.getElementById(bodyId);
+      const savedStart = ta ? ta.selectionStart : 0;
+      const savedEnd   = ta ? ta.selectionEnd   : 0;
+      openImgPicker(b, (path, w, h) => {
+        const tag = `{img:${path}:${w}:${h}}`;
         if (ta) { ta.setRangeText(tag, savedStart, savedEnd, 'end'); ta.dispatchEvent(new Event('input')); ta.focus(); }
       });
     });
@@ -2010,6 +2241,7 @@ document.getElementById('install-toggle').addEventListener('click', () => {
 // ═══════════════════════════════════════════════════════════
 
 buildIconGrid();
+buildImgPickerCats();
 loadState();
 setTheme(localStorage.getItem('gpg-wow-theme') || 'light');
 populateForm();
