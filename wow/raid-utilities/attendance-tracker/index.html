@@ -465,14 +465,6 @@
       <input class="form-input" type="password" id="wcl-secret"
              placeholder="Your WCL client secret" autocomplete="off">
     </div>
-    <div class="form-row">
-      <label class="form-label" for="wcl-username">Your WCL Username <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-      <input class="form-input" type="text" id="wcl-username"
-             placeholder="e.g. Arthuras" autocomplete="off" spellcheck="false">
-      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.3rem;line-height:1.45">
-        When two officers upload logs for the same raid, your log is kept and the duplicate is discarded. Leave blank to keep whichever log has more players.
-      </div>
-    </div>
 
     <hr class="setup-divider">
 
@@ -627,7 +619,7 @@
     <strong>Sessions:</strong> limit the table to the most recent 8, 16, or all sessions. Attendance percentages always reflect only the sessions currently visible.</p>
 
     <div class="help-section">Duplicate log merging</div>
-    <p class="help-p">When two officers both upload logs for the same raid night, the tracker automatically detects the overlap (matching timestamps + &gt;50% shared players) and keeps only one. If you set <strong>Your WCL Username</strong> in settings, your log always wins; otherwise the log with the most players is kept. The sync metadata line shows how many duplicates were merged on the last sync.</p>
+    <p class="help-p">When two officers both upload logs for the same raid night, the tracker automatically detects the overlap (matching timestamps + &gt;50% shared players) and keeps only one. Logs uploaded by <strong>RadagastIRL</strong> are always given priority; if that log isn't present for a given night, the log with the most players is kept instead. The sync metadata line shows how many duplicates were merged on the last sync.</p>
 
     <div class="help-section">Syncing</div>
     <p class="help-p">Click <strong>↻ Sync</strong> to re-pull the latest logs and roster from WarcraftLogs and Raider.IO. Your credentials, reports, and pug notes are stored only in your browser's local storage — nothing is sent anywhere except the WCL and Raider.IO APIs.</p>
@@ -651,10 +643,6 @@
     <div class="form-row">
       <label class="form-label" for="cfg-wcl-secret">WCL Client Secret</label>
       <input class="form-input" type="password" id="cfg-wcl-secret" autocomplete="off">
-    </div>
-    <div class="form-row">
-      <label class="form-label" for="cfg-wcl-username">Your WCL Username <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-      <input class="form-input" type="text" id="cfg-wcl-username" autocomplete="off" spellcheck="false">
     </div>
     <div class="form-row">
       <label class="form-label" for="cfg-guild">Guild Name</label>
@@ -688,10 +676,11 @@
 // ════════════════════════════════════════════════════════
 // CONSTANTS
 // ════════════════════════════════════════════════════════
-const WCL_TOKEN_URL = 'https://www.warcraftlogs.com/oauth/token';
-const WCL_GQL_URL   = 'https://www.warcraftlogs.com/api/v2/client';
-const RIO_BASE      = 'https://raider.io/api/v1';
-const STORAGE_KEY   = 'gpg-wow-attendance';
+const WCL_TOKEN_URL      = 'https://www.warcraftlogs.com/oauth/token';
+const WCL_GQL_URL        = 'https://www.warcraftlogs.com/api/v2/client';
+const RIO_BASE           = 'https://raider.io/api/v1';
+const STORAGE_KEY        = 'gpg-wow-attendance';
+const PREFERRED_LOG_OWNER = 'RadagastIRL'; // logs by this WCL user always win deduplication
 
 const CLASS_COLORS = {
   Warrior:'#C69B3A', Paladin:'#F48CBA', Hunter:'#AAD372', Rogue:'#FFF468',
@@ -705,7 +694,7 @@ const ROLE_ICONS = { tank:'🛡', healer:'✚', dps:'⚔' };
 // STATE
 // ════════════════════════════════════════════════════════
 let state = {
-  config: { wclClientId:'', wclClientSecret:'', myWclUsername:'', guildName:'', realm:'', region:'us' },
+  config: { wclClientId:'', wclClientSecret:'', guildName:'', realm:'', region:'us' },
   reports:       [],  // [{code,title,zone,startTime,endTime,players:[{name,cls,role,spec,id}]}]
   manualReports: [],  // same shape + manual:true — logs added by code/URL
   guildRoster:   [],  // [characterName, ...]
@@ -952,7 +941,7 @@ async function syncAll(onStatus) {
 
   // Deduplicate: when two officers both upload the same raid, keep the
   // preferred owner's log; fall back to the one with the most players.
-  const deduped   = deduplicateReports(reports, state.config.myWclUsername);
+  const deduped   = deduplicateReports(reports, PREFERRED_LOG_OWNER);
   state.lastDedupCount = reports.length - deduped.length;
 
   state.reports     = deduped.sort((a, b) => b.startTime - a.startTime);
@@ -1200,10 +1189,9 @@ document.getElementById('player-modal').addEventListener('click', e => {
 // SETUP SCREEN HANDLERS
 // ════════════════════════════════════════════════════════
 document.getElementById('connect-btn').addEventListener('click', async () => {
-  const id       = document.getElementById('wcl-id').value.trim();
-  const secret   = document.getElementById('wcl-secret').value.trim();
-  const username = document.getElementById('wcl-username').value.trim();
-  const guild    = document.getElementById('s-guild-name').value.trim();
+  const id     = document.getElementById('wcl-id').value.trim();
+  const secret = document.getElementById('wcl-secret').value.trim();
+  const guild  = document.getElementById('s-guild-name').value.trim();
   const realm    = document.getElementById('s-realm').value.trim();
   const region   = document.getElementById('s-region').value;
 
@@ -1215,7 +1203,7 @@ document.getElementById('connect-btn').addEventListener('click', async () => {
   if (!id || !secret) { errEl.className='banner error'; errEl.textContent='Enter your WCL Client ID and Secret.'; return; }
   if (!guild || !realm){ errEl.className='banner error'; errEl.textContent='Enter your guild name and realm.'; return; }
 
-  state.config = { wclClientId:id, wclClientSecret:secret, myWclUsername:username, guildName:guild, realm, region };
+  state.config = { wclClientId:id, wclClientSecret:secret, guildName:guild, realm, region };
   _token = null; _tokenExp = 0;
 
   const btn = document.getElementById('connect-btn');
@@ -1280,10 +1268,9 @@ document.getElementById('session-filter').querySelectorAll('.filter-btn').forEac
 
 // Settings
 document.getElementById('settings-btn').addEventListener('click', () => {
-  document.getElementById('cfg-wcl-id').value       = state.config.wclClientId;
-  document.getElementById('cfg-wcl-secret').value   = state.config.wclClientSecret;
-  document.getElementById('cfg-wcl-username').value = state.config.myWclUsername ?? '';
-  document.getElementById('cfg-guild').value         = state.config.guildName;
+  document.getElementById('cfg-wcl-id').value     = state.config.wclClientId;
+  document.getElementById('cfg-wcl-secret').value = state.config.wclClientSecret;
+  document.getElementById('cfg-guild').value       = state.config.guildName;
   document.getElementById('cfg-realm').value       = state.config.realm;
   document.getElementById('cfg-region').value      = state.config.region;
   document.getElementById('cfg-err').className     = 'banner';
@@ -1296,7 +1283,6 @@ document.getElementById('cfg-save').addEventListener('click', () => {
   state.config = {
     wclClientId:     document.getElementById('cfg-wcl-id').value.trim(),
     wclClientSecret: document.getElementById('cfg-wcl-secret').value.trim(),
-    myWclUsername:   document.getElementById('cfg-wcl-username').value.trim(),
     guildName:       document.getElementById('cfg-guild').value.trim(),
     realm:           document.getElementById('cfg-realm').value.trim(),
     region:          document.getElementById('cfg-region').value,
