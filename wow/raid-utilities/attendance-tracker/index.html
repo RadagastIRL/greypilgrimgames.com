@@ -689,6 +689,13 @@ function classifyDifficulty(fights) {
   return { isRaid, difficulty: primary, diffLabel, diffCls };
 }
 
+// Returns the fight ID to deep-link to: last kill, or last pull if no kill.
+function bestFightId(fights) {
+  if (!fights?.length) return 'last';
+  const kills = fights.filter(f => f.kill);
+  return kills.length ? kills[kills.length - 1].id : fights[fights.length - 1].id;
+}
+
 // ════════════════════════════════════════════════════════
 // WCL API
 // ════════════════════════════════════════════════════════
@@ -750,11 +757,11 @@ async function fetchGuildReports() {
 async function fetchReportPlayers(code) {
   const gql = `{ reportData { report(code:"${code}") {
     playerDetails(startTime:0, endTime:9999999999)
-    fights { difficulty }
+    fights { id difficulty kill }
   }}}`;
   const res    = await wclQuery(gql);
   const report = res.data?.reportData?.report;
-  const fallback = { players: [], isRaid: false, difficulty: 4, diffLabel: 'HC', diffCls: 'diff-hc' };
+  const fallback = { players: [], isRaid: false, difficulty: 4, diffLabel: 'HC', diffCls: 'diff-hc', fightId: 'last' };
   if (!report) return fallback;
 
   // WCL sometimes wraps in {data:{playerDetails:{...}}} and sometimes returns directly
@@ -766,7 +773,8 @@ async function fetchReportPlayers(code) {
   (inner?.dps     ?? []).forEach(p => players.push({ name:p.name, cls:p.type??'Unknown', role:'dps',    spec:p.specs?.[0]?.spec??'', id:p.id??0 }));
 
   const { isRaid, difficulty, diffLabel, diffCls } = classifyDifficulty(report.fights);
-  return { players, isRaid, difficulty, diffLabel, diffCls };
+  const fightId = bestFightId(report.fights);
+  return { players, isRaid, difficulty, diffLabel, diffCls, fightId };
 }
 
 // ════════════════════════════════════════════════════════
@@ -803,7 +811,7 @@ async function syncAll(onStatus) {
     const batch = rawReports.slice(i, i + 5);
     status(`Fetching player details… ${Math.min(i, rawReports.length)}/${rawReports.length}`);
     const results = await Promise.all(batch.map(async r => {
-      const { players, isRaid, difficulty, diffLabel, diffCls } = await fetchReportPlayers(r.code);
+      const { players, isRaid, difficulty, diffLabel, diffCls, fightId } = await fetchReportPlayers(r.code);
       return {
         code:      r.code,
         title:     r.title,
@@ -813,6 +821,7 @@ async function syncAll(onStatus) {
         difficulty,
         diffLabel,
         diffCls,
+        fightId,
         players,
         isRaid,
       };
@@ -937,7 +946,8 @@ function renderTable() {
     for (const r of reports) {
       const sourceId = p.sources.get(r.code);
       if (sourceId !== undefined) {
-        const url = `https://www.warcraftlogs.com/reports/${r.code}#fight=all&source=${sourceId}`;
+        const fight = r.fightId ?? 'last';
+        const url = `https://www.warcraftlogs.com/reports/${r.code}#fight=${fight}&source=${sourceId}`;
         tbody += `<td class="present" title="${esc(r.title)}"><a href="${url}" target="_blank" rel="noopener">●</a></td>`;
       } else {
         tbody += `<td class="absent">·</td>`;
@@ -993,7 +1003,7 @@ function openPlayerModal(name) {
     const on = sourceId !== undefined;
     const pill = `<span class="att-pill ${on ? 'on' : ''}" title="${esc(r.title)}">${fmtDate(r.startTime)}</span>`;
     return on
-      ? `<a href="https://www.warcraftlogs.com/reports/${r.code}#fight=all&source=${sourceId}" target="_blank" rel="noopener" style="text-decoration:none">${pill}</a>`
+      ? `<a href="https://www.warcraftlogs.com/reports/${r.code}#fight=${r.fightId ?? 'last'}&source=${sourceId}" target="_blank" rel="noopener" style="text-decoration:none">${pill}</a>`
       : pill;
   }).join('');
 
@@ -1292,7 +1302,7 @@ document.getElementById('add-report-confirm').addEventListener('click', async ()
     const gql = `{ reportData { report(code:"${code}") {
       title startTime endTime zone { name }
       playerDetails(startTime:0, endTime:9999999999)
-      fights { difficulty }
+      fights { id difficulty kill }
     }}}`;
     const res    = await wclQuery(gql);
     const report = res.data?.reportData?.report;
@@ -1329,6 +1339,7 @@ document.getElementById('add-report-confirm').addEventListener('click', async ()
       difficulty,
       diffLabel,
       diffCls,
+      fightId:   bestFightId(report.fights),
     };
 
     // ── Soft warning: timestamp overlap ────────────────
