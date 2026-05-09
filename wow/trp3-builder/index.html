@@ -483,6 +483,27 @@
     <div class="tab-panel" id="tab-basics">
 
       <div class="field-group">
+        <div class="field-group-title">Profile Appearance</div>
+        <div class="field">
+          <label>Profile Colour</label>
+          <div class="colour-row">
+            <input type="color" id="colour-picker" value="#ff7c0a">
+            <input type="text" id="colour-hex" class="colour-hex-input" placeholder="ff7c0a" maxlength="6">
+            <div class="colour-dot" id="colour-dot"></div>
+          </div>
+          <div class="field-hint">Shown on your nameplate and used as your profile accent colour</div>
+        </div>
+        <div class="field">
+          <label>Profile Icon</label>
+          <div class="icon-field">
+            <input type="text" id="f-icon" data-key="icon" placeholder="Interface\Icons\INV_Misc_QuestionMark">
+            <button class="icon-pick-btn" id="icon-pick-main">Browse…</button>
+          </div>
+          <div class="field-hint">WoW icon path — use Browse or paste from <a href="https://www.wowhead.com/icons" target="_blank" rel="noopener" style="color:var(--gold)">Wowhead Icons</a></div>
+        </div>
+      </div>
+
+      <div class="field-group">
         <div class="field-group-title">Profile &amp; Character Identity</div>
         <div class="field-row">
           <div class="field">
@@ -552,27 +573,6 @@
             <label for="f-weight">Weight</label>
             <input type="text" id="f-weight" placeholder="e.g. 175 lbs" data-key="weight">
           </div>
-        </div>
-      </div>
-
-      <div class="field-group">
-        <div class="field-group-title">Profile Appearance</div>
-        <div class="field">
-          <label>Profile Colour</label>
-          <div class="colour-row">
-            <input type="color" id="colour-picker" value="#ff7c0a">
-            <input type="text" id="colour-hex" class="colour-hex-input" placeholder="ff7c0a" maxlength="6">
-            <div class="colour-dot" id="colour-dot"></div>
-          </div>
-          <div class="field-hint">Shown on your nameplate and used as your profile accent colour</div>
-        </div>
-        <div class="field">
-          <label>Profile Icon</label>
-          <div class="icon-field">
-            <input type="text" id="f-icon" data-key="icon" placeholder="Interface\Icons\INV_Misc_QuestionMark">
-            <button class="icon-pick-btn" id="icon-pick-main">Browse…</button>
-          </div>
-          <div class="field-hint">WoW icon path — use Browse or paste from <a href="https://www.wowhead.com/icons" target="_blank" rel="noopener" style="color:var(--gold)">Wowhead Icons</a></div>
         </div>
       </div>
 
