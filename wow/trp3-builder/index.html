@@ -1217,8 +1217,8 @@ function openIconPicker(nearEl, cb) {
   document.getElementById('icon-search').value = '';
   renderIconGrid();
   const rect = nearEl.getBoundingClientRect();
-  const top  = rect.bottom + window.scrollY + 4;
-  const left = Math.min(rect.left + window.scrollX, window.innerWidth - 370);
+  const top  = rect.bottom + 4;
+  const left = Math.min(rect.left, window.innerWidth - 370);
   iconPopup.style.top  = top + 'px';
   iconPopup.style.left = Math.max(8, left) + 'px';
   iconPopup.style.display = 'block';
