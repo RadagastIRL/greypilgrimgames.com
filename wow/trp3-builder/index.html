@@ -1043,8 +1043,13 @@ function buildToolbar(containerId, textareaId) {
     if (!ta) return;
     const s = ta.selectionStart, e = ta.selectionEnd;
     const sel = ta.value.slice(s, e);
-    const insert = sel ? open + sel + close : open;
-    ta.setRangeText(insert, s, e, 'end');
+    if (sel) {
+      ta.setRangeText(open + sel + close, s, e, 'end');
+    } else {
+      ta.setRangeText(open + close, s, e, 'end');
+      const cur = s + open.length;
+      ta.setSelectionRange(cur, cur);
+    }
     ta.dispatchEvent(new Event('input'));
     ta.focus();
   }
@@ -1088,7 +1093,22 @@ function buildToolbar(containerId, textareaId) {
 
   // Link & icon
   bar.appendChild(btn('{link}', '{link*https://example.com*', '}', 'Insert hyperlink — edit the URL'));
-  bar.appendChild(btn('{icon}', '{icon:', ':20}', 'Inline icon — put icon name before :20'));
+  (function() {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'mark-btn';
+    b.textContent = '{icon}'; b.title = 'Insert inline WoW icon — opens icon picker';
+    b.addEventListener('click', () => {
+      const ta = document.getElementById(textareaId);
+      const savedStart = ta ? ta.selectionStart : 0;
+      const savedEnd   = ta ? ta.selectionEnd   : 0;
+      openIconPicker(b, path => {
+        const name = path.split('\\').pop().split('/').pop().toLowerCase();
+        const tag  = `{icon:${name}:20}`;
+        if (ta) { ta.setRangeText(tag, savedStart, savedEnd, 'end'); ta.dispatchEvent(new Event('input')); ta.focus(); }
+      });
+    });
+    bar.appendChild(b);
+  })();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1279,8 +1299,13 @@ function makeToolbarButtons(bodyId) {
     if (!ta) return;
     const s = ta.selectionStart, e = ta.selectionEnd;
     const sel = ta.value.slice(s, e);
-    const insert = sel ? open + sel + close : open;
-    ta.setRangeText(insert, s, e, 'end');
+    if (sel) {
+      ta.setRangeText(open + sel + close, s, e, 'end');
+    } else {
+      ta.setRangeText(open + close, s, e, 'end');
+      const cur = s + open.length;
+      ta.setSelectionRange(cur, cur);
+    }
     ta.dispatchEvent(new Event('input'));
     ta.focus();
   }
@@ -1311,7 +1336,22 @@ function makeToolbarButtons(bodyId) {
   bar.appendChild(btn('|r', '|r', '', 'End WoW colour code'));
   bar.appendChild(sep());
   bar.appendChild(btn('{link}', '{link*https://example.com*', '}', 'Hyperlink — edit URL'));
-  bar.appendChild(btn('{icon}', '{icon:', ':20}', 'Inline icon'));
+  (function() {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'mark-btn';
+    b.textContent = '{icon}'; b.title = 'Insert inline WoW icon — opens icon picker';
+    b.addEventListener('click', () => {
+      const ta = document.getElementById(bodyId);
+      const savedStart = ta ? ta.selectionStart : 0;
+      const savedEnd   = ta ? ta.selectionEnd   : 0;
+      openIconPicker(b, path => {
+        const name = path.split('\\').pop().split('/').pop().toLowerCase();
+        const tag  = `{icon:${name}:20}`;
+        if (ta) { ta.setRangeText(tag, savedStart, savedEnd, 'end'); ta.dispatchEvent(new Event('input')); ta.focus(); }
+      });
+    });
+    bar.appendChild(b);
+  })();
 
   return bar;
 }
