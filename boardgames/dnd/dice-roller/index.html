@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dice Roller — D&amp;D — Grey Pilgrim Games</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root, [data-theme="light"] {
+      --bg:           #f0e6d2;
+      --surface:      #faf2dd;
+      --surface2:     #e6dcc4;
+      --border:       #c0b090;
+      --text:         #2c1f10;
+      --text-muted:   #7a6a4a;
+      --accent:       #8a6620;
+      --accent-dim:   #a08840;
+      --danger:       #a02818;
+      --gain:         #4a7a2a;
+      --nat20:        #c89028;
+      --nat1:         #a02818;
+      --shadow:       rgba(60,40,20,0.15);
+      --font:         'Georgia', serif;
+      --font-ui:      system-ui, sans-serif;
+      --radius:       8px;
+    }
+
+    [data-theme="dark"] {
+      --bg:           #1a1410;
+      --surface:      #251c17;
+      --surface2:     #322821;
+      --border:       #4a3a2c;
+      --text:         #ead4a8;
+      --text-muted:   #9a8458;
+      --accent:       #d4a040;
+      --accent-dim:   #8a6620;
+      --danger:       #d04838;
+      --gain:         #6aaa3a;
+      --nat20:        #ffd060;
+      --nat1:         #e0382c;
+      --shadow:       rgba(0,0,0,0.5);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      [data-theme="os"] {
+        --bg:#1a1410; --surface:#251c17; --surface2:#322821; --border:#4a3a2c;
+        --text:#ead4a8; --text-muted:#9a8458; --accent:#d4a040; --accent-dim:#8a6620;
+        --danger:#d04838; --gain:#6aaa3a; --nat20:#ffd060; --nat1:#e0382c;
+        --shadow:rgba(0,0,0,0.5);
+      }
+    }
+    @media (prefers-color-scheme: light) {
+      [data-theme="os"] {
+        --bg:#f0e6d2; --surface:#faf2dd; --surface2:#e6dcc4; --border:#c0b090;
+        --text:#2c1f10; --text-muted:#7a6a4a; --accent:#8a6620; --accent-dim:#a08840;
+        --danger:#a02818; --gain:#4a7a2a; --nat20:#c89028; --nat1:#a02818;
+        --shadow:rgba(60,40,20,0.15);
+      }
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* Subtle texture - radial gradient + noise feel */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse at top, rgba(212,160,64,0.06), transparent 60%),
+        radial-gradient(ellipse at bottom, rgba(160,40,24,0.04), transparent 60%);
+      pointer-events: none;
+    }
+    [data-theme="light"] body::before {
+      background:
+        radial-gradient(ellipse at top, rgba(138,102,32,0.08), transparent 60%),
+        radial-gradient(ellipse at bottom, rgba(160,40,24,0.04), transparent 60%);
+    }
+
+    #app { position: relative; z-index: 1; }
+
+    /* ── Top nav ── */
+    nav {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.7rem 1rem;
+    }
+
+    nav a {
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    nav a:hover { color: var(--accent); }
+
+    #theme-bar {
+      display: inline-flex;
+      gap: 0.2rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 0.2rem;
+    }
+    #theme-bar button {
+      font-family: var(--font-ui);
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; background: transparent; color: var(--text-muted);
+      border: none; border-radius: 14px; padding: 0.25rem 0.6rem; cursor: pointer;
+    }
+    #theme-bar button.active { background: var(--accent); color: var(--surface); }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      padding: 1rem 1rem 1.5rem;
+    }
+    header h1 {
+      font-size: 2rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 20px rgba(212,160,64,0.2);
+    }
+    header p {
+      color: var(--text-muted);
+      font-family: var(--font-ui);
+      font-size: 0.88rem;
+      margin-top: 0.3rem;
+    }
+
+    /* ── Main grid ── */
+    main {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1rem 3rem;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    @media (min-width: 900px) {
+      main { grid-template-columns: minmax(0, 1fr) 320px; }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .panel-title {
+      font-family: var(--font-ui);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.7rem;
+    }
+
+    .panel-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.7rem;
+    }
+    .panel-title-row .panel-title { margin: 0; }
+
+    .section-reset {
+      background: none;
+      border: none;
+      font-family: var(--font-ui);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .section-reset:hover { color: var(--danger); background: var(--surface2); }
+    .section-reset:disabled { opacity: 0.3; cursor: default; }
+    .section-reset:disabled:hover { color: var(--text-muted); background: none; }
+
+    /* ── Dice chips ── */
+    .dice-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+    }
+    @media (max-width: 520px) {
+      .dice-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .die-chip {
+      position: relative;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.6rem 0.3rem;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.08s, background 0.15s, box-shadow 0.15s;
+      font-family: var(--font-ui);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .die-chip:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .die-chip:active { transform: scale(0.94); }
+    .die-chip.has-count {
+      background: rgba(212,160,64,0.12);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(212,160,64,0.15);
+      color: var(--accent);
+    }
+
+    .die-icon {
+      width: 32px; height: 32px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .die-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    .die-count {
+      position: absolute;
+      top: -6px; right: -6px;
+      background: var(--accent);
+      color: var(--surface);
+      font-size: 0.7rem;
+      font-weight: 800;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 4px var(--shadow);
+    }
+    .die-chip.has-count .die-count { display: flex; }
+
+    .die-minus {
+      position: absolute;
+      bottom: -6px; right: -6px;
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 700;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .die-chip.has-count .die-minus { display: flex; }
+    .die-minus:hover { color: var(--danger); border-color: var(--danger); }
+
+    /* ── Modifier + adv/dis row ── */
+    .roll-options {
+      margin-top: 1rem;
+      display: grid;
+      gap: 0.7rem;
+      grid-template-columns: 1fr 1fr;
+    }
+    @media (max-width: 520px) {
+      .roll-options { grid-template-columns: 1fr; }
+    }
+
+    .opt-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .opt-label {
+      font-family: var(--font-ui);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .modifier-row {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .mod-btn {
+      width: 32px; height: 32px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface2);
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: 1.1rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .mod-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .mod-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 0.4rem 0.5rem;
+      text-align: center;
+      outline: none;
+      min-width: 0;
+    }
+    .mod-input:focus { border-color: var(--accent); }
+
+    .adv-row {
+      display: flex;
+      gap: 0.3rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px;
+    }
+    .adv-btn {
+      flex: 1;
+      padding: 0.4rem;
+      border: none;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .adv-btn.active { background: var(--accent); color: var(--surface); }
+    .adv-btn:disabled { opacity: 0.35; cursor: default; }
+
+    /* ── Bonus dice ── */
+    .bonus-section { margin-top: 1rem; }
+    .bonus-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .bonus-chip {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 0.35rem 0.75rem;
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .bonus-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .bonus-chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--surface);
+      box-shadow: 0 0 10px rgba(212,160,64,0.25);
+    }
+    .bonus-chip.bane.active {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(208,72,56,0.3);
+    }
+
+    /* ── Label + Roll button ── */
+    .label-input {
+      width: 100%;
+      margin-top: 1rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.95rem;
+      padding: 0.55rem 0.8rem;
+      outline: none;
+    }
+    .label-input:focus { border-color: var(--accent); }
+    .label-input::placeholder { color: var(--text-muted); font-style: italic; }
+
+    .action-row {
+      margin-top: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .clear-btn {
+      padding: 0.7rem 1rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .clear-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+    .roll-btn {
+      flex: 1;
+      padding: 0.85rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: var(--surface);
+      font-family: var(--font);
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 0 18px rgba(212,160,64,0.3);
+      transition: opacity 0.15s, transform 0.08s;
+    }
+    .roll-btn:hover { opacity: 0.9; }
+    .roll-btn:active { transform: scale(0.98); }
+    .roll-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    /* ── Result card ── */
+    #result-card {
+      margin-top: 1.25rem;
+      padding: 1.5rem 1.2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 2px 12px var(--shadow);
+      display: none;
+    }
+    #result-card.visible { display: block; animation: rollIn 0.4s ease-out; }
+
+    @keyframes rollIn {
+      0%   { opacity: 0; transform: translateY(-8px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .result-label {
+      font-family: var(--font);
+      font-size: 1rem;
+      color: var(--accent);
+      font-style: italic;
+      margin-bottom: 0.3rem;
+    }
+    .result-label:empty { display: none; }
+
+    .result-expr {
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.7rem;
+    }
+
+    .result-breakdown {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      justify-content: center;
+      margin-bottom: 0.8rem;
+    }
+
+    .die-result {
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      font-weight: 700;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 0.55rem;
+      min-width: 36px;
+      color: var(--text);
+    }
+    .die-result.dropped {
+      opacity: 0.4;
+      text-decoration: line-through;
+    }
+    .die-result.crit-max { color: var(--nat20); border-color: var(--nat20); background: rgba(255,208,96,0.1); }
+    .die-result.crit-min { color: var(--nat1); border-color: var(--nat1); background: rgba(224,56,44,0.1); }
+
+    .die-result-tag {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-right: 0.2rem;
+    }
+
+    .breakdown-op {
+      font-family: var(--font-ui);
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      align-self: center;
+      padding: 0 0.1rem;
+    }
+
+    .modifier-tag {
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      align-self: center;
+    }
+
+    .bonus-tag {
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      background: var(--surface2);
+      border: 1px dashed var(--accent);
+      border-radius: 6px;
+      padding: 0.3rem 0.55rem;
+      color: var(--accent);
+    }
+    .bonus-tag.bane { color: var(--danger); border-color: var(--danger); }
+
+    .result-total {
+      font-family: var(--font);
+      font-size: 4rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+      margin: 0.4rem 0 0.2rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .result-total.nat20 {
+      color: var(--nat20);
+      text-shadow: 0 0 30px rgba(255,208,96,0.5);
+    }
+    .result-total.nat1 {
+      color: var(--nat1);
+      text-shadow: 0 0 24px rgba(224,56,44,0.4);
+    }
+
+    .crit-banner {
+      font-family: var(--font);
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-top: 0.4rem;
+    }
+    .crit-banner.nat20 {
+      color: var(--nat20);
+      animation: nat20Flash 0.55s ease-in-out 6;
+    }
+    .crit-banner.nat1 {
+      color: var(--nat1);
+      animation: nat1Flash 0.4s ease-in-out 6;
+    }
+    @keyframes nat20Flash {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+        text-shadow: 0 0 24px var(--nat20), 0 0 8px var(--nat20);
+      }
+      50% {
+        opacity: 0.55;
+        transform: scale(1.12);
+        text-shadow: 0 0 40px var(--nat20), 0 0 16px var(--nat20);
+      }
+    }
+    @keyframes nat1Flash {
+      0%, 100% {
+        opacity: 1;
+        transform: translateX(0);
+        text-shadow: 0 0 18px var(--nat1);
+      }
+      20% { transform: translateX(-4px); opacity: 0.6; }
+      40% { transform: translateX(4px); opacity: 1; text-shadow: 0 0 28px var(--nat1); }
+      60% { transform: translateX(-3px); opacity: 0.6; }
+      80% { transform: translateX(3px); opacity: 1; }
+    }
+
+    /* ── Presets ── */
+    .preset-section { margin-top: 1rem; }
+    .preset-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .preset-chip {
+      position: relative;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 0.4rem 0.75rem 0.4rem 0.85rem;
+      font-family: var(--font-ui);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .preset-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .preset-chip-name { line-height: 1; }
+    .preset-chip-expr {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+    .preset-del {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 0 0.1rem;
+      line-height: 1;
+    }
+    .preset-del:hover { color: var(--danger); }
+
+    .save-preset-btn {
+      background: transparent;
+      border: 1px dashed var(--border);
+      border-radius: 18px;
+      padding: 0.4rem 0.8rem;
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .save-preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .save-preset-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── History sidebar ── */
+    #history-panel {
+      max-height: 70vh;
+      display: flex;
+      flex-direction: column;
+    }
+    @media (max-width: 899px) {
+      #history-panel { max-height: none; }
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.7rem;
+    }
+    .history-clear {
+      background: none;
+      border: none;
+      font-family: var(--font-ui);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .history-clear:hover { color: var(--danger); }
+
+    #history-list {
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 60vh;
+    }
+
+    .history-empty {
+      text-align: center;
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 0.85rem;
+      padding: 1.5rem 0;
+    }
+
+    .history-entry {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--border);
+      border-radius: 6px;
+      padding: 0.55rem 0.7rem;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.08s;
+      font-family: var(--font-ui);
+    }
+    .history-entry:hover {
+      border-left-color: var(--accent);
+    }
+    .history-entry.nat20 { border-left-color: var(--nat20); }
+    .history-entry.nat1  { border-left-color: var(--nat1); }
+
+    .history-entry-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+    .history-entry-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .history-entry-label:empty::before {
+      content: 'Roll';
+      color: var(--text-muted);
+      font-style: italic;
+      font-weight: 500;
+    }
+    .history-entry-total {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--accent);
+      font-family: var(--font);
+      font-variant-numeric: tabular-nums;
+    }
+    .history-entry.nat20 .history-entry-total { color: var(--nat20); }
+    .history-entry.nat1 .history-entry-total  { color: var(--nat1); }
+
+    .history-entry-mid {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+      letter-spacing: 0.03em;
+    }
+    .history-entry-bottom {
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+      opacity: 0.75;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+
+<nav>
+  <a href="/boardgames/">← Board Games</a>
+  <div id="theme-bar">
+    <button data-theme="light">Light</button>
+    <button data-theme="dark" class="active">Dark</button>
+    <button data-theme="os">OS</button>
+  </div>
+</nav>
+
+<header>
+  <h1>Dice Roller</h1>
+  <p>True-random rolls for any combination of dice. Tracks history, criticals, and your favorite presets.</p>
+</header>
+
+<main>
+
+  <!-- ── Builder ── -->
+  <section>
+    <div class="panel">
+      <div class="panel-title-row">
+        <div class="panel-title">Choose your dice</div>
+        <button class="section-reset" id="reset-dice-btn" title="Deselect all dice">Reset</button>
+      </div>
+      <div class="dice-grid" id="dice-grid"></div>
+
+      <div class="panel-title-row" style="margin-top:1.1rem">
+        <div class="panel-title">Modifiers &amp; Bonuses</div>
+        <button class="section-reset" id="reset-options-btn" title="Clear modifier, d20 mode, and bonus dice">Reset</button>
+      </div>
+
+      <div class="roll-options">
+        <div class="opt-group">
+          <div class="opt-label">Modifier</div>
+          <div class="modifier-row">
+            <button class="mod-btn" id="mod-minus">−</button>
+            <input class="mod-input" type="number" id="mod-input" value="0">
+            <button class="mod-btn" id="mod-plus">+</button>
+          </div>
+        </div>
+        <div class="opt-group">
+          <div class="opt-label">d20 Mode</div>
+          <div class="adv-row" id="adv-row">
+            <button class="adv-btn active" data-adv="none">Normal</button>
+            <button class="adv-btn" data-adv="advantage">Adv.</button>
+            <button class="adv-btn" data-adv="disadvantage">Dis.</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bonus-section">
+        <div class="opt-label" style="margin-bottom:0.4rem">Bonus Dice</div>
+        <div class="bonus-grid" id="bonus-grid"></div>
+      </div>
+
+      <input class="label-input" type="text" id="label-input" placeholder="Optional roll label (e.g. Fireball, Stealth check)" maxlength="40">
+
+      <div class="action-row">
+        <button class="clear-btn" id="clear-btn" title="Clear everything including label">Clear All</button>
+        <button class="roll-btn" id="roll-btn" disabled>Roll!</button>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div id="result-card"></div>
+
+    <!-- Presets -->
+    <div class="panel preset-section">
+      <div class="panel-title">Saved Rolls</div>
+      <div class="preset-list" id="preset-list"></div>
+    </div>
+  </section>
+
+  <!-- ── History ── -->
+  <aside class="panel" id="history-panel">
+    <div class="history-header">
+      <div class="panel-title" style="margin:0">History</div>
+      <button class="history-clear" id="history-clear">Clear</button>
+    </div>
+    <div id="history-list"></div>
+  </aside>
+
+</main>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════
+
+const DICE_TYPES = [4, 6, 8, 10, 12, 20, 100];
+
+// SVG die icons (simple polygon outlines)
+const DIE_ICONS = {
+  4:   '<polygon points="20,4 36,32 4,32"/>',
+  6:   '<rect x="8" y="8" width="24" height="24" rx="3"/>',
+  8:   '<polygon points="20,3 36,20 20,37 4,20"/>',
+  10:  '<polygon points="20,3 35,16 28,36 12,36 5,16"/>',
+  12:  '<polygon points="20,3 33,11 33,29 20,37 7,29 7,11"/>',
+  20:  '<polygon points="20,2 36,12 36,28 20,38 4,28 4,12"/><polygon points="20,10 28,16 28,24 20,30 12,24 12,16" opacity="0.5"/>',
+  100: '<rect x="6" y="6" width="20" height="20" rx="3"/><rect x="14" y="14" width="20" height="20" rx="3"/>',
+};
+
+const BONUS_DICE = [
+  { id: 'guidance',     label: 'Guidance',       die: 4,  sign: 1 },
+  { id: 'bless',        label: 'Bless',          die: 4,  sign: 1 },
+  { id: 'bane',         label: 'Bane',           die: 4,  sign: -1 },
+  { id: 'bardic-d6',    label: 'Bardic d6',      die: 6,  sign: 1 },
+  { id: 'bardic-d8',    label: 'Bardic d8',      die: 8,  sign: 1 },
+  { id: 'bardic-d10',   label: 'Bardic d10',     die: 10, sign: 1 },
+  { id: 'bardic-d12',   label: 'Bardic d12',     die: 12, sign: 1 },
+  { id: 'superior-d8',  label: 'Superiority d8', die: 8,  sign: 1 },
+  { id: 'superior-d10', label: 'Superiority d10',die: 10, sign: 1 },
+  { id: 'superior-d12', label: 'Superiority d12',die: 12, sign: 1 },
+];
+
+const STORAGE_KEY = 'gpg-dice-roller';
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+
+let state = {
+  current: {
+    dice:      { 4:0, 6:0, 8:0, 10:0, 12:0, 20:0, 100:0 },
+    modifier:  0,
+    advantage: 'none',  // 'none' | 'advantage' | 'disadvantage'
+    bonus:     [],      // [bonusDie.id, ...]
+    label:     '',
+  },
+  history:  [],   // [{label, expression, diceResults, bonusResults, modifier, total, critType, timestamp}]
+  presets:  [],   // [{name, current}]
+};
+
+// ═══════════════════════════════════════════════════════════
+// PERSISTENCE
+// ═══════════════════════════════════════════════════════════
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      history: state.history.slice(0, 50),
+      presets: state.presets,
+    }));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (data.history) state.history = data.history;
+      if (data.presets) state.presets = data.presets;
+    }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════
+// ROLLING
+// ═══════════════════════════════════════════════════════════
+
+function rollDie(sides) {
+  return Math.floor(Math.random() * sides) + 1;
+}
+
+function performRoll() {
+  const c = state.current;
+  let total = 0;
+  const diceResults = [];
+
+  for (const sides of DICE_TYPES) {
+    const count = c.dice[sides];
+    if (!count) continue;
+
+    let rolls = [];
+    let dropped = [];
+
+    if (sides === 20 && count === 1 && c.advantage !== 'none') {
+      // Advantage / disadvantage: roll 2d20, keep one
+      const r1 = rollDie(20), r2 = rollDie(20);
+      const keep = c.advantage === 'advantage' ? Math.max(r1, r2) : Math.min(r1, r2);
+      const drop = c.advantage === 'advantage' ? Math.min(r1, r2) : Math.max(r1, r2);
+      rolls   = [keep];
+      dropped = [drop];
+      total  += keep;
+    } else {
+      for (let i = 0; i < count; i++) {
+        const r = rollDie(sides);
+        rolls.push(r);
+        total += r;
+      }
+    }
+
+    diceResults.push({ sides, count, rolls, dropped });
+  }
+
+  const bonusResults = [];
+  for (const id of c.bonus) {
+    const b = BONUS_DICE.find(x => x.id === id);
+    if (!b) continue;
+    const r = rollDie(b.die);
+    bonusResults.push({ id: b.id, label: b.label, die: b.die, sign: b.sign, value: r });
+    total += r * b.sign;
+  }
+
+  total += c.modifier;
+
+  // Detect crits on a single d20
+  let critType = null;
+  const d20 = diceResults.find(r => r.sides === 20);
+  if (d20 && d20.rolls.length === 1) {
+    if (d20.rolls[0] === 20) critType = 'nat20';
+    else if (d20.rolls[0] === 1) critType = 'nat1';
+  }
+
+  return {
+    label:        c.label,
+    expression:   buildExpression(c),
+    diceResults,
+    bonusResults,
+    modifier:     c.modifier,
+    advantage:    c.advantage,
+    total,
+    critType,
+    timestamp:    Date.now(),
+  };
+}
+
+function buildExpression(c) {
+  const parts = [];
+  for (const sides of DICE_TYPES) {
+    if (c.dice[sides]) {
+      let part = `${c.dice[sides]}d${sides}`;
+      if (sides === 20 && c.dice[sides] === 1) {
+        if (c.advantage === 'advantage')    part += ' (adv)';
+        else if (c.advantage === 'disadvantage') part += ' (dis)';
+      }
+      parts.push(part);
+    }
+  }
+  for (const id of c.bonus) {
+    const b = BONUS_DICE.find(x => x.id === id);
+    if (b) parts.push(`${b.sign > 0 ? '+' : '−'}${b.label}`);
+  }
+  if (c.modifier > 0) parts.push(`+${c.modifier}`);
+  else if (c.modifier < 0) parts.push(`${c.modifier}`);
+  return parts.join(' ') || '—';
+}
+
+function hasAnyDice() {
+  return DICE_TYPES.some(s => state.current.dice[s] > 0) || state.current.bonus.length > 0;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDERING — DICE GRID
+// ═══════════════════════════════════════════════════════════
+
+function renderDiceGrid() {
+  const grid = document.getElementById('dice-grid');
+  grid.innerHTML = '';
+  for (const sides of DICE_TYPES) {
+    const count = state.current.dice[sides];
+    const chip  = document.createElement('button');
+    chip.className = 'die-chip' + (count > 0 ? ' has-count' : '');
+    chip.dataset.sides = sides;
+    chip.innerHTML = `
+      <svg class="die-icon" viewBox="0 0 40 40">${DIE_ICONS[sides]}</svg>
+      <span class="die-label">d${sides}</span>
+      <span class="die-count">${count}</span>
+      <span class="die-minus" data-sides="${sides}">−</span>
+    `;
+    chip.addEventListener('click', e => {
+      if (e.target.classList.contains('die-minus')) {
+        e.stopPropagation();
+        decrementDie(sides);
+      } else {
+        incrementDie(sides);
+      }
+    });
+    grid.appendChild(chip);
+  }
+}
+
+function incrementDie(sides) {
+  if (state.current.dice[sides] >= 50) return;
+  state.current.dice[sides]++;
+  renderDiceGrid();
+  syncRollButton();
+  syncAdvRow();
+  syncResetButtons();
+}
+
+function decrementDie(sides) {
+  if (state.current.dice[sides] <= 0) return;
+  state.current.dice[sides]--;
+  renderDiceGrid();
+  syncRollButton();
+  syncAdvRow();
+  syncResetButtons();
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDERING — BONUS DICE
+// ═══════════════════════════════════════════════════════════
+
+function renderBonusGrid() {
+  const grid = document.getElementById('bonus-grid');
+  grid.innerHTML = '';
+  for (const b of BONUS_DICE) {
+    const active = state.current.bonus.includes(b.id);
+    const chip = document.createElement('button');
+    chip.className = 'bonus-chip' + (active ? ' active' : '') + (b.id === 'bane' ? ' bane' : '');
+    chip.textContent = b.label;
+    chip.title = `${b.sign > 0 ? '+' : '−'}d${b.die}`;
+    chip.addEventListener('click', () => {
+      if (active) {
+        state.current.bonus = state.current.bonus.filter(x => x !== b.id);
+      } else {
+        state.current.bonus.push(b.id);
+      }
+      renderBonusGrid();
+      syncRollButton();
+      syncResetButtons();
+    });
+    grid.appendChild(chip);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODIFIER + ADV
+// ═══════════════════════════════════════════════════════════
+
+document.getElementById('mod-minus').addEventListener('click', () => {
+  state.current.modifier--;
+  document.getElementById('mod-input').value = state.current.modifier;
+  syncResetButtons();
+});
+document.getElementById('mod-plus').addEventListener('click', () => {
+  state.current.modifier++;
+  document.getElementById('mod-input').value = state.current.modifier;
+  syncResetButtons();
+});
+document.getElementById('mod-input').addEventListener('input', e => {
+  const v = parseInt(e.target.value);
+  state.current.modifier = isNaN(v) ? 0 : v;
+  syncResetButtons();
+});
+
+function syncAdvRow() {
+  // Adv/Dis only meaningful when exactly 1d20 in roll
+  const d20Count = state.current.dice[20];
+  const enable = (d20Count === 1);
+  document.querySelectorAll('.adv-btn').forEach(b => {
+    b.disabled = !enable;
+    if (!enable && b.dataset.adv !== 'none') {
+      b.classList.remove('active');
+    }
+  });
+  if (!enable) {
+    state.current.advantage = 'none';
+    document.querySelector('.adv-btn[data-adv="none"]').classList.add('active');
+  }
+}
+
+document.querySelectorAll('.adv-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.disabled) return;
+    state.current.advantage = btn.dataset.adv;
+    document.querySelectorAll('.adv-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    syncResetButtons();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// LABEL + CLEAR + ROLL
+// ═══════════════════════════════════════════════════════════
+
+document.getElementById('label-input').addEventListener('input', e => {
+  state.current.label = e.target.value;
+});
+
+document.getElementById('clear-btn').addEventListener('click', clearBuilder);
+
+document.getElementById('reset-dice-btn').addEventListener('click', () => {
+  state.current.dice = { 4:0, 6:0, 8:0, 10:0, 12:0, 20:0, 100:0 };
+  renderDiceGrid();
+  syncAdvRow();
+  syncRollButton();
+  syncResetButtons();
+});
+
+document.getElementById('reset-options-btn').addEventListener('click', () => {
+  state.current.modifier  = 0;
+  state.current.advantage = 'none';
+  state.current.bonus     = [];
+  document.getElementById('mod-input').value = 0;
+  document.querySelectorAll('.adv-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.adv-btn[data-adv="none"]').classList.add('active');
+  renderBonusGrid();
+  syncRollButton();
+  syncResetButtons();
+});
+
+function syncResetButtons() {
+  const anyDice    = DICE_TYPES.some(s => state.current.dice[s] > 0);
+  const anyOptions = state.current.modifier !== 0 || state.current.advantage !== 'none' || state.current.bonus.length > 0;
+  document.getElementById('reset-dice-btn').disabled    = !anyDice;
+  document.getElementById('reset-options-btn').disabled = !anyOptions;
+}
+
+function clearBuilder() {
+  state.current = {
+    dice:      { 4:0, 6:0, 8:0, 10:0, 12:0, 20:0, 100:0 },
+    modifier:  0,
+    advantage: 'none',
+    bonus:     [],
+    label:     '',
+  };
+  document.getElementById('mod-input').value = 0;
+  document.getElementById('label-input').value = '';
+  document.querySelectorAll('.adv-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.adv-btn[data-adv="none"]').classList.add('active');
+  renderDiceGrid();
+  renderBonusGrid();
+  syncAdvRow();
+  syncRollButton();
+  syncResetButtons();
+}
+
+document.getElementById('roll-btn').addEventListener('click', () => {
+  const result = performRoll();
+  state.history.unshift(result);
+  if (state.history.length > 50) state.history.pop();
+  saveState();
+  renderResult(result);
+  renderHistory();
+});
+
+function syncRollButton() {
+  document.getElementById('roll-btn').disabled = !hasAnyDice();
+  document.getElementById('save-preset-btn').disabled = !hasAnyDice();
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDERING — RESULT CARD
+// ═══════════════════════════════════════════════════════════
+
+function renderResult(r) {
+  const card = document.getElementById('result-card');
+  card.classList.remove('visible');
+  // Force reflow to restart animation
+  void card.offsetWidth;
+
+  const pieces = [];
+
+  // Standard dice breakdown
+  let firstPiece = true;
+  for (const dr of r.diceResults) {
+    if (!firstPiece) pieces.push(`<span class="breakdown-op">+</span>`);
+    firstPiece = false;
+    pieces.push(`<span class="die-result-tag">d${dr.sides}</span>`);
+    for (const v of dr.rolls) {
+      let cls = 'die-result';
+      if (dr.sides === 20 && dr.rolls.length === 1) {
+        if (v === 20) cls += ' crit-max';
+        else if (v === 1) cls += ' crit-min';
+      } else if (v === dr.sides) cls += ' crit-max';
+      else if (v === 1 && dr.sides > 4) cls += ' crit-min';
+      pieces.push(`<span class="${cls}">${v}</span>`);
+    }
+    for (const v of dr.dropped) {
+      pieces.push(`<span class="die-result dropped" title="dropped">${v}</span>`);
+    }
+  }
+
+  // Bonus dice
+  for (const b of r.bonusResults) {
+    pieces.push(`<span class="breakdown-op">${b.sign > 0 ? '+' : '−'}</span>`);
+    pieces.push(`<span class="bonus-tag${b.sign < 0 ? ' bane' : ''}">${escHtml(b.label)}: ${b.value}</span>`);
+  }
+
+  // Modifier
+  if (r.modifier !== 0) {
+    pieces.push(`<span class="breakdown-op">${r.modifier > 0 ? '+' : '−'}</span>`);
+    pieces.push(`<span class="modifier-tag">${Math.abs(r.modifier)}</span>`);
+  }
+
+  let critBanner = '';
+  if (r.critType === 'nat20') critBanner = '<div class="crit-banner nat20">★ Natural 20 ★</div>';
+  else if (r.critType === 'nat1') critBanner = '<div class="crit-banner nat1">⚠ Natural 1 ⚠</div>';
+
+  card.innerHTML = `
+    <div class="result-label">${escHtml(r.label || '')}</div>
+    <div class="result-expr">${escHtml(r.expression)}</div>
+    <div class="result-breakdown">${pieces.join('')}</div>
+    <div class="result-total ${r.critType || ''}">${r.total}</div>
+    ${critBanner}
+  `;
+
+  card.classList.add('visible');
+}
+
+// ═══════════════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════════════
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  if (state.history.length === 0) {
+    list.innerHTML = '<div class="history-empty">No rolls yet. Roll some dice!</div>';
+    return;
+  }
+  list.innerHTML = state.history.map((r, i) => {
+    const time = new Date(r.timestamp).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+    const breakdownText = r.diceResults.map(dr =>
+      `${dr.count}d${dr.sides}: [${dr.rolls.join(', ')}]${dr.dropped.length ? ' drop ' + dr.dropped.join(',') : ''}`
+    ).join(' · ');
+    return `<div class="history-entry ${r.critType || ''}" data-idx="${i}">
+      <div class="history-entry-top">
+        <div class="history-entry-label">${escHtml(r.label || '')}</div>
+        <div class="history-entry-total">${r.total}</div>
+      </div>
+      <div class="history-entry-mid">${escHtml(r.expression)}</div>
+      <div class="history-entry-bottom">${escHtml(breakdownText)} · ${time}</div>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.history-entry').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = +el.dataset.idx;
+      const r = state.history[idx];
+      if (r) loadRollIntoBuilder(r);
+    });
+  });
+}
+
+function loadRollIntoBuilder(r) {
+  // Reconstruct current state from a past roll
+  clearBuilder();
+  for (const dr of r.diceResults) {
+    state.current.dice[dr.sides] = dr.count;
+  }
+  state.current.modifier  = r.modifier || 0;
+  state.current.advantage = r.advantage || 'none';
+  state.current.bonus     = r.bonusResults.map(b => b.id);
+  state.current.label     = r.label || '';
+  document.getElementById('mod-input').value = state.current.modifier;
+  document.getElementById('label-input').value = state.current.label;
+  renderDiceGrid();
+  renderBonusGrid();
+  syncAdvRow();
+  // Restore active adv button
+  document.querySelectorAll('.adv-btn').forEach(b => b.classList.remove('active'));
+  const activeAdv = document.querySelector(`.adv-btn[data-adv="${state.current.advantage}"]`);
+  if (activeAdv) activeAdv.classList.add('active');
+  syncRollButton();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('history-clear').addEventListener('click', () => {
+  if (state.history.length === 0) return;
+  if (!confirm('Clear roll history?')) return;
+  state.history = [];
+  saveState();
+  renderHistory();
+});
+
+// ═══════════════════════════════════════════════════════════
+// PRESETS
+// ═══════════════════════════════════════════════════════════
+
+function renderPresets() {
+  const list = document.getElementById('preset-list');
+  list.innerHTML = '';
+  state.presets.forEach((p, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'preset-chip';
+    chip.innerHTML = `
+      <div>
+        <div class="preset-chip-name">${escHtml(p.name)}</div>
+        <div class="preset-chip-expr">${escHtml(buildExpression(p.current))}</div>
+      </div>
+      <button class="preset-del" title="Delete preset" data-idx="${i}">✕</button>
+    `;
+    chip.addEventListener('click', e => {
+      if (e.target.classList.contains('preset-del')) {
+        e.stopPropagation();
+        if (confirm(`Delete preset "${p.name}"?`)) {
+          state.presets.splice(i, 1);
+          saveState();
+          renderPresets();
+        }
+      } else {
+        // Load preset and roll immediately
+        loadPresetIntoBuilder(p);
+      }
+    });
+    list.appendChild(chip);
+  });
+
+  // Add "Save current" button
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'save-preset-btn';
+  saveBtn.id = 'save-preset-btn';
+  saveBtn.textContent = '+ Save current';
+  saveBtn.disabled = !hasAnyDice();
+  saveBtn.addEventListener('click', () => {
+    if (!hasAnyDice()) return;
+    const name = prompt('Name this roll preset:', state.current.label || 'My Roll');
+    if (!name) return;
+    state.presets.push({
+      name,
+      current: JSON.parse(JSON.stringify(state.current)),
+    });
+    saveState();
+    renderPresets();
+  });
+  list.appendChild(saveBtn);
+}
+
+function loadPresetIntoBuilder(p) {
+  clearBuilder();
+  state.current = JSON.parse(JSON.stringify(p.current));
+  document.getElementById('mod-input').value = state.current.modifier;
+  document.getElementById('label-input').value = state.current.label || '';
+  renderDiceGrid();
+  renderBonusGrid();
+  syncAdvRow();
+  document.querySelectorAll('.adv-btn').forEach(b => b.classList.remove('active'));
+  const a = document.querySelector(`.adv-btn[data-adv="${state.current.advantage}"]`);
+  if (a) a.classList.add('active');
+  syncRollButton();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════
+
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  localStorage.setItem('gpg-wow-theme', theme);
+  document.querySelectorAll('#theme-bar button').forEach(b =>
+    b.classList.toggle('active', b.dataset.theme === theme));
+}
+document.querySelectorAll('#theme-bar button').forEach(b =>
+  b.addEventListener('click', () => setTheme(b.dataset.theme)));
+setTheme(localStorage.getItem('gpg-wow-theme') || 'dark');
+
+// ═══════════════════════════════════════════════════════════
+// UTIL
+// ═══════════════════════════════════════════════════════════
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+}
+
+// Spacebar to roll
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    if (hasAnyDice()) document.getElementById('roll-btn').click();
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+
+loadState();
+renderDiceGrid();
+renderBonusGrid();
+renderHistory();
+renderPresets();
+syncAdvRow();
+syncRollButton();
+syncResetButtons();
+</script>
+
+</body>
+</html>
