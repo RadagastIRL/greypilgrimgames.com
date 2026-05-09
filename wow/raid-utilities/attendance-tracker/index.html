@@ -1265,7 +1265,10 @@ document.getElementById('settings-modal').addEventListener('click', e => {
 // HELP MODAL
 // ════════════════════════════════════════════════════════
 function openHelp()  { document.getElementById('help-modal').style.display = 'flex'; }
-function closeHelp() { document.getElementById('help-modal').style.display = 'none'; }
+function closeHelp() {
+  document.getElementById('help-modal').style.display = 'none';
+  localStorage.setItem('gpg-wow-attendance-help-seen', '1');
+}
 document.getElementById('help-btn').addEventListener('click', openHelp);
 document.getElementById('help-close').addEventListener('click', closeHelp);
 document.getElementById('help-close-btn').addEventListener('click', closeHelp);
@@ -1481,6 +1484,7 @@ function showMain() {
   document.getElementById('guild-heading').textContent   = state.config.guildName;
   updateSyncMeta();
   renderTable();
+  if (!localStorage.getItem('gpg-wow-attendance-help-seen')) openHelp();
 }
 function updateSyncMeta() {
   const el = document.getElementById('sync-meta');
