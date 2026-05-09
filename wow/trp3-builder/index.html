@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TotalRP3 Profile Builder — Grey Pilgrim Games</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root, [data-theme="light"] {
+      --bg:         #f0ece2;
+      --surface:    #faf7f2;
+      --surface2:   #e8e3d8;
+      --border:     #cfc9bc;
+      --text:       #2c2416;
+      --text-muted: #7a6e5c;
+      --gold:       #7a5a10;
+      --gold-dim:   #a07828;
+      --shadow:     rgba(0,0,0,0.08);
+      --radius:     8px;
+      --font:       'Georgia', serif;
+      --font-ui:    system-ui, sans-serif;
+    }
+    [data-theme="dark"] {
+      --bg:         #0e0e12;
+      --surface:    #1a1a24;
+      --surface2:   #23232f;
+      --border:     #33334a;
+      --text:       #d4c4a8;
+      --text-muted: #7a7090;
+      --gold:       #c8a84b;
+      --gold-dim:   #8a7232;
+      --shadow:     rgba(0,0,0,0.5);
+    }
+    @media (prefers-color-scheme: dark) {
+      [data-theme="os"] {
+        --bg:#0e0e12;--surface:#1a1a24;--surface2:#23232f;
+        --border:#33334a;--text:#d4c4a8;--text-muted:#7a7090;
+        --gold:#c8a84b;--gold-dim:#8a7232;--shadow:rgba(0,0,0,0.5);
+      }
+    }
+    @media (prefers-color-scheme: light) {
+      [data-theme="os"] {
+        --bg:#f0ece2;--surface:#faf7f2;--surface2:#e8e3d8;
+        --border:#cfc9bc;--text:#2c2416;--text-muted:#7a6e5c;
+        --gold:#7a5a10;--gold-dim:#a07828;--shadow:rgba(0,0,0,0.08);
+      }
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ── Nav ── */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.55rem 1.25rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    nav > a { font-size: 0.78rem; color: var(--text-muted); text-decoration: none; white-space: nowrap; }
+    nav > a:hover { color: var(--gold); }
+    .nav-right { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+    #theme-bar {
+      display: inline-flex; gap: 0.2rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 0.2rem;
+    }
+    #theme-bar button {
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+      background: transparent; color: var(--text-muted); border: none; border-radius: 14px;
+      padding: 0.25rem 0.6rem; cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    #theme-bar button.active { background: var(--gold); color: var(--surface); }
+
+    /* ── Buttons ── */
+    .btn {
+      font-family: var(--font-ui); font-size: 0.78rem; font-weight: 600;
+      padding: 0.35rem 0.85rem; border-radius: 6px; cursor: pointer;
+      border: 1px solid var(--border); transition: opacity 0.15s, background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .btn-primary { background: var(--gold); color: var(--surface); border-color: var(--gold); }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-secondary { background: var(--surface2); color: var(--text); }
+    .btn-secondary:hover { border-color: var(--gold-dim); }
+    .btn-sm { font-size: 0.72rem; padding: 0.2rem 0.55rem; }
+    .btn-danger { background: transparent; color: #c02020; border-color: #c02020; }
+    .btn-danger:hover { background: rgba(192,32,32,0.08); }
+
+    /* ── Header ── */
+    header { text-align: center; padding: 1.75rem 1rem 1rem; }
+    header h1 { font-size: 2rem; color: var(--gold); letter-spacing: 0.05em; font-family: var(--font); }
+    header p { color: var(--text-muted); font-size: 0.88rem; margin-top: 0.4rem; line-height: 1.5; }
+    header code { font-size: 0.82rem; background: var(--surface2); padding: 0.1rem 0.35rem; border-radius: 4px; border: 1px solid var(--border); }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 390px;
+      gap: 1.5rem;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 1.25rem 1rem 3rem;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .preview-panel { position: static; max-height: none; }
+    }
+
+    /* ── Editor pane ── */
+    .editor-pane {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px var(--shadow);
+    }
+
+    .tab-bar {
+      display: flex;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 0 0.5rem;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 0.65rem 1rem; background: none; border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted); font-family: var(--font-ui); font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; transition: color 0.15s, border-color 0.15s; white-space: nowrap;
+    }
+    .tab-btn.active { border-bottom-color: var(--gold); color: var(--gold); }
+    .tab-btn:hover:not(.active) { color: var(--text); }
+
+    .tab-panel { padding: 1.25rem; display: flex; flex-direction: column; gap: 1.1rem; }
+    .tab-panel.hidden { display: none; }
+
+    /* ── Form ── */
+    .field-group { display: flex; flex-direction: column; gap: 0.7rem; }
+    .field-group-title {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-muted); padding-bottom: 0.4rem; border-bottom: 1px solid var(--border);
+    }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+    .field { display: flex; flex-direction: column; gap: 0.3rem; }
+    label {
+      font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--text-muted);
+    }
+    input[type="text"], input[type="number"], select, textarea {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-family: var(--font-ui); font-size: 0.88rem;
+      padding: 0.42rem 0.7rem; width: 100%; outline: none; transition: border-color 0.15s;
+    }
+    input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+      border-color: var(--gold-dim);
+    }
+    textarea { resize: vertical; min-height: 80px; line-height: 1.55; }
+    .field-hint { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.15rem; line-height: 1.4; }
+
+    /* ── Colour row ── */
+    .colour-row { display: flex; gap: 0.5rem; align-items: center; }
+    input[type="color"] {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+      padding: 0.1rem 0.25rem; height: 36px; width: 48px; cursor: pointer; flex-shrink: 0;
+    }
+    .colour-hex-input { font-family: monospace !important; width: 90px !important; flex-shrink: 0; }
+    .colour-dot {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 2px solid var(--border); flex-shrink: 0;
+    }
+
+    /* ── Icon field ── */
+    .icon-field { display: flex; gap: 0.5rem; align-items: center; }
+    .icon-field input { flex: 1; font-family: monospace !important; font-size: 0.78rem !important; }
+    .icon-pick-btn {
+      flex-shrink: 0; font-size: 0.72rem; padding: 0.3rem 0.6rem;
+      border: 1px solid var(--border); border-radius: 6px;
+      background: var(--surface2); color: var(--text-muted); cursor: pointer;
+      font-family: var(--font-ui); transition: color 0.15s, border-color 0.15s;
+    }
+    .icon-pick-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+    #icon-picker-popup {
+      position: fixed; z-index: 600;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 0.75rem; box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      display: none; width: 310px; max-height: 290px; overflow-y: auto;
+    }
+    .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; }
+    .icon-swatch {
+      display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+      padding: 0.45rem 0.2rem; border: 1px solid var(--border); border-radius: 6px;
+      cursor: pointer; background: var(--surface2); transition: border-color 0.15s, background 0.15s;
+    }
+    .icon-swatch:hover { border-color: var(--gold-dim); background: var(--surface); }
+    .icon-swatch .ig { font-size: 1.3rem; line-height: 1; }
+    .icon-swatch .il { font-size: 0.58rem; color: var(--text-muted); text-align: center; line-height: 1.2; }
+
+    /* ── Personality sliders ── */
+    .slider-list { display: flex; flex-direction: column; gap: 0.6rem; }
+    .slider-row {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem;
+    }
+    .slider-label-row {
+      display: grid; grid-template-columns: 1fr 32px 1fr; gap: 0.4rem; align-items: center;
+    }
+    .slider-label-row input { font-size: 0.78rem; padding: 0.28rem 0.5rem; }
+    .slider-label-row input:last-child { text-align: right; }
+    .sl-val { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-align: center; }
+    .slider-range-row { display: flex; gap: 0.5rem; align-items: center; }
+    .slider-range-row input[type="range"] { flex: 1; accent-color: var(--gold); }
+    .slider-actions { display: flex; gap: 0.3rem; justify-content: flex-end; margin-top: 0.1rem; }
+
+    /* ── About sections ── */
+    .section-list { display: flex; flex-direction: column; gap: 0.85rem; }
+    .section-row {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.9rem; display: flex; flex-direction: column; gap: 0.55rem;
+    }
+    .section-hdr { display: flex; gap: 0.5rem; align-items: center; }
+    .section-num {
+      font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text-muted); flex-shrink: 0;
+    }
+    .section-hdr input { flex: 1; font-weight: 600; }
+    .section-actions { display: flex; gap: 0.3rem; flex-shrink: 0; }
+
+    .markup-toolbar {
+      display: flex; gap: 0.3rem; flex-wrap: wrap;
+      padding: 0.3rem 0.5rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px 6px 0 0; border-bottom: none;
+    }
+    .markup-toolbar + textarea { border-top-left-radius: 0; border-top-right-radius: 0; }
+    .mark-btn {
+      font-size: 0.66rem; padding: 0.18rem 0.45rem;
+      border: 1px solid var(--border); border-radius: 4px;
+      background: var(--surface2); color: var(--text-muted); cursor: pointer;
+      font-family: var(--font-ui); transition: color 0.15s, border-color 0.15s;
+    }
+    .mark-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+    .mark-color-btn {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+    }
+    .mark-color-swatch {
+      display: inline-block; width: 8px; height: 8px; border-radius: 2px;
+    }
+
+    /* ── Preview panel ── */
+    .preview-panel {
+      position: sticky; top: 1rem;
+      background: #080a12;
+      border: 1px solid rgba(180,140,50,0.28);
+      border-radius: 10px; overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,210,80,0.05);
+      color: #c4b89a;
+      font-family: 'Georgia', serif;
+      max-height: calc(100vh - 2rem);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(180,140,50,0.2) transparent;
+    }
+    .preview-hdr {
+      background: rgba(15,10,2,0.85);
+      border-bottom: 1px solid rgba(180,140,50,0.2);
+      padding: 0.55rem 1rem;
+      font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.14em; color: rgba(180,140,50,0.5);
+      font-family: system-ui, sans-serif;
+    }
+    .preview-body { padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+
+    /* Nameplate */
+    .pv-nameplate { text-align: center; padding-bottom: 0.85rem; border-bottom: 1px solid rgba(180,140,50,0.15); }
+    .pv-icon {
+      width: 52px; height: 52px; border-radius: 7px;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(180,140,50,0.25);
+      margin: 0 auto 0.55rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.5rem; color: rgba(180,140,50,0.4);
+      text-align: center; padding: 0.2rem; line-height: 1.3; word-break: break-all;
+    }
+    .pv-title { font-size: 0.7rem; color: rgba(200,175,90,0.65); font-style: italic; margin-bottom: 0.1rem; }
+    .pv-name { font-size: 1.35rem; font-weight: bold; line-height: 1.1; }
+    .pv-sub { font-size: 0.7rem; color: rgba(200,180,130,0.5); margin-top: 0.2rem; }
+    .pv-tagline { font-size: 0.76rem; color: rgba(200,180,130,0.6); font-style: italic; margin-top: 0.3rem; }
+
+    /* Status */
+    .pv-status {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.28rem 0.7rem; border-radius: 20px;
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em;
+      align-self: center; font-family: system-ui, sans-serif;
+    }
+    .pv-status.ic  { background: rgba(40,120,40,0.2);  color: #55bb55; border: 1px solid rgba(40,120,40,0.35); }
+    .pv-status.ooc { background: rgba(80,80,80,0.2);   color: #999;    border: 1px solid rgba(80,80,80,0.35); }
+    .pv-status.lfr { background: rgba(40,80,200,0.2);  color: #6688ee; border: 1px solid rgba(40,80,200,0.35); }
+    .pv-status.dnd { background: rgba(160,30,30,0.2);  color: #ee5555; border: 1px solid rgba(160,30,30,0.35); }
+    .pv-currently { font-style: italic; font-weight: 400; font-family: 'Georgia', serif; }
+
+    /* Characteristics */
+    .pv-section-title {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+      color: rgba(200,168,75,0.7); margin-bottom: 0.45rem; padding-bottom: 0.3rem;
+      border-bottom: 1px solid rgba(180,140,50,0.18); font-family: system-ui, sans-serif;
+    }
+    .pv-chars { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem 0.8rem; }
+    .pv-char { display: flex; gap: 0.35rem; font-size: 0.74rem; }
+    .pv-ck { color: rgba(200,168,75,0.55); white-space: nowrap; flex-shrink: 0; }
+    .pv-cv { color: #c4b89a; }
+
+    /* Personality bars */
+    .pv-bars { display: flex; flex-direction: column; gap: 0.5rem; }
+    .pv-bar-row { display: flex; flex-direction: column; gap: 0.18rem; }
+    .pv-bar-labels { display: flex; justify-content: space-between; font-size: 0.63rem; color: rgba(200,180,130,0.55); }
+    .pv-bar-track { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+    .pv-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, rgba(80,150,255,0.55), rgba(255,155,55,0.55)); }
+
+    /* About */
+    .pv-about-sec { margin-bottom: 0.65rem; }
+    .pv-about-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(200,168,75,0.7); margin-bottom: 0.25rem; font-family: system-ui, sans-serif; }
+    .pv-about-body { font-size: 0.79rem; line-height: 1.65; color: #c4b89a; }
+    .pv-empty { font-size: 0.74rem; color: rgba(200,180,130,0.25); font-style: italic; }
+
+    /* ── Import modal ── */
+    .modal-bd {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.72); align-items: center; justify-content: center;
+    }
+    .modal-bd.visible { display: flex; }
+    .modal-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.5rem; max-width: 420px; width: 90%;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+    }
+    .modal-card h2 { font-family: var(--font); color: var(--gold); font-size: 1.1rem; margin-bottom: 1rem; }
+    .profile-opt {
+      padding: 0.6rem 0.85rem; border: 1px solid var(--border); border-radius: 6px;
+      margin-bottom: 0.45rem; cursor: pointer; font-size: 0.88rem;
+      background: var(--surface2); transition: border-color 0.15s;
+    }
+    .profile-opt:hover { border-color: var(--gold-dim); }
+    .modal-foot { display: flex; justify-content: flex-end; margin-top: 0.75rem; }
+
+    /* ── Ko-fi footer ── */
+    .kofi-footer { text-align: center; padding: 1rem 1rem 1.5rem; font-size: 0.72rem; }
+    .kofi-footer a { color: var(--text-muted); text-decoration: none; opacity: 0.65; transition: opacity 0.15s, color 0.15s; }
+    .kofi-footer a:hover { opacity: 1; color: var(--gold); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/wow/">← World of Warcraft</a>
+  <div class="nav-right">
+    <button class="btn btn-secondary btn-sm" id="import-btn">⬆ Import .lua</button>
+    <button class="btn btn-primary btn-sm" id="export-btn">⬇ Export .lua</button>
+    <div id="theme-bar">
+      <button data-theme="light" class="active">Light</button>
+      <button data-theme="dark">Dark</button>
+      <button data-theme="os">OS</button>
+    </div>
+  </div>
+</nav>
+
+<header>
+  <h1>TotalRP3 Profile Builder</h1>
+  <p>Build your TRP3 profile and export a <code>totalRP3.lua</code> to drop straight into your SavedVariables folder.<br>Or import your existing file to edit it here.</p>
+</header>
+
+<input type="file" id="file-input" accept=".lua" style="display:none">
+
+<div class="layout">
+
+  <!-- ═══ EDITOR ═══ -->
+  <div class="editor-pane">
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="basics">Basics</button>
+      <button class="tab-btn" data-tab="personality">Personality</button>
+      <button class="tab-btn" data-tab="about">About</button>
+      <button class="tab-btn" data-tab="misc">Misc / OOC</button>
+    </div>
+
+    <!-- ── Basics ── -->
+    <div class="tab-panel" id="tab-basics">
+
+      <div class="field-group">
+        <div class="field-group-title">Profile &amp; Character Identity</div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-profile-name">Profile Name</label>
+            <input type="text" id="f-profile-name" placeholder="My Character" data-key="profileName">
+          </div>
+          <div class="field">
+            <label for="f-player-string">Character–Realm</label>
+            <input type="text" id="f-player-string" placeholder="Charname-Realm" data-key="playerString">
+            <div class="field-hint">Exact in-game name and realm, e.g. <em>Sylvanas-Silvermoon</em></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">Name &amp; Title</div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-first-name">First Name</label>
+            <input type="text" id="f-first-name" data-key="firstName">
+          </div>
+          <div class="field">
+            <label for="f-last-name">Last Name</label>
+            <input type="text" id="f-last-name" data-key="lastName">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-title">Title</label>
+          <input type="text" id="f-title" placeholder="the Unbroken" data-key="title">
+          <div class="field-hint">Displayed above the character's name</div>
+        </div>
+        <div class="field">
+          <label for="f-tagline">Short Description / Tagline</label>
+          <input type="text" id="f-tagline" placeholder="Shown when others hover your portrait" data-key="tagline">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">Physical Characteristics</div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-race">Race</label>
+            <input type="text" id="f-race" placeholder="e.g. Night Elf" data-key="race">
+          </div>
+          <div class="field">
+            <label for="f-class">Class</label>
+            <input type="text" id="f-class" placeholder="e.g. Druid" data-key="class">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-age">Age</label>
+            <input type="text" id="f-age" placeholder="e.g. 250" data-key="age">
+          </div>
+          <div class="field">
+            <label for="f-eye-colour">Eye Colour</label>
+            <input type="text" id="f-eye-colour" placeholder="e.g. Amber" data-key="eyeColour">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-height">Height</label>
+            <input type="text" id="f-height" placeholder="e.g. 6'2&quot;" data-key="height">
+          </div>
+          <div class="field">
+            <label for="f-weight">Weight</label>
+            <input type="text" id="f-weight" placeholder="e.g. 175 lbs" data-key="weight">
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">Profile Appearance</div>
+        <div class="field">
+          <label>Profile Colour</label>
+          <div class="colour-row">
+            <input type="color" id="colour-picker" value="#ff7c0a">
+            <input type="text" id="colour-hex" class="colour-hex-input" placeholder="ff7c0a" maxlength="6">
+            <div class="colour-dot" id="colour-dot"></div>
+          </div>
+          <div class="field-hint">Shown on your nameplate and used as your profile accent colour</div>
+        </div>
+        <div class="field">
+          <label>Profile Icon</label>
+          <div class="icon-field">
+            <input type="text" id="f-icon" data-key="icon" placeholder="Interface\Icons\INV_Misc_QuestionMark">
+            <button class="icon-pick-btn" id="icon-pick-main">Browse…</button>
+          </div>
+          <div class="field-hint">WoW icon path — use Browse or type it in. Find more on Wowhead.</div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">Currently</div>
+        <div class="field">
+          <label for="f-status">Roleplay Status</label>
+          <select id="f-status" data-key="currentlyStatus">
+            <option value="2">In Character (IC)</option>
+            <option value="1">Out of Character (OOC)</option>
+            <option value="3">Looking for RP (LFR)</option>
+            <option value="4">Do Not Disturb (DND)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-currently-text">Currently Doing</label>
+          <input type="text" id="f-currently-text" placeholder="What your character is doing right now" data-key="currentlyText">
+        </div>
+      </div>
+
+    </div><!-- /tab-basics -->
+
+    <!-- ── Personality ── -->
+    <div class="tab-panel hidden" id="tab-personality">
+      <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.5">
+        Each trait is a slider between two opposing labels (0 = fully left, 100 = fully right). These appear as bars in your TRP3 profile.
+      </p>
+      <div class="slider-list" id="slider-list"></div>
+      <button class="btn btn-secondary" id="add-slider-btn" style="align-self:flex-start">+ Add Trait</button>
+    </div>
+
+    <!-- ── About ── -->
+    <div class="tab-panel hidden" id="tab-about">
+      <p style="font-size:0.8rem;color:var(--text-muted);line-height:1.5">
+        Each section appears as a titled block in your About tab. Supports TRP3 colour markup:
+        <code style="font-size:0.74rem;background:var(--surface2);padding:0.1rem 0.3rem;border-radius:3px;border:1px solid var(--border)">{col:ff7c0a}orange text{/col}</code>
+        and WoW colour codes:
+        <code style="font-size:0.74rem;background:var(--surface2);padding:0.1rem 0.3rem;border-radius:3px;border:1px solid var(--border)">|cffff7c0aorange|r</code>
+      </p>
+      <div class="section-list" id="section-list"></div>
+      <button class="btn btn-secondary" id="add-section-btn" style="align-self:flex-start">+ Add Section</button>
+    </div>
+
+    <!-- ── Misc ── -->
+    <div class="tab-panel hidden" id="tab-misc">
+      <div class="field">
+        <label for="f-misc">Miscellaneous / OOC Notes</label>
+        <textarea id="f-misc" rows="10" placeholder="OOC notes, player preferences, contact info, content limits…&#10;&#10;Supports the same colour markup as the About sections."></textarea>
+        <div class="field-hint">This appears in the Misc tab of your TRP3 profile.</div>
+      </div>
+    </div>
+
+  </div><!-- /editor-pane -->
+
+  <!-- ═══ PREVIEW ═══ -->
+  <div class="preview-panel">
+    <div class="preview-hdr">Preview · TotalRP3</div>
+    <div class="preview-body" id="preview-body"></div>
+  </div>
+
+</div><!-- /layout -->
+
+<!-- Icon picker popup -->
+<div id="icon-picker-popup">
+  <div class="icon-grid" id="icon-grid"></div>
+</div>
+
+<!-- Import modal -->
+<div class="modal-bd" id="import-modal">
+  <div class="modal-card">
+    <h2>Select a Profile to Import</h2>
+    <div id="profile-picker-list"></div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary btn-sm" id="import-cancel-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<footer class="kofi-footer">
+  <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener">☕ Support me on Ko-fi</a>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════
+
+const ICONS = [
+  { label:'Question', emoji:'❓', path:'Interface\\Icons\\INV_Misc_QuestionMark' },
+  { label:'Book',     emoji:'📖', path:'Interface\\Icons\\INV_Misc_Book_09' },
+  { label:'Scroll',   emoji:'📜', path:'Interface\\Icons\\INV_Scroll_03' },
+  { label:'Note',     emoji:'📝', path:'Interface\\Icons\\INV_Misc_Note_01' },
+  { label:'Map',      emoji:'🗺️', path:'Interface\\Icons\\INV_Misc_Map01' },
+  { label:'Sword',    emoji:'⚔️', path:'Interface\\Icons\\INV_Sword_04' },
+  { label:'Shield',   emoji:'🛡️', path:'Interface\\Icons\\INV_Shield_06' },
+  { label:'Dagger',   emoji:'🗡️', path:'Interface\\Icons\\INV_Weapon_ShortBlade_05' },
+  { label:'Bow',      emoji:'🏹', path:'Interface\\Icons\\INV_Weapon_Bow_05' },
+  { label:'Staff',    emoji:'🪄', path:'Interface\\Icons\\INV_Staff_13' },
+  { label:'Holy',     emoji:'✨', path:'Interface\\Icons\\Spell_Holy_Resurrection' },
+  { label:'Shadow',   emoji:'🌑', path:'Interface\\Icons\\Spell_Shadow_SoulLeech_3' },
+  { label:'Fire',     emoji:'🔥', path:'Interface\\Icons\\Spell_Fire_Flamebolt' },
+  { label:'Frost',    emoji:'❄️', path:'Interface\\Icons\\Spell_Frost_FrostBolt02' },
+  { label:'Nature',   emoji:'🌿', path:'Interface\\Icons\\Spell_Nature_FaerieFire' },
+  { label:'Arcane',   emoji:'💫', path:'Interface\\Icons\\Spell_Arcane_ArcaneBolt' },
+  { label:'Rose',     emoji:'🌹', path:'Interface\\Icons\\INV_Misc_Flower_01' },
+  { label:'Ring',     emoji:'💍', path:'Interface\\Icons\\INV_Jewelry_Ring_08' },
+  { label:'Gem',      emoji:'💎', path:'Interface\\Icons\\INV_Misc_Gem_Diamond_01' },
+  { label:'Potion',   emoji:'⚗️', path:'Interface\\Icons\\INV_Potion_01' },
+  { label:'Heart',    emoji:'❤️', path:'Interface\\Icons\\Spell_Holy_PrayerOfHealing02' },
+  { label:'Skull',    emoji:'💀', path:'Interface\\Icons\\Ability_Creature_Cursed_03' },
+  { label:'Star',     emoji:'⭐', path:'Interface\\Icons\\Achievement_Reputation_08' },
+  { label:'Person',   emoji:'🧍', path:'Interface\\Icons\\Achievement_Character_Human_Male' },
+];
+
+const STATUS_META = {
+  1: { label:'Out of Character', cls:'ooc', dot:'⚫' },
+  2: { label:'In Character',     cls:'ic',  dot:'🟢' },
+  3: { label:'Looking for RP',   cls:'lfr', dot:'🔵' },
+  4: { label:'Do Not Disturb',   cls:'dnd', dot:'🔴' },
+};
+
+const MARKUP_COLORS = [
+  { label:'Gold',   hex:'ffd100' },
+  { label:'Silver', hex:'c0c0c0' },
+  { label:'Red',    hex:'ff4444' },
+  { label:'Blue',   hex:'6699ff' },
+  { label:'Green',  hex:'55cc55' },
+  { label:'Orange', hex:'ff7c0a' },
+];
+
+const DEFAULT_SLIDERS = [
+  { id:'s1', left:'Cheerful',  right:'Melancholic', value:50 },
+  { id:'s2', left:'Introvert', right:'Extrovert',   value:50 },
+  { id:'s3', left:'Humble',    right:'Arrogant',    value:50 },
+  { id:'s4', left:'Lawful',    right:'Chaotic',     value:50 },
+  { id:'s5', left:'Brave',     right:'Cowardly',    value:50 },
+];
+
+const DEFAULT_SECTIONS = [
+  { id:'a1', icon:'Interface\\Icons\\INV_Misc_Book_09',                     title:'History',     body:'' },
+  { id:'a2', icon:'Interface\\Icons\\Achievement_Character_Human_Male',     title:'Appearance',  body:'' },
+  { id:'a3', icon:'Interface\\Icons\\Spell_Holy_Resurrection',              title:'Personality', body:'' },
+];
+
+const STORAGE_KEY = 'gpg-trp3-builder';
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+
+let state = {
+  profileName:     'My Character',
+  playerString:    '',
+  firstName:       '',
+  lastName:        '',
+  title:           '',
+  race:            '',
+  class:           '',
+  age:             '',
+  height:          '',
+  weight:          '',
+  eyeColour:       '',
+  tagline:         '',
+  colour:          'ff7c0a',
+  icon:            'Interface\\Icons\\INV_Misc_QuestionMark',
+  currentlyStatus: 2,
+  currentlyText:   '',
+  sliders:         JSON.parse(JSON.stringify(DEFAULT_SLIDERS)),
+  sections:        JSON.parse(JSON.stringify(DEFAULT_SECTIONS)),
+  misc:            '',
+};
+
+let nextId = 100;
+
+function setState(patch) {
+  Object.assign(state, patch);
+  saveState();
+  renderPreview();
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, nextId })); } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (saved.state) state = Object.assign(state, saved.state);
+    if (saved.nextId) nextId = saved.nextId;
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════
+
+function escHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function parseMarkup(text) {
+  if (!text) return '';
+  let h = String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  h = h.replace(/\{col:([0-9a-fA-F]{6})\}/gi, '<span style="color:#$1">');
+  h = h.replace(/\{\/col\}/gi, '</span>');
+  h = h.replace(/\|cff([0-9a-fA-F]{6})/gi, '<span style="color:#$1">');
+  h = h.replace(/\|r/gi, '</span>');
+  h = h.replace(/\{icon:[^}]+\}/gi, '');
+  h = h.replace(/\n/g, '<br>');
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════
+
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  localStorage.setItem('gpg-wow-theme', t);
+  document.querySelectorAll('#theme-bar button').forEach(b =>
+    b.classList.toggle('active', b.dataset.theme === t));
+}
+document.querySelectorAll('#theme-bar button').forEach(b =>
+  b.addEventListener('click', () => setTheme(b.dataset.theme)));
+
+// ═══════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════
+
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name)?.classList.remove('hidden');
+  document.querySelector(`.tab-btn[data-tab="${name}"]`)?.classList.add('active');
+}
+document.querySelectorAll('.tab-btn').forEach(b =>
+  b.addEventListener('click', () => showTab(b.dataset.tab)));
+
+// ═══════════════════════════════════════════════════════════
+// BASICS FORM BINDINGS
+// ═══════════════════════════════════════════════════════════
+
+function bindBasics() {
+  document.querySelectorAll('[data-key]').forEach(el => {
+    const handler = () => {
+      const key = el.dataset.key;
+      const val = (el.tagName === 'SELECT') ? +el.value : el.value;
+      setState({ [key]: val });
+    };
+    el.addEventListener('input', handler);
+    el.addEventListener('change', handler);
+  });
+
+  const picker  = document.getElementById('colour-picker');
+  const hexIn   = document.getElementById('colour-hex');
+  const dot     = document.getElementById('colour-dot');
+
+  function syncColour(hex6) {
+    const safe = hex6.replace(/[^0-9a-fA-F]/g,'').slice(0,6).toLowerCase();
+    state.colour = safe;
+    saveState();
+    renderPreview();
+    dot.style.background = '#' + (safe || 'ff7c0a');
+    if (safe.length === 6) picker.value = '#' + safe;
+    if (hexIn !== document.activeElement) hexIn.value = safe;
+  }
+  picker.addEventListener('input', e => syncColour(e.target.value.replace('#','')));
+  hexIn.addEventListener('input',  e => syncColour(e.target.value));
+
+  document.getElementById('f-misc').addEventListener('input', e => setState({ misc: e.target.value }));
+}
+
+function populateForm() {
+  const map = {
+    'f-profile-name':   'profileName',
+    'f-player-string':  'playerString',
+    'f-first-name':     'firstName',
+    'f-last-name':      'lastName',
+    'f-title':          'title',
+    'f-tagline':        'tagline',
+    'f-race':           'race',
+    'f-class':          'class',
+    'f-age':            'age',
+    'f-eye-colour':     'eyeColour',
+    'f-height':         'height',
+    'f-weight':         'weight',
+    'f-icon':           'icon',
+    'f-currently-text': 'currentlyText',
+  };
+  for (const [id, key] of Object.entries(map)) {
+    const el = document.getElementById(id);
+    if (el) el.value = state[key] ?? '';
+  }
+  document.getElementById('f-status').value = String(state.currentlyStatus ?? 2);
+  const col = state.colour || 'ff7c0a';
+  document.getElementById('colour-picker').value = '#' + col;
+  document.getElementById('colour-hex').value    = col;
+  document.getElementById('colour-dot').style.background = '#' + col;
+  document.getElementById('f-misc').value = state.misc ?? '';
+}
+
+// ═══════════════════════════════════════════════════════════
+// ICON PICKER
+// ═══════════════════════════════════════════════════════════
+
+const iconPopup = document.getElementById('icon-picker-popup');
+let iconTargetCb = null;
+
+function buildIconGrid() {
+  const grid = document.getElementById('icon-grid');
+  ICONS.forEach(icon => {
+    const sw = document.createElement('div');
+    sw.className = 'icon-swatch';
+    sw.innerHTML = `<span class="ig">${icon.emoji}</span><span class="il">${icon.label}</span>`;
+    sw.addEventListener('click', () => {
+      if (iconTargetCb) iconTargetCb(icon.path);
+      closeIconPicker();
+    });
+    grid.appendChild(sw);
+  });
+}
+
+function openIconPicker(nearEl, cb) {
+  iconTargetCb = cb;
+  const rect = nearEl.getBoundingClientRect();
+  const top  = rect.bottom + window.scrollY + 4;
+  const left = Math.min(rect.left + window.scrollX, window.innerWidth - 320);
+  iconPopup.style.top  = top  + 'px';
+  iconPopup.style.left = left + 'px';
+  iconPopup.style.display = 'block';
+}
+function closeIconPicker() { iconPopup.style.display = 'none'; iconTargetCb = null; }
+
+document.getElementById('icon-pick-main').addEventListener('click', e => {
+  openIconPicker(e.currentTarget, path => {
+    state.icon = path;
+    document.getElementById('f-icon').value = path;
+    saveState(); renderPreview();
+  });
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('#icon-picker-popup') && !e.target.closest('.icon-pick-btn'))
+    closeIconPicker();
+});
+
+// ═══════════════════════════════════════════════════════════
+// PERSONALITY SLIDERS
+// ═══════════════════════════════════════════════════════════
+
+function renderSliders() {
+  const list = document.getElementById('slider-list');
+  list.innerHTML = '';
+  state.sliders.forEach((sl, idx) => {
+    const row = document.createElement('div');
+    row.className = 'slider-row';
+    row.innerHTML = `
+      <div class="slider-label-row">
+        <input type="text" class="sl-left" value="${escHtml(sl.left)}" placeholder="Left trait">
+        <span class="sl-val">${sl.value}</span>
+        <input type="text" class="sl-right" value="${escHtml(sl.right)}" placeholder="Right trait">
+      </div>
+      <div class="slider-range-row">
+        <input type="range" min="0" max="100" value="${sl.value}" class="sl-range">
+      </div>
+      <div class="slider-actions">
+        ${idx > 0 ? `<button class="btn btn-secondary btn-sm sl-up">↑</button>` : ''}
+        ${idx < state.sliders.length - 1 ? `<button class="btn btn-secondary btn-sm sl-down">↓</button>` : ''}
+        <button class="btn btn-danger btn-sm sl-remove">✕</button>
+      </div>`;
+
+    const valBadge = row.querySelector('.sl-val');
+    row.querySelector('.sl-range').addEventListener('input', e => {
+      sl.value = +e.target.value;
+      valBadge.textContent = sl.value;
+      saveState(); renderPreview();
+    });
+    row.querySelector('.sl-left').addEventListener('input',  e => { sl.left  = e.target.value; saveState(); renderPreview(); });
+    row.querySelector('.sl-right').addEventListener('input', e => { sl.right = e.target.value; saveState(); renderPreview(); });
+    row.querySelector('.sl-up')?.addEventListener('click',   () => moveSlider(idx, -1));
+    row.querySelector('.sl-down')?.addEventListener('click', () => moveSlider(idx,  1));
+    row.querySelector('.sl-remove').addEventListener('click',() => removeSlider(sl.id));
+    list.appendChild(row);
+  });
+}
+
+function addSlider()          { state.sliders.push({ id:'s'+(nextId++), left:'Left', right:'Right', value:50 }); saveState(); renderSliders(); renderPreview(); }
+function removeSlider(id)     { state.sliders = state.sliders.filter(s => s.id !== id); saveState(); renderSliders(); renderPreview(); }
+function moveSlider(idx, dir) {
+  const n = idx + dir;
+  if (n < 0 || n >= state.sliders.length) return;
+  [state.sliders[idx], state.sliders[n]] = [state.sliders[n], state.sliders[idx]];
+  saveState(); renderSliders(); renderPreview();
+}
+document.getElementById('add-slider-btn').addEventListener('click', addSlider);
+
+// ═══════════════════════════════════════════════════════════
+// ABOUT SECTIONS
+// ═══════════════════════════════════════════════════════════
+
+function renderSections() {
+  const list = document.getElementById('section-list');
+  list.innerHTML = '';
+  state.sections.forEach((sec, idx) => {
+    const row = document.createElement('div');
+    row.className = 'section-row';
+    const iconInputId = 'sec-icon-' + sec.id;
+    const bodyId      = 'sec-body-' + sec.id;
+
+    const colorBtns = MARKUP_COLORS.map(c =>
+      `<button class="mark-btn mark-color-btn" data-open="{col:${c.hex}}" data-close="{/col}" data-ta="${bodyId}" title="${c.label}">
+        <span class="mark-color-swatch" style="background:#${c.hex}"></span>${c.label}
+      </button>`
+    ).join('');
+
+    row.innerHTML = `
+      <div class="section-hdr">
+        <span class="section-num">§${idx + 1}</span>
+        <input type="text" class="sec-title" value="${escHtml(sec.title)}" placeholder="Section title">
+        <div class="section-actions">
+          ${idx > 0 ? `<button class="btn btn-secondary btn-sm sec-up">↑</button>` : ''}
+          ${idx < state.sections.length - 1 ? `<button class="btn btn-secondary btn-sm sec-down">↓</button>` : ''}
+          <button class="btn btn-danger btn-sm sec-remove">✕</button>
+        </div>
+      </div>
+      <div class="icon-field">
+        <label style="flex-shrink:0;font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em">Icon</label>
+        <input type="text" id="${iconInputId}" class="sec-icon" value="${escHtml(sec.icon)}" placeholder="Interface\\Icons\\...">
+        <button class="icon-pick-btn sec-icon-pick">Browse…</button>
+      </div>
+      <div class="markup-toolbar">
+        ${colorBtns}
+        <button class="mark-btn" data-open="{/col}" data-close="" data-ta="${bodyId}">End color</button>
+        <button class="mark-btn" data-open="|r" data-close="" data-ta="${bodyId}">|r</button>
+      </div>
+      <textarea id="${bodyId}" class="sec-body" rows="5" placeholder="Section body. Supports {col:ff7c0a}colour markup{/col}.">${escHtml(sec.body)}</textarea>`;
+
+    row.querySelector('.sec-title').addEventListener('input', e => { sec.title = e.target.value; saveState(); renderPreview(); });
+    row.querySelector('.sec-icon').addEventListener('input',  e => { sec.icon  = e.target.value; saveState(); renderPreview(); });
+    row.querySelector('.sec-body').addEventListener('input',  e => { sec.body  = e.target.value; saveState(); renderPreview(); });
+
+    row.querySelector('.sec-icon-pick').addEventListener('click', e => {
+      openIconPicker(e.currentTarget, path => {
+        sec.icon = path;
+        row.querySelector('.sec-icon').value = path;
+        saveState(); renderPreview();
+      });
+    });
+
+    row.querySelectorAll('.mark-btn[data-ta]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const ta    = document.getElementById(btn.dataset.ta);
+        if (!ta) return;
+        const open  = btn.dataset.open  || '';
+        const close = btn.dataset.close || '';
+        const s = ta.selectionStart, e2 = ta.selectionEnd;
+        const selected = ta.value.slice(s, e2);
+        const insert = selected ? open + selected + close : open;
+        ta.setRangeText(insert, s, e2, 'end');
+        ta.dispatchEvent(new Event('input'));
+        ta.focus();
+      });
+    });
+
+    row.querySelector('.sec-up')?.addEventListener('click',    () => moveSection(idx, -1));
+    row.querySelector('.sec-down')?.addEventListener('click',  () => moveSection(idx,  1));
+    row.querySelector('.sec-remove').addEventListener('click', () => removeSection(sec.id));
+    list.appendChild(row);
+  });
+}
+
+function addSection()          { state.sections.push({ id:'a'+(nextId++), icon:'Interface\\Icons\\INV_Misc_QuestionMark', title:'New Section', body:'' }); saveState(); renderSections(); renderPreview(); }
+function removeSection(id)     { state.sections = state.sections.filter(s => s.id !== id); saveState(); renderSections(); renderPreview(); }
+function moveSection(idx, dir) {
+  const n = idx + dir;
+  if (n < 0 || n >= state.sections.length) return;
+  [state.sections[idx], state.sections[n]] = [state.sections[n], state.sections[idx]];
+  saveState(); renderSections(); renderPreview();
+}
+document.getElementById('add-section-btn').addEventListener('click', addSection);
+
+// ═══════════════════════════════════════════════════════════
+// PREVIEW
+// ═══════════════════════════════════════════════════════════
+
+function renderPreview() {
+  const s   = state;
+  const col = '#' + (s.colour || 'ff7c0a');
+  const fullName  = [s.firstName, s.lastName].filter(Boolean).join(' ') || '<span style="opacity:0.3">No name set</span>';
+  const raceClass = [s.race, s.class].filter(Boolean).join(' · ');
+  const sm        = STATUS_META[s.currentlyStatus] || STATUS_META[2];
+  const iconLabel = (s.icon || '').split('\\').pop() || '?';
+
+  let h = `<div class="pv-nameplate">
+    <div class="pv-icon">${escHtml(iconLabel)}</div>
+    ${s.title ? `<div class="pv-title">${escHtml(s.title)}</div>` : ''}
+    <div class="pv-name" style="color:${col}">${fullName.includes('<') ? fullName : escHtml(fullName)}</div>
+    ${raceClass ? `<div class="pv-sub">${escHtml(raceClass)}</div>` : ''}
+    ${s.tagline ? `<div class="pv-tagline">"${escHtml(s.tagline)}"</div>` : ''}
+  </div>`;
+
+  h += `<div class="pv-status ${sm.cls}">${sm.dot}&nbsp;${sm.label}`;
+  if (s.currentlyText) h += ` &nbsp;·&nbsp; <span class="pv-currently">${escHtml(s.currentlyText)}</span>`;
+  h += `</div>`;
+
+  const chars = [
+    ['Age', s.age], ['Height', s.height], ['Weight', s.weight], ['Eye Colour', s.eyeColour],
+  ].filter(([,v]) => v);
+  if (chars.length) {
+    h += `<div><div class="pv-section-title">Characteristics</div><div class="pv-chars">
+      ${chars.map(([k,v]) => `<div class="pv-char"><span class="pv-ck">${k}:</span><span class="pv-cv">${escHtml(v)}</span></div>`).join('')}
+    </div></div>`;
+  }
+
+  const activeSliders = s.sliders.filter(sl => sl.left || sl.right);
+  if (activeSliders.length) {
+    h += `<div><div class="pv-section-title">Personality</div><div class="pv-bars">
+      ${activeSliders.map(sl => `
+        <div class="pv-bar-row">
+          <div class="pv-bar-labels"><span>${escHtml(sl.left)}</span><span>${escHtml(sl.right)}</span></div>
+          <div class="pv-bar-track"><div class="pv-bar-fill" style="width:${sl.value}%"></div></div>
+        </div>`).join('')}
+    </div></div>`;
+  }
+
+  const activeSections = s.sections.filter(sec => sec.title || sec.body);
+  if (activeSections.length) {
+    h += `<div><div class="pv-section-title">About</div>
+      ${activeSections.map(sec => `
+        <div class="pv-about-sec">
+          ${sec.title ? `<div class="pv-about-title">${escHtml(sec.title)}</div>` : ''}
+          <div class="pv-about-body">${parseMarkup(sec.body) || '<span class="pv-empty">(empty)</span>'}</div>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  if (s.misc) {
+    h += `<div><div class="pv-section-title">Notes / OOC</div>
+      <div class="pv-about-body">${parseMarkup(s.misc)}</div></div>`;
+  }
+
+  document.getElementById('preview-body').innerHTML = h;
+}
+
+// ═══════════════════════════════════════════════════════════
+// LUA SERIALIZER
+// ═══════════════════════════════════════════════════════════
+
+function luaStr(v) {
+  return '"' + String(v ?? '').replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n').replace(/\r/g,'') + '"';
+}
+
+function serializeToLua(s) {
+  const pn = (s.profileName || 'My Character').trim();
+
+  const ps = s.sliders.map(sl =>
+    `\t\t\t\t\t\t{\n` +
+    `\t\t\t\t\t\t\t["LF"] = ${luaStr(sl.left)},\n` +
+    `\t\t\t\t\t\t\t["RF"] = ${luaStr(sl.right)},\n` +
+    `\t\t\t\t\t\t\t["VA"] = ${Math.max(0,Math.min(100,Math.round(sl.value||50)))},\n` +
+    `\t\t\t\t\t\t\t["ID"] = ${luaStr(sl.id)},\n` +
+    `\t\t\t\t\t\t},`
+  ).join('\n');
+
+  const t1 = s.sections.map(sec =>
+    `\t\t\t\t\t\t{\n` +
+    `\t\t\t\t\t\t\t["ID"] = ${luaStr(sec.id)},\n` +
+    `\t\t\t\t\t\t\t["TT"] = ${luaStr(sec.title)},\n` +
+    `\t\t\t\t\t\t\t["TX"] = ${luaStr(sec.body)},\n` +
+    `\t\t\t\t\t\t\t["IC"] = ${luaStr(sec.icon)},\n` +
+    `\t\t\t\t\t\t},`
+  ).join('\n');
+
+  return `TotalRP3_DB = {
+\t["player"] = {
+\t\t["profiles"] = {
+\t\t\t[${luaStr(pn)}] = {
+\t\t\t\t["profileID"] = ${luaStr(pn)},
+\t\t\t\t["Information"] = {
+\t\t\t\t\t["characteristics"] = {
+\t\t\t\t\t\t["FN"] = ${luaStr(s.firstName)},
+\t\t\t\t\t\t["LN"] = ${luaStr(s.lastName)},
+\t\t\t\t\t\t["TI"] = ${luaStr(s.title)},
+\t\t\t\t\t\t["RA"] = ${luaStr(s.race)},
+\t\t\t\t\t\t["CL"] = ${luaStr(s.class)},
+\t\t\t\t\t\t["AG"] = ${luaStr(s.age)},
+\t\t\t\t\t\t["HE"] = ${luaStr(s.height)},
+\t\t\t\t\t\t["WE"] = ${luaStr(s.weight)},
+\t\t\t\t\t\t["EC"] = ${luaStr(s.eyeColour)},
+\t\t\t\t\t\t["RE"] = ${luaStr(s.tagline)},
+\t\t\t\t\t\t["CH"] = ${luaStr(s.colour || 'ff7c0a')},
+\t\t\t\t\t\t["IC"] = ${luaStr(s.icon)},
+\t\t\t\t\t\t["CO"] = ${luaStr(s.currentlyText)},
+\t\t\t\t\t\t["CU"] = ${Math.max(1,Math.min(4,s.currentlyStatus||2))},
+\t\t\t\t\t\t["PS"] = {
+${ps}
+\t\t\t\t\t\t},
+\t\t\t\t\t},
+\t\t\t\t\t["about"] = {
+\t\t\t\t\t\t["TE"] = 1,
+\t\t\t\t\t\t["T1"] = {
+${t1}
+\t\t\t\t\t\t},
+\t\t\t\t\t},
+\t\t\t\t\t["misc"] = {
+\t\t\t\t\t\t["TT"] = ${luaStr(s.misc)},
+\t\t\t\t\t},
+\t\t\t\t},
+\t\t\t},
+\t\t},
+\t\t["player"] = ${luaStr(s.playerString || 'Charname-Realm')},
+\t\t["selectedProfile"] = ${luaStr(pn)},
+\t},
+}
+`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// LUA PARSER
+// ═══════════════════════════════════════════════════════════
+
+function parseLuaFile(src) {
+  let pos = 0;
+  const len = src.length;
+
+  function skip() {
+    while (pos < len) {
+      const ch = src[pos];
+      if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') { pos++; continue; }
+      if (src[pos] === '-' && src[pos+1] === '-') {
+        if (src[pos+2] === '[') {
+          // Possibly long comment — scan for level
+          let lvl = 0, i = pos + 3;
+          while (i < len && src[i] === '=') { lvl++; i++; }
+          if (src[i] === '[') {
+            const close = ']' + '='.repeat(lvl) + ']';
+            const e = src.indexOf(close, i + 1);
+            pos = e < 0 ? len : e + close.length;
+            continue;
+          }
+        }
+        while (pos < len && src[pos] !== '\n') pos++;
+        continue;
+      }
+      break;
+    }
+  }
+
+  function readLongString() {
+    // pos is at opening [
+    let lvl = 0; pos++;
+    while (pos < len && src[pos] === '=') { lvl++; pos++; }
+    pos++; // second [
+    if (src[pos] === '\n') pos++;
+    const close = ']' + '='.repeat(lvl) + ']';
+    const e = src.indexOf(close, pos);
+    const content = e < 0 ? '' : src.slice(pos, e);
+    pos = e < 0 ? len : e + close.length;
+    return content;
+  }
+
+  function readString(q) {
+    pos++;
+    let s = '';
+    while (pos < len && src[pos] !== q) {
+      if (src[pos] === '\\') {
+        pos++;
+        const c = src[pos++];
+        if      (c === 'n')  s += '\n';
+        else if (c === 't')  s += '\t';
+        else if (c === 'r')  s += '\r';
+        else if (c === '\\') s += '\\';
+        else if (c === '"')  s += '"';
+        else if (c === "'")  s += "'";
+        else if (c >= '0' && c <= '9') {
+          let num = c;
+          if (pos < len && src[pos] >= '0' && src[pos] <= '9') num += src[pos++];
+          if (pos < len && src[pos] >= '0' && src[pos] <= '9') num += src[pos++];
+          s += String.fromCharCode(parseInt(num, 10));
+        } else s += c;
+      } else {
+        s += src[pos++];
+      }
+    }
+    pos++; // closing quote
+    return s;
+  }
+
+  function parseValue() {
+    skip();
+    if (pos >= len) return null;
+    const ch = src[pos];
+    if (ch === '{') return parseTable();
+    if (ch === '"' || ch === "'") return readString(ch);
+    if (ch === '[') {
+      // Long string if followed by [ or =
+      if (src[pos+1] === '[' || src[pos+1] === '=') return readLongString();
+      return null;
+    }
+    if (ch === '-' || (ch >= '0' && ch <= '9')) {
+      const m = src.slice(pos).match(/^-?[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?/);
+      if (m) { pos += m[0].length; return parseFloat(m[0]); }
+    }
+    const rest = src.slice(pos);
+    if (rest.startsWith('true'))  { pos += 4; return true; }
+    if (rest.startsWith('false')) { pos += 5; return false; }
+    if (rest.startsWith('nil'))   { pos += 3; return null; }
+    const m = rest.match(/^[a-zA-Z_][a-zA-Z0-9_]*/);
+    if (m) { pos += m[0].length; return m[0]; }
+    pos++; return null;
+  }
+
+  function parseTable() {
+    pos++; // {
+    const result = {};
+    let ai = 1;
+    while (true) {
+      skip();
+      if (pos >= len || src[pos] === '}') { if (pos < len) pos++; break; }
+      if (src[pos] === ',') { pos++; continue; }
+
+      if (src[pos] === '[') {
+        pos++; // [
+        const key = parseValue();
+        skip(); pos++; // ]
+        skip(); pos++; // =
+        const val = parseValue();
+        if (key !== null) result[key] = val;
+      } else {
+        const saved = pos;
+        const im = src.slice(pos).match(/^[a-zA-Z_][a-zA-Z0-9_]*/);
+        if (im) {
+          const after = src.slice(pos + im[0].length).replace(/^[\s\t\n\r]+/, '');
+          if (after[0] === '=') {
+            pos += im[0].length; skip(); pos++; // =
+            const val = parseValue();
+            result[im[0]] = val;
+            continue;
+          }
+        }
+        pos = saved;
+        const val = parseValue();
+        result[ai++] = val;
+      }
+    }
+    return result;
+  }
+
+  const root = {};
+  while (pos < len) {
+    skip();
+    if (pos >= len) break;
+    const m = src.slice(pos).match(/^[a-zA-Z_][a-zA-Z0-9_]*/);
+    if (!m) { pos++; continue; }
+    const name = m[0]; pos += name.length;
+    skip();
+    if (pos < len && src[pos] === '=') { pos++; root[name] = parseValue(); }
+  }
+  return root;
+}
+
+function extractProfiles(parsed) {
+  try {
+    // Handle possible trailing space in key name
+    const db = parsed['TotalRP3_DB'] || Object.values(parsed).find(v => v && typeof v === 'object' && v.player);
+    const player = db?.player;
+    return { profiles: player?.profiles || {}, playerStr: player?.player || '' };
+  } catch(e) { return { profiles:{}, playerStr:'' }; }
+}
+
+function profileToState(data, playerStr, profileName) {
+  const chars = data?.Information?.characteristics || {};
+  const about = data?.Information?.about || {};
+  const misc  = data?.Information?.misc  || {};
+
+  const ps = chars?.PS || chars?.ps || {};
+  const sliders = [];
+  for (let i = 1; ; i++) {
+    const sl = ps[i]; if (!sl) break;
+    sliders.push({ id:String(sl.ID||sl.id||i), left:String(sl.LF||sl.lf||''), right:String(sl.RF||sl.rf||''), value:Number(sl.VA??sl.va??50) });
+  }
+
+  const t1raw = about?.T1 || about?.t1 || {};
+  const sections = [];
+  for (let i = 1; ; i++) {
+    const sec = t1raw[i]; if (!sec) break;
+    sections.push({ id:String(sec.ID||sec.id||'a'+i), title:String(sec.TT||sec.tt||''), body:String(sec.TX||sec.tx||''), icon:String(sec.IC||sec.ic||'Interface\\Icons\\INV_Misc_QuestionMark') });
+  }
+
+  return {
+    profileName:     profileName,
+    playerString:    playerStr,
+    firstName:       String(chars.FN || ''),
+    lastName:        String(chars.LN || ''),
+    title:           String(chars.TI || ''),
+    race:            String(chars.RA || ''),
+    class:           String(chars.CL || ''),
+    age:             String(chars.AG || ''),
+    height:          String(chars.HE || ''),
+    weight:          String(chars.WE || ''),
+    eyeColour:       String(chars.EC || ''),
+    tagline:         String(chars.RE || ''),
+    colour:          String(chars.CH || 'ff7c0a').replace('#',''),
+    icon:            String(chars.IC || 'Interface\\Icons\\INV_Misc_QuestionMark'),
+    currentlyStatus: Number(chars.CU ?? 2),
+    currentlyText:   String(chars.CO || ''),
+    sliders:         sliders.length ? sliders : JSON.parse(JSON.stringify(DEFAULT_SLIDERS)),
+    sections:        sections.length ? sections : JSON.parse(JSON.stringify(DEFAULT_SECTIONS)),
+    misc:            String(misc.TT || ''),
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// IMPORT / EXPORT
+// ═══════════════════════════════════════════════════════════
+
+let _importProfiles = null, _importPlayerStr = '';
+
+document.getElementById('import-btn').addEventListener('click', () => document.getElementById('file-input').click());
+
+document.getElementById('file-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = evt => {
+    try {
+      const parsed = parseLuaFile(evt.target.result);
+      const { profiles, playerStr } = extractProfiles(parsed);
+      _importPlayerStr = playerStr;
+      _importProfiles  = profiles;
+      const names = Object.keys(profiles);
+      if (!names.length) { alert('No profiles found. Is this a valid totalRP3.lua?'); return; }
+      if (names.length === 1) { applyImport(names[0]); }
+      else { showProfilePicker(names); }
+    } catch(err) {
+      alert('Could not parse the file.\n\n' + err.message);
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
+
+function applyImport(name) {
+  const newState = profileToState(_importProfiles[name], _importPlayerStr, name);
+  Object.assign(state, newState);
+  nextId = Math.max(nextId, 200);
+  saveState();
+  populateForm();
+  renderSliders();
+  renderSections();
+  renderPreview();
+  showTab('basics');
+  document.getElementById('import-modal').classList.remove('visible');
+}
+
+function showProfilePicker(names) {
+  const list = document.getElementById('profile-picker-list');
+  list.innerHTML = '';
+  names.forEach(name => {
+    const opt = document.createElement('div');
+    opt.className = 'profile-opt';
+    opt.textContent = name;
+    opt.addEventListener('click', () => applyImport(name));
+    list.appendChild(opt);
+  });
+  document.getElementById('import-modal').classList.add('visible');
+}
+
+document.getElementById('import-cancel-btn').addEventListener('click', () =>
+  document.getElementById('import-modal').classList.remove('visible'));
+document.getElementById('import-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('visible');
+});
+
+document.getElementById('export-btn').addEventListener('click', () => {
+  if (!state.profileName?.trim()) {
+    alert('Please enter a Profile Name before exporting.');
+    showTab('basics');
+    document.getElementById('f-profile-name').focus();
+    return;
+  }
+  const lua  = serializeToLua(state);
+  const blob = new Blob([lua], { type: 'text/plain;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'totalRP3.lua'; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+
+buildIconGrid();
+loadState();
+setTheme(localStorage.getItem('gpg-wow-theme') || 'light');
+populateForm();
+bindBasics();
+renderSliders();
+renderSections();
+renderPreview();
+</script>
+</body>
+</html>
