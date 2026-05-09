@@ -1097,7 +1097,8 @@ function buildToolbar(containerId, textareaId) {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'mark-btn';
     b.textContent = '{icon}'; b.title = 'Insert inline WoW icon — opens icon picker';
-    b.addEventListener('click', () => {
+    b.addEventListener('click', e => {
+      e.stopPropagation();
       const ta = document.getElementById(textareaId);
       const savedStart = ta ? ta.selectionStart : 0;
       const savedEnd   = ta ? ta.selectionEnd   : 0;
@@ -1340,7 +1341,8 @@ function makeToolbarButtons(bodyId) {
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'mark-btn';
     b.textContent = '{icon}'; b.title = 'Insert inline WoW icon — opens icon picker';
-    b.addEventListener('click', () => {
+    b.addEventListener('click', e => {
+      e.stopPropagation();
       const ta = document.getElementById(bodyId);
       const savedStart = ta ? ta.selectionStart : 0;
       const savedEnd   = ta ? ta.selectionEnd   : 0;
