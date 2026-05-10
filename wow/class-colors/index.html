@@ -5,6 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WoW Class Colors Quiz</title>
   <style>
+    /* ── App-specific colour tokens (extends theme.css) ── */
+    :root, [data-theme="light"] {
+      --correct:      #d4edda;
+      --correct-text: #1a6b2e;
+      --wrong:        #f8d7da;
+      --wrong-text:   #8b1a1a;
+      --invalid:      #fff3cd;
+      --invalid-text: #7a5800;
+      --swatch-ring:  rgba(0,0,0,0.15);
+    }
+    [data-theme="dark"] {
+      --correct:      #3a7d44;
+      --correct-text: #6fcf80;
+      --wrong:        #7d3a3a;
+      --wrong-text:   #cf6f6f;
+      --invalid:      #4a3800;
+      --invalid-text: #f0c040;
+      --swatch-ring:  rgba(255,255,255,0.12);
+    }
+    @media (prefers-color-scheme: dark) {
+      [data-theme="os"] {
+        --correct:#3a7d44; --correct-text:#6fcf80;
+        --wrong:#7d3a3a;   --wrong-text:#cf6f6f;
+        --invalid:#4a3800; --invalid-text:#f0c040;
+        --swatch-ring:rgba(255,255,255,0.12);
+      }
+    }
+    @media (prefers-color-scheme: light) {
+      [data-theme="os"] {
+        --correct:#d4edda; --correct-text:#1a6b2e;
+        --wrong:#f8d7da;   --wrong-text:#8b1a1a;
+        --invalid:#fff3cd; --invalid-text:#7a5800;
+        --swatch-ring:rgba(0,0,0,0.15);
+      }
+    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
