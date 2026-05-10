@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D&amp;D Character Sheet — Grey Pilgrim Games</title>
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ── Nav ── */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-shrink: 0;
+    }
+    nav a { font-size: 0.8rem; color: var(--text-muted); text-decoration: none; }
+    nav a:hover { color: var(--gold); }
+    #theme-bar { display: inline-flex; gap: 0.25rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 0.25rem; }
+    #theme-bar button { font-family: var(--font-ui); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; background: transparent; color: var(--text-muted); border: none; border-radius: 16px; padding: 0.3rem 0.75rem; cursor: pointer; transition: background 0.15s, color 0.15s; }
+    #theme-bar button.active { background: var(--gold); color: var(--surface); }
+
+    /* ── Character bar ── */
+    #char-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      padding: 0.6rem 0.8rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    #char-select { flex: 1; min-width: 120px; font-family: var(--font-ui); font-size: 0.85rem; padding: 0.3rem 0.5rem; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; }
+    .bar-btn { font-family: var(--font-ui); font-size: 0.75rem; font-weight: 600; padding: 0.3rem 0.7rem; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; background: var(--surface2); color: var(--text-muted); white-space: nowrap; transition: background 0.15s; }
+    .bar-btn:hover { background: var(--border); color: var(--text); }
+    .bar-btn.danger:hover { background: #c0392b; color: #fff; border-color: #c0392b; }
+    .bar-btn.primary { background: var(--gold); color: var(--surface); border-color: var(--gold); }
+    .bar-btn.primary:hover { opacity: 0.85; }
+
+    /* ── Sheet layout ── */
+    #sheet-layout {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 1rem;
+      flex: 1;
+      min-height: 0;
+    }
+    @media (max-width: 860px) {
+      #sheet-layout { grid-template-columns: 1fr; }
+      #summary-card { order: -1; }
+    }
+
+    /* ── Tabs ── */
+    #sheet-main {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #tab-nav {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+    .tab-btn {
+      font-family: var(--font-ui);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.6rem 0.9rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+    #tab-content { flex: 1; overflow-y: auto; padding: 1rem; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Section headings ── */
+    .section-heading {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.3rem;
+      margin-bottom: 0.75rem;
+      margin-top: 1rem;
+    }
+    .section-heading:first-child { margin-top: 0; }
+
+    /* ── Field grid ── */
+    .field-grid { display: grid; gap: 0.6rem; }
+    .field-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    .field-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .field-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 500px) {
+      .field-grid.cols-3, .field-grid.cols-4 { grid-template-columns: 1fr 1fr; }
+    }
+
+    .field { display: flex; flex-direction: column; gap: 0.2rem; }
+    .field label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
+    .field input, .field select, .field textarea {
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      padding: 0.35rem 0.5rem;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none;
+      border-color: var(--gold-dim);
+    }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field .auto-val {
+      font-size: 0.82rem;
+      padding: 0.35rem 0.5rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    /* ── Ability scores ── */
+    #abilities-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.6rem;
+    }
+    @media (max-width: 500px) { #abilities-grid { grid-template-columns: repeat(3, 1fr); } }
+    .ability-block {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.4rem;
+      text-align: center;
+    }
+    .ability-block label { display: block; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.25rem; }
+    .ability-block input[type="number"] { width: 100%; text-align: center; font-size: 1.1rem; font-weight: 700; padding: 0.2rem; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 5px; }
+    .ability-mod { font-size: 1.1rem; font-weight: 700; color: var(--gold); margin-top: 0.2rem; }
+    .ability-save { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.1rem; }
+
+    /* ── Skills ── */
+    #skills-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; }
+    @media (max-width: 500px) { #skills-list { grid-template-columns: 1fr; } }
+    .skill-row { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; }
+    .skill-row select { font-size: 0.68rem; padding: 0.1rem 0.2rem; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text); }
+    .skill-bonus { font-weight: 700; color: var(--gold); min-width: 2.2rem; text-align: right; font-size: 0.8rem; }
+    .skill-name { flex: 1; color: var(--text); }
+    .skill-ability { font-size: 0.65rem; color: var(--text-muted); }
+
+    /* ── Saves ── */
+    #saves-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
+    @media (max-width: 500px) { #saves-grid { grid-template-columns: repeat(2, 1fr); } }
+    .save-row { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; }
+    .save-row input[type="checkbox"] { accent-color: var(--gold); }
+    .save-bonus { font-weight: 700; color: var(--gold); min-width: 2.2rem; text-align: right; }
+    .save-name { flex: 1; text-transform: capitalize; }
+
+    /* ── Combat ── */
+    .hp-row { display: flex; align-items: center; gap: 0.5rem; }
+    .hp-row input { font-size: 1.2rem; font-weight: 700; text-align: center; width: 70px; }
+    .hp-sep { font-size: 1rem; color: var(--text-muted); }
+    .hp-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .death-saves { display: flex; gap: 0.6rem; align-items: center; }
+    .death-group { display: flex; gap: 0.3rem; align-items: center; }
+    .death-group label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+    .ds-pip { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); cursor: pointer; background: var(--bg); transition: background 0.15s; }
+    .ds-pip.success.filled { background: #27ae60; border-color: #27ae60; }
+    .ds-pip.failure.filled { background: #c0392b; border-color: #c0392b; }
+    .conditions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.35rem; }
+    @media (max-width: 500px) { .conditions-grid { grid-template-columns: repeat(2, 1fr); } }
+    .condition-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; cursor: pointer; }
+    .condition-item input[type="checkbox"] { accent-color: var(--gold); }
+    .condition-item.active label { color: var(--gold); font-weight: 700; }
+
+    /* ── Attacks ── */
+    #attacks-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    #attacks-table th { text-align: left; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); padding: 0.3rem 0.4rem; }
+    #attacks-table td { padding: 0.3rem 0.4rem; border-bottom: 1px solid var(--border); }
+    #attacks-table td input { background: transparent; border: none; padding: 0; width: 100%; font-size: 0.8rem; color: var(--text); }
+    #attacks-table td input:focus { outline: 1px solid var(--gold-dim); border-radius: 3px; }
+    #attacks-table .del-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 0.9rem; padding: 0 0.3rem; }
+    #attacks-table .del-btn:hover { color: #c0392b; }
+    .add-row-btn { font-family: var(--font-ui); font-size: 0.75rem; padding: 0.3rem 0.7rem; margin-top: 0.5rem; border: 1px dashed var(--border); border-radius: 6px; background: transparent; color: var(--text-muted); cursor: pointer; width: 100%; transition: border-color 0.15s, color 0.15s; }
+    .add-row-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+    /* ── Spells ── */
+    #spell-search-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+    #spell-search-row input, #spell-search-row select { font-family: var(--font-ui); font-size: 0.82rem; padding: 0.3rem 0.5rem; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; }
+    #spell-search-row input { flex: 1; min-width: 120px; }
+    #spell-results { max-height: 180px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.75rem; }
+    #spell-results.hidden { display: none; }
+    .spell-result-item { display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0.6rem; border-bottom: 1px solid var(--border); font-size: 0.8rem; cursor: pointer; transition: background 0.12s; }
+    .spell-result-item:last-child { border-bottom: none; }
+    .spell-result-item:hover { background: var(--surface2); }
+    .spell-result-info { color: var(--text-muted); font-size: 0.7rem; }
+    .spell-add-btn { font-size: 0.7rem; padding: 0.15rem 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--gold); color: var(--surface); cursor: pointer; font-weight: 700; white-space: nowrap; }
+    .slot-track { display: flex; gap: 0.25rem; flex-wrap: wrap; align-items: center; }
+    .slot-pip { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg); cursor: pointer; transition: background 0.12s, border-color 0.12s; }
+    .slot-pip.used { background: var(--gold); border-color: var(--gold-dim); }
+    .spell-level-section { margin-bottom: 1rem; }
+    .spell-level-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem; }
+    .spell-level-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); white-space: nowrap; }
+    .spell-level-slots { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: var(--text-muted); }
+    .char-spell-item { display: flex; align-items: flex-start; gap: 0.4rem; padding: 0.35rem 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+    .char-spell-item:last-child { border-bottom: none; }
+    .spell-prepared-cb { accent-color: var(--gold); margin-top: 2px; flex-shrink: 0; }
+    .spell-item-body { flex: 1; }
+    .spell-item-name { font-weight: 600; }
+    .spell-item-meta { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.1rem; }
+    .spell-item-desc { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem; display: none; }
+    .spell-item-name:hover { cursor: pointer; color: var(--gold); }
+    .char-spell-item .del-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 0.85rem; flex-shrink: 0; }
+    .char-spell-item .del-btn:hover { color: #c0392b; }
+    .conc-badge { font-size: 0.6rem; background: var(--gold-dim); color: var(--surface); border-radius: 3px; padding: 0.05rem 0.3rem; font-weight: 700; letter-spacing: 0.06em; }
+    .rit-badge { font-size: 0.6rem; background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); border-radius: 3px; padding: 0.05rem 0.3rem; font-weight: 700; letter-spacing: 0.06em; }
+
+    /* ── Equipment ── */
+    .currency-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; }
+    .currency-item { text-align: center; }
+    .currency-item label { display: block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.2rem; }
+    .currency-item input { text-align: center; }
+    #items-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    #items-table th { text-align: left; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); padding: 0.3rem 0.4rem; }
+    #items-table td { padding: 0.3rem 0.4rem; border-bottom: 1px solid var(--border); }
+    #items-table td input { background: transparent; border: none; padding: 0; width: 100%; font-size: 0.8rem; color: var(--text); }
+    #items-table td input:focus { outline: 1px solid var(--gold-dim); border-radius: 3px; }
+
+    /* ── Features & Resources ── */
+    #resources-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+    @media (max-width: 500px) { #resources-list { grid-template-columns: 1fr; } }
+    .resource-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem; }
+    .resource-name { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 0.4rem; }
+    .resource-pips { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+    .res-pip { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); background: var(--bg); cursor: pointer; transition: background 0.12s; }
+    .res-pip.filled { background: var(--gold); border-color: var(--gold-dim); }
+    .resource-reset { font-size: 0.62rem; color: var(--text-muted); margin-top: 0.25rem; }
+    #features-list textarea { width: 100%; }
+
+    /* ── Summary card ── */
+    #summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      align-self: start;
+    }
+    #summary-card .char-name { font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+    #summary-card .char-subtitle { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.1rem; }
+    .summary-stat-row { display: flex; gap: 0.5rem; }
+    .summary-stat { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 0.4rem; text-align: center; }
+    .summary-stat .val { font-size: 1.2rem; font-weight: 700; color: var(--gold); line-height: 1; }
+    .summary-stat .lbl { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); margin-top: 0.15rem; }
+    .summary-abilities { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
+    .sum-ab { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; text-align: center; padding: 0.3rem; }
+    .sum-ab .mod { font-size: 1rem; font-weight: 700; color: var(--gold); }
+    .sum-ab .score { font-size: 0.65rem; color: var(--text-muted); }
+    .sum-ab .name { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+    .summary-section-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.3rem; }
+    .summary-misc-row { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 0.2rem 0; border-bottom: 1px solid var(--border); }
+    .summary-misc-row:last-child { border-bottom: none; }
+    .summary-misc-row .key { color: var(--text-muted); }
+    .summary-misc-row .val { font-weight: 700; color: var(--text); }
+    #concentration-banner { background: var(--gold-dim); color: var(--surface); font-size: 0.75rem; font-weight: 700; padding: 0.35rem 0.5rem; border-radius: 6px; text-align: center; display: none; }
+    #conditions-active { display: none; }
+    #conditions-active .conditions-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+    .cond-chip { font-size: 0.68rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 0.15rem 0.45rem; color: var(--text-muted); }
+
+    /* ── HP quick controls ── */
+    .hp-quick { display: flex; align-items: center; gap: 0.4rem; }
+    .hp-delta-input { width: 55px; text-align: center; font-size: 0.85rem; padding: 0.25rem; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 5px; }
+    .hp-delta-btn { font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.5rem; border: 1px solid var(--border); border-radius: 5px; cursor: pointer; background: var(--surface2); color: var(--text); }
+    .hp-delta-btn.heal { border-color: #27ae60; color: #27ae60; }
+    .hp-delta-btn.heal:hover { background: #27ae60; color: #fff; }
+    .hp-delta-btn.dmg { border-color: #c0392b; color: #c0392b; }
+    .hp-delta-btn.dmg:hover { background: #c0392b; color: #fff; }
+    #current-hp-display { font-size: 1.5rem; font-weight: 700; color: var(--gold); min-width: 2.5rem; text-align: center; }
+
+    /* ── Print ── */
+    @media print {
+      nav, #char-bar, #tab-nav, #spell-search-row, #spell-results { display: none !important; }
+      #sheet-layout { display: block !important; }
+      #summary-card { break-inside: avoid; }
+      .tab-panel { display: block !important; }
+      body { padding: 0; font-size: 10pt; }
+      #sheet-main { border: none; }
+      #tab-content { overflow: visible; }
+    }
+
+    /* ── Empty state ── */
+    #empty-state { text-align: center; color: var(--text-muted); padding: 3rem 1rem; }
+    #empty-state h2 { color: var(--gold); font-size: 1.3rem; margin-bottom: 0.5rem; }
+    #empty-state p { font-size: 0.88rem; margin-bottom: 1.5rem; }
+  </style>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+</head>
+<body>
+
+<nav>
+  <a href="/boardgames/">← Board &amp; Tabletop Games</a>
+  <div id="theme-bar">
+    <button data-theme="light" class="active">Light</button>
+    <button data-theme="dark">Dark</button>
+    <button data-theme="os">OS</button>
+  </div>
+</nav>
+
+<!-- Character bar -->
+<div id="char-bar">
+  <select id="char-select"><option value="">— No character —</option></select>
+  <button class="bar-btn primary" id="btn-new">+ New</button>
+  <button class="bar-btn" id="btn-duplicate">Duplicate</button>
+  <button class="bar-btn danger" id="btn-delete">Delete</button>
+  <button class="bar-btn" id="btn-export">Export JSON</button>
+  <label class="bar-btn" for="import-file" style="cursor:pointer;">Import JSON</label>
+  <input type="file" id="import-file" accept=".json" style="display:none;">
+  <button class="bar-btn" id="btn-print">Print / PDF</button>
+  <button class="bar-btn" id="btn-rest-short">Short Rest</button>
+  <button class="bar-btn" id="btn-rest-long">Long Rest</button>
+</div>
+
+<!-- Main layout -->
+<div id="sheet-layout">
+
+  <!-- Left: Sheet -->
+  <div id="sheet-main">
+    <div id="tab-nav">
+      <button class="tab-btn active" data-tab="identity">Identity</button>
+      <button class="tab-btn" data-tab="abilities">Abilities</button>
+      <button class="tab-btn" data-tab="combat">Combat</button>
+      <button class="tab-btn" data-tab="spells">Spells</button>
+      <button class="tab-btn" data-tab="equipment">Equipment</button>
+      <button class="tab-btn" data-tab="features">Features</button>
+      <button class="tab-btn" data-tab="notes">Notes</button>
+    </div>
+    <div id="tab-content">
+
+      <!-- Empty state -->
+      <div id="empty-state">
+        <h2>No character selected</h2>
+        <p>Create a new character or import an existing one to get started.</p>
+        <button class="bar-btn primary" onclick="document.getElementById('btn-new').click()">+ Create New Character</button>
+      </div>
+
+      <!-- Tab: Identity -->
+      <div class="tab-panel" id="tab-identity">
+        <div class="section-heading">Character Info</div>
+        <div class="field-grid cols-2">
+          <div class="field"><label>Character Name</label><input type="text" id="f-name" placeholder="Name"></div>
+          <div class="field"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
+        </div>
+        <div class="field-grid cols-3" style="margin-top:0.6rem;">
+          <div class="field"><label>Species / Race</label><input type="text" id="f-race" placeholder="Human, Elf…"></div>
+          <div class="field"><label>Background</label><input type="text" id="f-background" placeholder="Sage, Soldier…"></div>
+          <div class="field"><label>Alignment</label>
+            <select id="f-alignment">
+              <option value="">—</option>
+              <option>Lawful Good</option><option>Neutral Good</option><option>Chaotic Good</option>
+              <option>Lawful Neutral</option><option>True Neutral</option><option>Chaotic Neutral</option>
+              <option>Lawful Evil</option><option>Neutral Evil</option><option>Chaotic Evil</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-grid cols-2" style="margin-top:0.6rem;">
+          <div class="field"><label>Experience Points</label><input type="number" id="f-xp" min="0" placeholder="0"></div>
+          <div class="field"><label>Inspiration</label>
+            <select id="f-inspiration">
+              <option value="0">No</option>
+              <option value="1">Yes (1 point)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="section-heading" style="margin-top:1rem;">Classes</div>
+        <div id="classes-list"></div>
+        <button class="add-row-btn" id="btn-add-class">+ Add Class</button>
+
+        <div class="section-heading" style="margin-top:1rem;">Background Ability Score Increase <span style="font-weight:400;text-transform:none;letter-spacing:0;">(2024 rules: +2/+1 or three +1s from background)</span></div>
+        <div class="field-grid cols-3">
+          <div class="field"><label>Background Bonus 1</label>
+            <select id="f-bg-bonus1-ability"><option value="">None</option><option value="str">Strength</option><option value="dex">Dexterity</option><option value="con">Constitution</option><option value="int">Intelligence</option><option value="wis">Wisdom</option><option value="cha">Charisma</option></select>
+          </div>
+          <div class="field"><label>Amount</label>
+            <select id="f-bg-bonus1-val"><option value="0">0</option><option value="1">+1</option><option value="2">+2</option></select>
+          </div>
+          <div class="field"><label>Background Bonus 2</label>
+            <select id="f-bg-bonus2-ability"><option value="">None</option><option value="str">Strength</option><option value="dex">Dexterity</option><option value="con">Constitution</option><option value="int">Intelligence</option><option value="wis">Wisdom</option><option value="cha">Charisma</option></select>
+          </div>
+        </div>
+        <div class="field-grid cols-2" style="margin-top:0.6rem;">
+          <div class="field"><label>Amount</label>
+            <select id="f-bg-bonus2-val"><option value="0">0</option><option value="1">+1</option><option value="2">+2</option></select>
+          </div>
+          <div class="field"><label>Background Bonus 3 (optional +1)</label>
+            <select id="f-bg-bonus3-ability"><option value="">None</option><option value="str">Strength</option><option value="dex">Dexterity</option><option value="con">Constitution</option><option value="int">Intelligence</option><option value="wis">Wisdom</option><option value="cha">Charisma</option></select>
+          </div>
+        </div>
+
+        <div class="section-heading" style="margin-top:1rem;">Appearance &amp; Description</div>
+        <div class="field"><label>Physical Description</label><textarea id="f-appearance" placeholder="Height, weight, eyes, hair, distinguishing features…" rows="3"></textarea></div>
+      </div>
+
+      <!-- Tab: Abilities & Skills -->
+      <div class="tab-panel" id="tab-abilities">
+        <div class="section-heading">Proficiency Bonus &amp; Passive Perception</div>
+        <div class="field-grid cols-3">
+          <div class="field"><label>Proficiency Bonus</label><div class="auto-val" id="d-prof">+2</div></div>
+          <div class="field"><label>Passive Perception</label><div class="auto-val" id="d-passive">10</div></div>
+          <div class="field"><label>Initiative</label><div class="auto-val" id="d-initiative">+0</div></div>
+        </div>
+
+        <div class="section-heading" style="margin-top:1rem;">Ability Scores</div>
+        <div id="abilities-grid">
+          <div class="ability-block">
+            <label>STR</label>
+            <input type="number" id="ab-str" min="1" max="30" value="10">
+            <div class="ability-mod" id="mod-str">+0</div>
+            <div class="ability-save">Save: <span id="save-str">+0</span></div>
+          </div>
+          <div class="ability-block">
+            <label>DEX</label>
+            <input type="number" id="ab-dex" min="1" max="30" value="10">
+            <div class="ability-mod" id="mod-dex">+0</div>
+            <div class="ability-save">Save: <span id="save-dex">+0</span></div>
+          </div>
+          <div class="ability-block">
+            <label>CON</label>
+            <input type="number" id="ab-con" min="1" max="30" value="10">
+            <div class="ability-mod" id="mod-con">+0</div>
+            <div class="ability-save">Save: <span id="save-con">+0</span></div>
+          </div>
+          <div class="ability-block">
+            <label>INT</label>
+            <input type="number" id="ab-int" min="1" max="30" value="10">
+            <div class="ability-mod" id="mod-int">+0</div>
+            <div class="ability-save">Save: <span id="save-int">+0</span></div>
+          </div>
+          <div class="ability-block">
+            <label>WIS</label>
+            <input type="number" id="ab-wis" min="1" max="30" value="10">
+            <div class="ability-mod" id="mod-wis">+0</div>
+            <div class="ability-save">Save: <span id="save-wis">+0</span></div>
+          </div>
+          <div class="ability-block">
+            <label>CHA</label>
+            <input type="number" id="ab-cha" min="1" max="30" value="10">
+            <div class="ability-mod" id="mod-cha">+0</div>
+            <div class="ability-save">Save: <span id="save-cha">+0</span></div>
+          </div>
+        </div>
+
+        <div class="section-heading" style="margin-top:1rem;">Saving Throw Proficiencies</div>
+        <div id="saves-grid">
+          <label class="save-row"><input type="checkbox" class="save-prof-cb" data-ability="str"> <span class="save-bonus" id="sb-str">+0</span> <span class="save-name">Strength</span></label>
+          <label class="save-row"><input type="checkbox" class="save-prof-cb" data-ability="dex"> <span class="save-bonus" id="sb-dex">+0</span> <span class="save-name">Dexterity</span></label>
+          <label class="save-row"><input type="checkbox" class="save-prof-cb" data-ability="con"> <span class="save-bonus" id="sb-con">+0</span> <span class="save-name">Constitution</span></label>
+          <label class="save-row"><input type="checkbox" class="save-prof-cb" data-ability="int"> <span class="save-bonus" id="sb-int">+0</span> <span class="save-name">Intelligence</span></label>
+          <label class="save-row"><input type="checkbox" class="save-prof-cb" data-ability="wis"> <span class="save-bonus" id="sb-wis">+0</span> <span class="save-name">Wisdom</span></label>
+          <label class="save-row"><input type="checkbox" class="save-prof-cb" data-ability="cha"> <span class="save-bonus" id="sb-cha">+0</span> <span class="save-name">Charisma</span></label>
+        </div>
+
+        <div class="section-heading" style="margin-top:1rem;">Skills</div>
+        <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:0.5rem;">Proficiency: None / Prof / Expertise &nbsp;|&nbsp; JoAT = Jack of All Trades (Bard)</div>
+        <div style="margin-bottom:0.5rem;">
+          <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;cursor:pointer;">
+            <input type="checkbox" id="jack-of-all-trades" style="accent-color:var(--gold);"> Jack of All Trades (add half proficiency to non-proficient checks)
+          </label>
+        </div>
+        <div id="skills-list"></div>
+
+        <div class="section-heading" style="margin-top:1rem;">Languages &amp; Proficiencies</div>
+        <div class="field-grid cols-2">
+          <div class="field"><label>Languages</label><textarea id="f-languages" rows="3" placeholder="Common, Elvish…"></textarea></div>
+          <div class="field"><label>Tool &amp; Other Proficiencies</label><textarea id="f-tools" rows="3" placeholder="Thieves' tools, Smith's tools…"></textarea></div>
+        </div>
+      </div>
+
+      <!-- Tab: Combat -->
+      <div class="tab-panel" id="tab-combat">
+        <div class="section-heading">Hit Points</div>
+        <div class="field-grid cols-3">
+          <div class="field"><label>HP Max <span id="hp-max-auto-note" style="font-weight:400;text-transform:none;">(auto)</span></label>
+            <div style="display:flex;gap:0.4rem;align-items:center;">
+              <input type="number" id="f-hp-max-override" placeholder="Auto" style="width:70px;">
+              <span style="font-size:0.72rem;color:var(--text-muted);">Override</span>
+            </div>
+            <div style="font-size:0.78rem;color:var(--gold);font-weight:700;" id="hp-max-display">—</div>
+          </div>
+          <div class="field"><label>Current HP</label>
+            <div class="hp-row">
+              <div id="current-hp-display">—</div>
+            </div>
+            <div class="hp-quick" style="margin-top:0.4rem;">
+              <input type="number" class="hp-delta-input" id="hp-delta" placeholder="±" min="0">
+              <button class="hp-delta-btn heal" id="btn-heal">Heal</button>
+              <button class="hp-delta-btn dmg" id="btn-damage">Damage</button>
+            </div>
+          </div>
+          <div class="field"><label>Temporary HP</label><input type="number" id="f-hp-temp" min="0" placeholder="0"></div>
+        </div>
+
+        <div class="section-heading" style="margin-top:1rem;">Defenses &amp; Movement</div>
+        <div class="field-grid cols-4">
+          <div class="field"><label>AC Mode</label>
+            <select id="f-ac-mode">
+              <option value="auto">Auto-calc</option>
+              <option value="manual">Manual</option>
+            </select>
+          </div>
+          <div class="field"><label>Armor Type</label>
+            <select id="f-armor-type">
+              <option value="none">No armor (10)</option>
+              <option value="padded">Padded (11+Dex)</option>
+              <option value="leather">Leather (11+Dex)</option>
+              <option value="studded">Studded Leather (12+Dex)</option>
+              <option value="hide">Hide (12+Dex, max+2)</option>
+              <option value="chain-shirt">Chain Shirt (13+Dex, max+2)</option>
+              <option value="scale">Scale Mail (14+Dex, max+2)</option>
+              <option value="breastplate">Breastplate (14+Dex, max+2)</option>
+              <option value="half-plate">Half Plate (15+Dex, max+2)</option>
+              <option value="ring">Ring Mail (14)</option>
+              <option value="chain">Chain Mail (16)</option>
+              <option value="splint">Splint (17)</option>
+              <option value="plate">Plate (18)</option>
+            </select>
+          </div>
+          <div class="field"><label>Shield</label>
+            <select id="f-shield">
+              <option value="0">No shield</option>
+              <option value="2">Shield (+2)</option>
+            </select>
+          </div>
+          <div class="field"><label>AC Bonus (magic, etc.)</label><input type="number" id="f-ac-bonus" value="0" min="-5" max="10"></div>
+        </div>
+        <div class="field-grid cols-4" style="margin-top:0.6rem;">
+          <div class="field"><label>Armor Class</label><div class="auto-val" id="d-ac">10</div></div>
+          <div class="field"><label>Manual AC Override</label><input type="number" id="f-ac-manual" placeholder="10" style="display:none;"></div>
+          <div class="field"><label>Speed (ft.)</label><input type="number" id="f-speed" value="30" min="0"></div>
+          <div class="field"><label>Hit Dice</label><div class="auto-val" id="d-hit-dice">—</div></div>
+        </div>
+
+        <div class="section-heading" style="margin-top:1rem;">Hit Dice Tracking</div>
+        <div id="hit-dice-track" style="font-size:0.82rem;color:var(--text-muted);">
+          <div id="hd-pips-wrap" style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.4rem;"></div>
+          <button class="bar-btn" id="btn-use-hd" style="font-size:0.72rem;padding:0.2rem 0.5rem;">Use 1 Hit Die</button>
+        </div>
+
+        <div class="section-heading" style="margin-top:1rem;">Death Saving Throws</div>
+        <div class="death-saves">
+          <div class="death-group">
+            <label>Successes</label>
+            <div id="death-success-pips">
+              <span class="ds-pip success" data-idx="0"></span>
+              <span class="ds-pip success" data-idx="1"></span>
+              <span class="ds-pip success" data-idx="2"></span>
+            </div>
+          </div>
+          <div class="death-group">
+            <label>Failures</label>
+            <div id="death-fail-pips">
+              <span class="ds-pip failure" data-idx="0"></span>
+              <span class="ds-pip failure" data-idx="1"></span>
+              <span class="ds-pip failure" data-idx="2"></span>
+            </div>
+          </div>
+          <button class="bar-btn" id="btn-reset-death" style="font-size:0.72rem;">Reset</button>
+        </div>
+
+        <div class="section-heading" style="margin-top:1rem;">Conditions</div>
+        <div class="conditions-grid" id="conditions-grid"></div>
+
+        <div class="section-heading" style="margin-top:1rem;">Concentration</div>
+        <div class="field-grid cols-2">
+          <div class="field"><label>Currently Concentrating On</label><input type="text" id="f-concentration" placeholder="Spell name or leave blank"></div>
+        </div>
+
+        <div class="section-heading" style="margin-top:1rem;">Attacks &amp; Actions</div>
+        <table id="attacks-table">
+          <thead><tr><th>Name</th><th>Attack Bonus</th><th>Damage / Type</th><th>Range</th><th>Notes</th><th></th></tr></thead>
+          <tbody id="attacks-body"></tbody>
+        </table>
+        <button class="add-row-btn" id="btn-add-attack">+ Add Attack</button>
+      </div>
+
+      <!-- Tab: Spells -->
+      <div class="tab-panel" id="tab-spells">
+        <div id="spell-stats" style="margin-bottom:0.75rem; display:flex; gap:0.75rem; flex-wrap:wrap;">
+          <div class="field" style="min-width:120px;">
+            <label>Spellcasting Ability</label>
+            <div class="auto-val" id="d-spell-ability">—</div>
+          </div>
+          <div class="field" style="min-width:100px;">
+            <label>Spell Save DC</label>
+            <div class="auto-val" id="d-spell-dc">—</div>
+          </div>
+          <div class="field" style="min-width:100px;">
+            <label>Spell Attack</label>
+            <div class="auto-val" id="d-spell-attack">—</div>
+          </div>
+        </div>
+
+        <div class="section-heading">Add Spell from SRD Database</div>
+        <div id="spell-search-row">
+          <input type="text" id="spell-search-input" placeholder="Search by name…">
+          <select id="spell-filter-level">
+            <option value="">All levels</option>
+            <option value="0">Cantrips</option>
+            <option value="1">1st level</option>
+            <option value="2">2nd level</option>
+            <option value="3">3rd level</option>
+            <option value="4">4th level</option>
+            <option value="5">5th level</option>
+            <option value="6">6th level</option>
+            <option value="7">7th level</option>
+            <option value="8">8th level</option>
+            <option value="9">9th level</option>
+          </select>
+          <select id="spell-filter-class">
+            <option value="">All classes</option>
+            <option value="bard">Bard</option>
+            <option value="cleric">Cleric</option>
+            <option value="druid">Druid</option>
+            <option value="paladin">Paladin</option>
+            <option value="ranger">Ranger</option>
+            <option value="sorcerer">Sorcerer</option>
+            <option value="warlock">Warlock</option>
+            <option value="wizard">Wizard</option>
+          </select>
+          <button class="bar-btn" id="btn-add-manual-spell">+ Custom Spell</button>
+        </div>
+        <div id="spell-results" class="hidden"></div>
+
+        <div class="section-heading">Spell Slots</div>
+        <div id="spell-slots-track"></div>
+
+        <div class="section-heading" style="margin-top:1rem;">Spells Known / Prepared</div>
+        <div id="char-spells-list"></div>
+      </div>
+
+      <!-- Tab: Equipment -->
+      <div class="tab-panel" id="tab-equipment">
+        <div class="section-heading">Currency</div>
+        <div class="currency-row">
+          <div class="currency-item"><label>CP</label><input type="number" id="f-cp" min="0" placeholder="0"></div>
+          <div class="currency-item"><label>SP</label><input type="number" id="f-sp" min="0" placeholder="0"></div>
+          <div class="currency-item"><label>EP</label><input type="number" id="f-ep" min="0" placeholder="0"></div>
+          <div class="currency-item"><label>GP</label><input type="number" id="f-gp" min="0" placeholder="0"></div>
+          <div class="currency-item"><label>PP</label><input type="number" id="f-pp" min="0" placeholder="0"></div>
+        </div>
+
+        <div class="section-heading" style="margin-top:1rem;">Equipment &amp; Gear</div>
+        <table id="items-table">
+          <thead><tr><th>Item</th><th style="width:50px">Qty</th><th style="width:60px">Wt (lb)</th><th>Notes</th><th></th></tr></thead>
+          <tbody id="items-body"></tbody>
+        </table>
+        <button class="add-row-btn" id="btn-add-item">+ Add Item</button>
+
+        <div class="section-heading" style="margin-top:1rem;">Carrying Capacity</div>
+        <div id="carry-info" style="font-size:0.82rem;color:var(--text-muted);">
+          Capacity: <span id="d-carry-cap">—</span> lb. &nbsp;|&nbsp; Current: <span id="d-carry-cur">0</span> lb.
+        </div>
+      </div>
+
+      <!-- Tab: Features -->
+      <div class="tab-panel" id="tab-features">
+        <div class="section-heading">Class Resources</div>
+        <div id="resources-list"></div>
+
+        <div class="section-heading" style="margin-top:1rem;">Class Features &amp; Traits</div>
+        <div class="field"><textarea id="f-class-features" rows="6" placeholder="List class features, racial traits, and feats here…"></textarea></div>
+
+        <div class="section-heading" style="margin-top:1rem;">Background Feature</div>
+        <div class="field"><textarea id="f-background-feature" rows="3" placeholder="Background feature description…"></textarea></div>
+
+        <div class="section-heading" style="margin-top:1rem;">Other Traits &amp; Feats</div>
+        <div class="field"><textarea id="f-feats" rows="4" placeholder="Feats, special abilities, racial traits…"></textarea></div>
+      </div>
+
+      <!-- Tab: Notes -->
+      <div class="tab-panel" id="tab-notes">
+        <div class="section-heading">Backstory</div>
+        <div class="field"><textarea id="f-backstory" rows="6" placeholder="Character backstory, history, motivations…"></textarea></div>
+
+        <div class="section-heading" style="margin-top:1rem;">Personality, Ideals, Bonds, Flaws</div>
+        <div class="field-grid cols-2">
+          <div class="field"><label>Personality Traits</label><textarea id="f-personality" rows="3" placeholder=""></textarea></div>
+          <div class="field"><label>Ideals</label><textarea id="f-ideals" rows="3" placeholder=""></textarea></div>
+          <div class="field"><label>Bonds</label><textarea id="f-bonds" rows="3" placeholder=""></textarea></div>
+          <div class="field"><label>Flaws</label><textarea id="f-flaws" rows="3" placeholder=""></textarea></div>
+        </div>
+
+        <div class="section-heading" style="margin-top:1rem;">Allies &amp; Organizations</div>
+        <div class="field"><textarea id="f-allies" rows="4" placeholder="Allies, contacts, organizations, enemies…"></textarea></div>
+
+        <div class="section-heading" style="margin-top:1rem;">Additional Notes</div>
+        <div class="field"><textarea id="f-notes" rows="6" placeholder="Session notes, quests, treasure, anything…"></textarea></div>
+      </div>
+
+    </div><!-- /tab-content -->
+  </div><!-- /sheet-main -->
+
+  <!-- Right: Summary card -->
+  <div id="summary-card">
+    <div>
+      <div class="char-name" id="sum-name">—</div>
+      <div class="char-subtitle" id="sum-subtitle">No character loaded</div>
+    </div>
+
+    <div id="concentration-banner">⚡ Concentrating: <span id="sum-conc">—</span></div>
+
+    <div>
+      <div class="summary-section-label">Hit Points</div>
+      <div class="summary-stat-row">
+        <div class="summary-stat">
+          <div class="val" id="sum-hp">—</div>
+          <div class="lbl">Current</div>
+        </div>
+        <div class="summary-stat">
+          <div class="val" id="sum-hp-max">—</div>
+          <div class="lbl">Max</div>
+        </div>
+        <div class="summary-stat">
+          <div class="val" id="sum-hp-temp">—</div>
+          <div class="lbl">Temp</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="summary-section-label">Combat</div>
+      <div class="summary-stat-row">
+        <div class="summary-stat"><div class="val" id="sum-ac">—</div><div class="lbl">AC</div></div>
+        <div class="summary-stat"><div class="val" id="sum-init">—</div><div class="lbl">Initiative</div></div>
+        <div class="summary-stat"><div class="val" id="sum-speed">—</div><div class="lbl">Speed</div></div>
+        <div class="summary-stat"><div class="val" id="sum-prof">—</div><div class="lbl">Prof.</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="summary-section-label">Ability Scores</div>
+      <div class="summary-abilities">
+        <div class="sum-ab"><div class="name">STR</div><div class="mod" id="sum-mod-str">+0</div><div class="score" id="sum-score-str">10</div></div>
+        <div class="sum-ab"><div class="name">DEX</div><div class="mod" id="sum-mod-dex">+0</div><div class="score" id="sum-score-dex">10</div></div>
+        <div class="sum-ab"><div class="name">CON</div><div class="mod" id="sum-mod-con">+0</div><div class="score" id="sum-score-con">10</div></div>
+        <div class="sum-ab"><div class="name">INT</div><div class="mod" id="sum-mod-int">+0</div><div class="score" id="sum-score-int">10</div></div>
+        <div class="sum-ab"><div class="name">WIS</div><div class="mod" id="sum-mod-wis">+0</div><div class="score" id="sum-score-wis">10</div></div>
+        <div class="sum-ab"><div class="name">CHA</div><div class="mod" id="sum-mod-cha">+0</div><div class="score" id="sum-score-cha">10</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="summary-section-label">Other</div>
+      <div class="summary-misc-row"><span class="key">Passive Perception</span><span class="val" id="sum-passive">—</span></div>
+      <div class="summary-misc-row"><span class="key">Spell DC</span><span class="val" id="sum-spell-dc">—</span></div>
+      <div class="summary-misc-row"><span class="key">Spell Attack</span><span class="val" id="sum-spell-atk">—</span></div>
+    </div>
+
+    <div id="conditions-active">
+      <div class="summary-section-label">Active Conditions</div>
+      <div class="conditions-chips" id="sum-conditions"></div>
+    </div>
+  </div>
+
+</div><!-- /sheet-layout -->
+
+<script src="/assets/js/theme.js" defer></script>
+<script src="app.js" defer></script>
+</body>
+</html>
