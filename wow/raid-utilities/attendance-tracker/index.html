@@ -5,6 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Raid Attendance Tracker — WoW — Grey Pilgrim Games</title>
   <style>
+    /* ── App-specific colour tokens (extends theme.css) ── */
+    :root, [data-theme="light"] {
+      --accent:     #7a5a10;
+      --accent-dim: #a07828;
+      --member:     #2d7a2d;
+      --pug:        #8a5a00;
+      --danger:     #a02020;
+    }
+    [data-theme="dark"] {
+      --accent:     #f0c040;
+      --accent-dim: #a07c18;
+      --member:     #3fb950;
+      --pug:        #d29922;
+      --danger:     #f85149;
+    }
+    @media (prefers-color-scheme: dark) {
+      [data-theme="os"] {
+        --accent:#f0c040; --accent-dim:#a07c18;
+        --member:#3fb950; --pug:#d29922; --danger:#f85149;
+      }
+    }
+    @media (prefers-color-scheme: light) {
+      [data-theme="os"] {
+        --accent:#7a5a10; --accent-dim:#a07828;
+        --member:#2d7a2d; --pug:#8a5a00; --danger:#a02020;
+      }
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
