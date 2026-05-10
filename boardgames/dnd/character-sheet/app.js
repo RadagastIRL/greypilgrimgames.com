@@ -405,7 +405,6 @@ function renderSheet() {
 
   // Combat
   setVal('f-hp-max-override', char.hpMaxOverride ?? '');
-  setVal('f-hp-temp', char.hpTemp ?? 0);
   setVal('f-ac-mode', char.acMode || 'auto');
   setVal('f-armor-type', char.armorType || 'none');
   setVal('f-shield', char.shield ?? 0);
@@ -791,10 +790,12 @@ function renderSummaryCard(char) {
   if (!char) {
     document.getElementById('sum-name').textContent = '—';
     document.getElementById('sum-subtitle').textContent = 'No character loaded';
-    ['sum-hp','sum-hp-max','sum-hp-temp','sum-ac','sum-init','sum-speed','sum-prof','sum-passive','sum-spell-dc','sum-spell-atk'].forEach(id => {
+    ['sum-hp','sum-hp-max','sum-ac','sum-init','sum-speed','sum-prof','sum-passive','sum-spell-dc','sum-spell-atk'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.textContent = '—';
     });
+    const tempWrap = document.getElementById('sum-hp-temp-wrap');
+    if (tempWrap) tempWrap.style.display = 'none';
     ABILITIES.forEach(ab => {
       const m = document.getElementById('sum-mod-' + ab);
       const s = document.getElementById('sum-score-' + ab);
@@ -817,7 +818,12 @@ function renderSummaryCard(char) {
   const hpMax = calcHPMax(char);
   document.getElementById('sum-hp').textContent = char.hpCurrent ?? hpMax ?? '—';
   document.getElementById('sum-hp-max').textContent = hpMax ?? '—';
-  document.getElementById('sum-hp-temp').textContent = char.hpTemp || 0;
+  const tempWrap = document.getElementById('sum-hp-temp-wrap');
+  if (tempWrap) {
+    const hasTemp = (char.hpTemp || 0) > 0;
+    tempWrap.style.display = hasTemp ? '' : 'none';
+    document.getElementById('sum-hp-temp').textContent = char.hpTemp || 0;
+  }
   document.getElementById('sum-ac').textContent = calcAC(char);
   document.getElementById('sum-init').textContent = fmtBonus(abilityMod(abilityScore(char, 'dex')));
   document.getElementById('sum-speed').textContent = (char.speed || 30) + '\'';
@@ -989,7 +995,6 @@ function readCharFromForm(char) {
   char.tools     = document.getElementById('f-tools')?.value || '';
 
   char.hpMaxOverride = document.getElementById('f-hp-max-override')?.value ? parseInt(document.getElementById('f-hp-max-override').value) : null;
-  char.hpTemp    = parseInt(document.getElementById('f-hp-temp')?.value) || 0;
   char.acMode    = document.getElementById('f-ac-mode')?.value || 'auto';
   char.acManual  = parseInt(document.getElementById('f-ac-manual')?.value) || 10;
   char.armorType = document.getElementById('f-armor-type')?.value || 'none';
@@ -1239,6 +1244,34 @@ function initEventHandlers() {
     saveAll();
     updateCombatDerivedUI(char);
     renderSummaryCard(char);
+  });
+
+  document.getElementById('btn-set-temp')?.addEventListener('click', () => {
+    const char = getActive();
+    if (!char) return;
+    const val = parseInt(document.getElementById('f-hp-temp-quick')?.value) || 0;
+    char.hpTemp = Math.max(0, val);
+    document.getElementById('f-hp-temp-quick').value = '';
+    saveAll();
+    renderSummaryCard(char);
+  });
+
+  document.getElementById('btn-use-hd-sum')?.addEventListener('click', () => {
+    const char = getActive();
+    if (!char) return;
+    const used = parseInt(char.hdUsed) || 0;
+    const total = totalLevel(char);
+    if (used >= total) { alert('No hit dice remaining.'); return; }
+    const die = CLASS_DATA[char.classes[0]?.name?.toLowerCase()]?.hitDie || 8;
+    const conMod = abilityMod(abilityScore(char, 'con'));
+    const roll = Math.floor(Math.random() * die) + 1;
+    const healed = roll + conMod;
+    const hpMax = calcHPMax(char) || 999;
+    char.hdUsed = used + 1;
+    char.hpCurrent = Math.min((char.hpCurrent || 0) + Math.max(1, healed), hpMax);
+    saveAll();
+    renderSheet();
+    alert(`Rolled 1d${die} (${roll}) + ${conMod} CON = ${Math.max(1, healed)} HP healed.`);
   });
 
   document.getElementById('btn-use-hd')?.addEventListener('click', () => {

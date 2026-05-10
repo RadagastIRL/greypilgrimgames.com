@@ -304,15 +304,21 @@
     #conditions-active .conditions-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
     .cond-chip { font-size: 0.68rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 0.15rem 0.45rem; color: var(--text-muted); }
 
-    /* ── HP quick controls ── */
-    .hp-quick { display: flex; align-items: center; gap: 0.4rem; }
-    .hp-delta-input { width: 55px; text-align: center; font-size: 0.85rem; padding: 0.25rem; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 5px; }
-    .hp-delta-btn { font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.5rem; border: 1px solid var(--border); border-radius: 5px; cursor: pointer; background: var(--surface2); color: var(--text); }
+    /* ── HP quick controls (summary card) ── */
+    .hp-current-row { display: flex; align-items: baseline; gap: 0.3rem; margin-bottom: 0.5rem; }
+    .hp-big { font-size: 2rem; font-weight: 700; color: var(--gold); line-height: 1; }
+    .hp-sep { font-size: 1.1rem; color: var(--text-muted); }
+    .hp-max { font-size: 1.1rem; font-weight: 600; color: var(--text-muted); }
+    .hp-temp-badge { font-size: 0.75rem; font-weight: 700; color: #27ae60; background: rgba(39,174,96,0.12); border-radius: 4px; padding: 0.1rem 0.35rem; margin-left: 0.3rem; }
+    .hp-controls { display: flex; align-items: center; gap: 0.4rem; }
+    .hp-delta-input { width: 80px; text-align: center; font-size: 0.88rem; padding: 0.3rem 0.4rem; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 5px; font-family: var(--font-ui); }
+    .hp-delta-btn { font-family: var(--font-ui); font-size: 0.78rem; font-weight: 700; padding: 0.3rem 0.6rem; border: 1px solid var(--border); border-radius: 5px; cursor: pointer; background: var(--surface2); color: var(--text); flex: 1; transition: background 0.12s, color 0.12s; }
     .hp-delta-btn.heal { border-color: #27ae60; color: #27ae60; }
     .hp-delta-btn.heal:hover { background: #27ae60; color: #fff; }
     .hp-delta-btn.dmg { border-color: #c0392b; color: #c0392b; }
     .hp-delta-btn.dmg:hover { background: #c0392b; color: #fff; }
-    #current-hp-display { font-size: 1.5rem; font-weight: 700; color: var(--gold); min-width: 2.5rem; text-align: center; }
+    .hp-delta-btn.temp { border-color: #2980b9; color: #2980b9; }
+    .hp-delta-btn.temp:hover { background: #2980b9; color: #fff; }
 
     /* ── Print ── */
     @media print {
@@ -519,25 +525,17 @@
       <!-- Tab: Combat -->
       <div class="tab-panel" id="tab-combat">
         <div class="section-heading">Hit Points</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.6rem;">Use the <strong>Damage</strong> and <strong>Heal</strong> buttons in the summary panel (right) to track current HP during play.</div>
         <div class="field-grid cols-3">
-          <div class="field"><label>HP Max <span id="hp-max-auto-note" style="font-weight:400;text-transform:none;">(auto)</span></label>
-            <div style="display:flex;gap:0.4rem;align-items:center;">
-              <input type="number" id="f-hp-max-override" placeholder="Auto" style="width:70px;">
-              <span style="font-size:0.72rem;color:var(--text-muted);">Override</span>
-            </div>
-            <div style="font-size:0.78rem;color:var(--gold);font-weight:700;" id="hp-max-display">—</div>
+          <div class="field"><label>HP Max (auto-calculated)</label>
+            <div style="font-size:1.1rem;color:var(--gold);font-weight:700;" id="hp-max-display">—</div>
+          </div>
+          <div class="field"><label>HP Max Override</label>
+            <input type="number" id="f-hp-max-override" placeholder="Leave blank for auto" style="">
           </div>
           <div class="field"><label>Current HP</label>
-            <div class="hp-row">
-              <div id="current-hp-display">—</div>
-            </div>
-            <div class="hp-quick" style="margin-top:0.4rem;">
-              <input type="number" class="hp-delta-input" id="hp-delta" placeholder="±" min="0">
-              <button class="hp-delta-btn heal" id="btn-heal">Heal</button>
-              <button class="hp-delta-btn dmg" id="btn-damage">Damage</button>
-            </div>
+            <div style="font-size:1.1rem;color:var(--gold);font-weight:700;" id="current-hp-display">—</div>
           </div>
-          <div class="field"><label>Temporary HP</label><input type="number" id="f-hp-temp" min="0" placeholder="0"></div>
         </div>
 
         <div class="section-heading" style="margin-top:1rem;">Defenses &amp; Movement</div>
@@ -751,19 +749,21 @@
 
     <div>
       <div class="summary-section-label">Hit Points</div>
-      <div class="summary-stat-row">
-        <div class="summary-stat">
-          <div class="val" id="sum-hp">—</div>
-          <div class="lbl">Current</div>
-        </div>
-        <div class="summary-stat">
-          <div class="val" id="sum-hp-max">—</div>
-          <div class="lbl">Max</div>
-        </div>
-        <div class="summary-stat">
-          <div class="val" id="sum-hp-temp">—</div>
-          <div class="lbl">Temp</div>
-        </div>
+      <div class="hp-current-row">
+        <span id="sum-hp" class="hp-big">—</span>
+        <span class="hp-sep">/</span>
+        <span id="sum-hp-max" class="hp-max">—</span>
+        <span class="hp-temp-badge" id="sum-hp-temp-wrap" style="display:none;">+<span id="sum-hp-temp">0</span> temp</span>
+      </div>
+      <div class="hp-controls">
+        <input type="number" id="hp-delta" class="hp-delta-input" placeholder="amount" min="0">
+        <button class="hp-delta-btn dmg" id="btn-damage">Damage</button>
+        <button class="hp-delta-btn heal" id="btn-heal">Heal</button>
+      </div>
+      <div class="hp-controls" style="margin-top:0.3rem;">
+        <input type="number" id="f-hp-temp-quick" class="hp-delta-input" placeholder="temp HP" min="0">
+        <button class="hp-delta-btn temp" id="btn-set-temp">Set Temp</button>
+        <button class="bar-btn" id="btn-use-hd-sum" style="font-size:0.72rem;padding:0.25rem 0.5rem;flex:1;">Use Hit Die</button>
       </div>
     </div>
 
