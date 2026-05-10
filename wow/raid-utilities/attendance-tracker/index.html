@@ -7,53 +7,6 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root, [data-theme="light"] {
-      --bg:         #f0ece2;
-      --surface:    #faf7f2;
-      --surface2:   #e8e3d8;
-      --border:     #cfc9bc;
-      --text:       #2c2416;
-      --text-muted: #7a6e5c;
-      --accent:     #7a5a10;
-      --accent-dim: #a07828;
-      --member:     #2d7a2d;
-      --pug:        #8a5a00;
-      --danger:     #a02020;
-      --shadow:     rgba(0,0,0,0.08);
-      --font:       'Georgia', serif;
-      --font-ui:    system-ui, sans-serif;
-    }
-
-    [data-theme="dark"] {
-      --bg:         #0d1117;
-      --surface:    #161b22;
-      --surface2:   #21262d;
-      --border:     #30363d;
-      --text:       #e6edf3;
-      --text-muted: #8b949e;
-      --accent:     #f0c040;
-      --accent-dim: #a07c18;
-      --member:     #3fb950;
-      --pug:        #d29922;
-      --danger:     #f85149;
-      --shadow:     rgba(0,0,0,0.4);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      [data-theme="os"] {
-        --bg:#0d1117; --surface:#161b22; --surface2:#21262d; --border:#30363d;
-        --text:#e6edf3; --text-muted:#8b949e; --accent:#f0c040; --accent-dim:#a07c18;
-        --member:#3fb950; --pug:#d29922; --danger:#f85149; --shadow:rgba(0,0,0,0.4);
-      }
-    }
-    @media (prefers-color-scheme: light) {
-      [data-theme="os"] {
-        --bg:#f0ece2; --surface:#faf7f2; --surface2:#e8e3d8; --border:#cfc9bc;
-        --text:#2c2416; --text-muted:#7a6e5c; --accent:#7a5a10; --accent-dim:#a07828;
-        --member:#2d7a2d; --pug:#8a5a00; --danger:#a02020; --shadow:rgba(0,0,0,0.08);
-      }
-    }
-
     body {
       background: var(--bg);
       color: var(--text);
@@ -434,6 +387,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180"    href="/assets/icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/css/theme.css">
 </head>
 <body>
 
@@ -1549,18 +1503,6 @@ function updateSyncMeta() {
 }
 
 // ════════════════════════════════════════════════════════
-// THEME
-// ════════════════════════════════════════════════════════
-function setTheme(t) {
-  document.documentElement.dataset.theme = t;
-  localStorage.setItem('gpg-wow-theme', t);
-  document.querySelectorAll('.theme-bar button')
-    .forEach(b => b.classList.toggle('active', b.dataset.theme === t));
-}
-document.querySelectorAll('.theme-bar button').forEach(b =>
-  b.addEventListener('click', () => setTheme(b.dataset.theme))
-);
-setTheme(localStorage.getItem('gpg-wow-theme') || 'dark');
 
 // ════════════════════════════════════════════════════════
 // INIT
@@ -1572,5 +1514,6 @@ if (state.config.wclClientId && state.config.guildName) {
   showSetup();
 }
 </script>
+  <script src="/assets/js/theme.js" defer></script>
 </body>
 </html>

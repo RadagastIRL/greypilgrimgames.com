@@ -890,6 +890,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180"    href="/assets/icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/css/theme.css">
 </head>
 <body>
 
@@ -1619,15 +1620,6 @@ function loadPresetIntoBuilder(p) {
 // THEME
 // ═══════════════════════════════════════════════════════════
 
-function setTheme(theme) {
-  document.documentElement.dataset.theme = theme;
-  localStorage.setItem('gpg-wow-theme', theme);
-  document.querySelectorAll('#theme-bar button').forEach(b =>
-    b.classList.toggle('active', b.dataset.theme === theme));
-}
-document.querySelectorAll('#theme-bar button').forEach(b =>
-  b.addEventListener('click', () => setTheme(b.dataset.theme)));
-setTheme(localStorage.getItem('gpg-wow-theme') || 'dark');
 
 // ═══════════════════════════════════════════════════════════
 // UTIL
@@ -1682,5 +1674,6 @@ if (!localStorage.getItem('gpg-dice-roller-help-seen')) openHelp();
 <footer class="kofi-footer">
   <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener">☕ Support me on Ko-fi</a>
 </footer>
+  <script src="/assets/js/theme.js" defer></script>
 </body>
 </html>

@@ -7,61 +7,6 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root,
-    [data-theme="light"] {
-      --bg:           #f0ece2;
-      --surface:      #faf7f2;
-      --surface2:     #e8e3d8;
-      --border:       #cfc9bc;
-      --text:         #2c2416;
-      --text-muted:   #7a6e5c;
-      --gold:         #7a5a10;
-      --gold-dim:     #a07828;
-      --shadow:       rgba(0,0,0,0.08);
-      --radius: 8px;
-      --font: 'Georgia', serif;
-      --font-ui: system-ui, sans-serif;
-    }
-
-    [data-theme="dark"] {
-      --bg:           #0e0e12;
-      --surface:      #1a1a24;
-      --surface2:     #23232f;
-      --border:       #33334a;
-      --text:         #d4c4a8;
-      --text-muted:   #7a7090;
-      --gold:         #c8a84b;
-      --gold-dim:     #8a7232;
-      --shadow:       rgba(0,0,0,0.5);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      [data-theme="os"] {
-        --bg:           #0e0e12;
-        --surface:      #1a1a24;
-        --surface2:     #23232f;
-        --border:       #33334a;
-        --text:         #d4c4a8;
-        --text-muted:   #7a7090;
-        --gold:         #c8a84b;
-        --gold-dim:     #8a7232;
-        --shadow:       rgba(0,0,0,0.5);
-      }
-    }
-    @media (prefers-color-scheme: light) {
-      [data-theme="os"] {
-        --bg:           #f0ece2;
-        --surface:      #faf7f2;
-        --surface2:     #e8e3d8;
-        --border:       #cfc9bc;
-        --text:         #2c2416;
-        --text-muted:   #7a6e5c;
-        --gold:         #7a5a10;
-        --gold-dim:     #a07828;
-        --shadow:       rgba(0,0,0,0.08);
-      }
-    }
-
     body {
       background: var(--bg);
       color: var(--text);
@@ -240,6 +185,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180"    href="/assets/icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/css/theme.css">
 </head>
 <body>
 
@@ -281,17 +227,6 @@
   <span>Enjoying the tools? <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener">Buy me a coffee</a> — it helps with hosting and keeps new tools in development.</span>
 </div>
 
-<script>
-  const themeButtons = document.querySelectorAll('#theme-bar button');
-
-  function setTheme(theme) {
-    document.documentElement.dataset.theme = theme;
-    localStorage.setItem('gpg-wow-theme', theme);
-    themeButtons.forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
-  }
-
-  themeButtons.forEach(btn => btn.addEventListener('click', () => setTheme(btn.dataset.theme)));
-  setTheme(localStorage.getItem('gpg-wow-theme') || 'light');
-</script>
+  <script src="/assets/js/theme.js" defer></script>
 </body>
 </html>

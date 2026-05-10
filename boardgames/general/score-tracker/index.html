@@ -7,54 +7,6 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root, [data-theme="light"] {
-      --bg:           #f0ece2;
-      --surface:      #faf7f2;
-      --surface2:     #e8e3d8;
-      --border:       #cfc9bc;
-      --text:         #2c2416;
-      --text-muted:   #7a6e5c;
-      --gold:         #7a5a10;
-      --gold-dim:     #a07828;
-      --shadow:       rgba(0,0,0,0.08);
-      --correct:      #d4edda;
-      --correct-text: #1a6b2e;
-      --radius: 10px;
-      --font: 'Georgia', serif;
-      --font-ui: system-ui, sans-serif;
-    }
-
-    [data-theme="dark"] {
-      --bg:           #0e0e12;
-      --surface:      #1a1a24;
-      --surface2:     #23232f;
-      --border:       #33334a;
-      --text:         #d4c4a8;
-      --text-muted:   #7a7090;
-      --gold:         #c8a84b;
-      --gold-dim:     #8a7232;
-      --shadow:       rgba(0,0,0,0.5);
-      --correct:      #3a7d44;
-      --correct-text: #6fcf80;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      [data-theme="os"] {
-        --bg: #0e0e12; --surface: #1a1a24; --surface2: #23232f;
-        --border: #33334a; --text: #d4c4a8; --text-muted: #7a7090;
-        --gold: #c8a84b; --gold-dim: #8a7232; --shadow: rgba(0,0,0,0.5);
-        --correct: #3a7d44; --correct-text: #6fcf80;
-      }
-    }
-    @media (prefers-color-scheme: light) {
-      [data-theme="os"] {
-        --bg: #f0ece2; --surface: #faf7f2; --surface2: #e8e3d8;
-        --border: #cfc9bc; --text: #2c2416; --text-muted: #7a6e5c;
-        --gold: #7a5a10; --gold-dim: #a07828; --shadow: rgba(0,0,0,0.08);
-        --correct: #d4edda; --correct-text: #1a6b2e;
-      }
-    }
-
     body {
       background: var(--bg);
       color: var(--text);
@@ -678,6 +630,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180"    href="/assets/icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/css/theme.css">
 </head>
 <body>
 
@@ -1408,16 +1361,6 @@ document.getElementById('full-reset-btn').addEventListener('click', () => {
 // THEME
 // ═══════════════════════════════════════════════════════════
 
-function setTheme(theme) {
-  document.documentElement.dataset.theme = theme;
-  localStorage.setItem('gpg-wow-theme', theme);
-  document.querySelectorAll('#theme-bar button').forEach(b =>
-    b.classList.toggle('active', b.dataset.theme === theme));
-}
-
-document.querySelectorAll('#theme-bar button').forEach(b =>
-  b.addEventListener('click', () => setTheme(b.dataset.theme)));
-setTheme(localStorage.getItem('gpg-wow-theme') || 'light');
 
 // ═══════════════════════════════════════════════════════════
 // EVENT WIRING
@@ -1520,5 +1463,6 @@ if (!localStorage.getItem('gpg-score-tracker-help-seen')) openHelp();
 <footer class="kofi-footer">
   <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener">☕ Support me on Ko-fi</a>
 </footer>
+  <script src="/assets/js/theme.js" defer></script>
 </body>
 </html>

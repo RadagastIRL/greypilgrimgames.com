@@ -1,0 +1,102 @@
+/*
+ * theme.css — Grey Pilgrim Games shared design tokens
+ *
+ * Provides:
+ *  • CSS reset
+ *  • Standard parchment palette (light / dark / OS-preference)
+ *  • #theme-bar toggle component
+ *
+ * Pages with a custom palette (dice roller, Star Realms, etc.) still link
+ * this file for the reset and component styles, then override :root in their
+ * own <style> block — later declarations win at equal specificity.
+ */
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Standard parchment palette ── */
+:root,
+[data-theme="light"] {
+  --bg:         #f0ece2;
+  --surface:    #faf7f2;
+  --surface2:   #e8e3d8;
+  --border:     #cfc9bc;
+  --text:       #2c2416;
+  --text-muted: #7a6e5c;
+  --gold:       #7a5a10;
+  --gold-dim:   #a07828;
+  --shadow:     rgba(0, 0, 0, 0.08);
+  --radius:     8px;
+  --font:       'Georgia', serif;
+  --font-ui:    system-ui, sans-serif;
+}
+
+[data-theme="dark"] {
+  --bg:         #0e0e12;
+  --surface:    #1a1a24;
+  --surface2:   #23232f;
+  --border:     #33334a;
+  --text:       #d4c4a8;
+  --text-muted: #7a7090;
+  --gold:       #c8a84b;
+  --gold-dim:   #8a7232;
+  --shadow:     rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-theme="os"] {
+    --bg:         #0e0e12;
+    --surface:    #1a1a24;
+    --surface2:   #23232f;
+    --border:     #33334a;
+    --text:       #d4c4a8;
+    --text-muted: #7a7090;
+    --gold:       #c8a84b;
+    --gold-dim:   #8a7232;
+    --shadow:     rgba(0, 0, 0, 0.5);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  [data-theme="os"] {
+    --bg:         #f0ece2;
+    --surface:    #faf7f2;
+    --surface2:   #e8e3d8;
+    --border:     #cfc9bc;
+    --text:       #2c2416;
+    --text-muted: #7a6e5c;
+    --gold:       #7a5a10;
+    --gold-dim:   #a07828;
+    --shadow:     rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* ── Theme-bar toggle component ── */
+#theme-bar {
+  display: inline-flex;
+  gap: 0.25rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 0.25rem;
+}
+
+#theme-bar button {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  border-radius: 16px;
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+#theme-bar button.active {
+  background: var(--gold);
+  color: var(--surface);
+}

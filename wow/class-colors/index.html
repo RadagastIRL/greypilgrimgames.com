@@ -7,91 +7,6 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ── Light theme (default) ── */
-    :root,
-    [data-theme="light"] {
-      --bg:           #f0ece2;
-      --surface:      #faf7f2;
-      --surface2:     #e8e3d8;
-      --border:       #cfc9bc;
-      --text:         #2c2416;
-      --text-muted:   #7a6e5c;
-      --gold:         #7a5a10;
-      --gold-dim:     #a07828;
-      --correct:      #d4edda;
-      --correct-text: #1a6b2e;
-      --wrong:        #f8d7da;
-      --wrong-text:   #8b1a1a;
-      --invalid:      #fff3cd;
-      --invalid-text: #7a5800;
-      --swatch-ring:  rgba(0,0,0,0.15);
-      --shadow:       rgba(0,0,0,0.08);
-      --radius: 8px;
-      --font: 'Georgia', serif;
-      --font-ui: system-ui, sans-serif;
-    }
-
-    /* ── Dark theme ── */
-    [data-theme="dark"] {
-      --bg:           #0e0e12;
-      --surface:      #1a1a24;
-      --surface2:     #23232f;
-      --border:       #33334a;
-      --text:         #d4c4a8;
-      --text-muted:   #7a7090;
-      --gold:         #c8a84b;
-      --gold-dim:     #8a7232;
-      --correct:      #3a7d44;
-      --correct-text: #6fcf80;
-      --wrong:        #7d3a3a;
-      --wrong-text:   #cf6f6f;
-      --invalid:      #4a3800;
-      --invalid-text: #f0c040;
-      --swatch-ring:  rgba(255,255,255,0.12);
-      --shadow:       rgba(0,0,0,0.5);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      [data-theme="os"] {
-        --bg:           #0e0e12;
-        --surface:      #1a1a24;
-        --surface2:     #23232f;
-        --border:       #33334a;
-        --text:         #d4c4a8;
-        --text-muted:   #7a7090;
-        --gold:         #c8a84b;
-        --gold-dim:     #8a7232;
-        --correct:      #3a7d44;
-        --correct-text: #6fcf80;
-        --wrong:        #7d3a3a;
-        --wrong-text:   #cf6f6f;
-        --invalid:      #4a3800;
-        --invalid-text: #f0c040;
-        --swatch-ring:  rgba(255,255,255,0.12);
-        --shadow:       rgba(0,0,0,0.5);
-      }
-    }
-    @media (prefers-color-scheme: light) {
-      [data-theme="os"] {
-        --bg:           #f0ece2;
-        --surface:      #faf7f2;
-        --surface2:     #e8e3d8;
-        --border:       #cfc9bc;
-        --text:         #2c2416;
-        --text-muted:   #7a6e5c;
-        --gold:         #7a5a10;
-        --gold-dim:     #a07828;
-        --correct:      #d4edda;
-        --correct-text: #1a6b2e;
-        --wrong:        #f8d7da;
-        --wrong-text:   #8b1a1a;
-        --invalid:      #fff3cd;
-        --invalid-text: #7a5800;
-        --swatch-ring:  rgba(0,0,0,0.15);
-        --shadow:       rgba(0,0,0,0.08);
-      }
-    }
-
     body {
       background: var(--bg);
       color: var(--text);
@@ -694,6 +609,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180"    href="/assets/icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/css/theme.css">
 </head>
 <body>
 
@@ -873,66 +789,6 @@ let answerHistory     = []; // true = correct, false = wrong
 // ── Elements ──────────────────────────────────────────────────────────────
 const gametypeBtns = document.querySelectorAll('#gametype-bar button');
 const modeButtons  = document.querySelectorAll('#mode-bar button');
-const themeButtons = document.querySelectorAll('#theme-bar button');
-const timerWrap    = document.getElementById('timer-wrap');
-const timerCount   = document.getElementById('timer-count');
-const timerBarFill = document.getElementById('timer-bar-fill');
-const scoreCorrect = document.getElementById('score-correct');
-const scoreWrong   = document.getElementById('score-wrong');
-const scoreStreak  = document.getElementById('score-streak');
-const streakDisp   = document.getElementById('streak-display');
-const qLabel       = document.getElementById('question-label');
-const colorSwatch  = document.getElementById('color-swatch');
-const classNameEl  = document.getElementById('class-name');
-const typeArea     = document.getElementById('type-area');
-const classInput   = document.getElementById('class-input');
-const submitBtn    = document.getElementById('submit-btn');
-const skipBtn      = document.getElementById('skip-btn');
-const hintToggle   = document.getElementById('hint-toggle');
-const hintBox      = document.getElementById('hint-box');
-const colorGrid    = document.getElementById('color-grid');
-const feedbackEl   = document.getElementById('feedback');
-const nextBtn      = document.getElementById('next-btn');
-const resetBtn     = document.getElementById('reset-btn');
-const refToggle    = document.getElementById('ref-toggle');
-const refTable     = document.getElementById('ref-table');
-const splash       = document.getElementById('splash');
-
-// ── Helpers ───────────────────────────────────────────────────────────────
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function normalize(s) {
-  return s.trim().toLowerCase().replace(/[^a-z]/g, '');
-}
-
-function refillDeck() {
-  deck = shuffle(CLASSES.map(c => ({ ...c })));
-}
-
-function pickQuestion() {
-  if (!deck.length) refillDeck();
-  current = deck.pop();
-  qtype = mode === 'mixed'
-    ? (Math.random() < 0.5 ? 'color-to-class' : 'class-to-color')
-    : mode;
-}
-
-// ── Theme ─────────────────────────────────────────────────────────────────
-function setTheme(theme) {
-  document.documentElement.dataset.theme = theme;
-  localStorage.setItem('gpg-wow-theme', theme);
-  themeButtons.forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
-}
-
-themeButtons.forEach(btn => btn.addEventListener('click', () => setTheme(btn.dataset.theme)));
-setTheme(localStorage.getItem('gpg-wow-theme') || 'light');
 
 // ── Timer ─────────────────────────────────────────────────────────────────
 function startTimer() {
@@ -1329,5 +1185,6 @@ if (!localStorage.getItem('gpg-class-colors-help-seen')) openHowTo();
 <footer class="kofi-footer">
   <a href="https://ko-fi.com/radagastirl" target="_blank" rel="noopener">☕ Support me on Ko-fi</a>
 </footer>
+  <script src="/assets/js/theme.js" defer></script>
 </body>
 </html>
