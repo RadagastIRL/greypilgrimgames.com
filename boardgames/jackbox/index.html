@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jackbox Game Picker — Grey Pilgrim Games</title>
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 0 0 4rem;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ── Nav ── */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    nav a { font-family: var(--font-ui); font-size: 0.8rem; color: var(--text-muted); text-decoration: none; }
+    nav a:hover { color: var(--gold); }
+    #theme-bar { display: inline-flex; gap: 0.25rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 0.25rem; }
+    #theme-bar button { font-family: var(--font-ui); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; background: transparent; color: var(--text-muted); border: none; border-radius: 16px; padding: 0.3rem 0.75rem; cursor: pointer; transition: background 0.15s, color 0.15s; }
+    #theme-bar button.active { background: var(--gold); color: var(--surface); }
+
+    /* ── Page header ── */
+    #page-header {
+      padding: 1.5rem 1.5rem 1rem;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    #page-header h1 { font-size: 1.6rem; color: var(--gold); margin-bottom: 0.25rem; }
+    #page-header p { font-family: var(--font-ui); font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* ── Layout ── */
+    #app-layout {
+      display: grid;
+      grid-template-columns: 290px 1fr;
+      gap: 1.25rem;
+      align-items: start;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ── Filter sidebar ── */
+    #filters {
+      position: sticky;
+      top: 57px;
+      max-height: calc(100vh - 70px);
+      overflow-y: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      scrollbar-width: thin;
+    }
+
+    .filter-section { display: flex; flex-direction: column; gap: 0.5rem; }
+    .filter-label {
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Player count filter */
+    .player-mode-row {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .player-mode-btn {
+      flex: 1;
+      font-family: var(--font-ui);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.3rem 0;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s, border-color 0.12s;
+      text-align: center;
+    }
+    .player-mode-btn.active { background: var(--gold); color: var(--surface); border-color: var(--gold); }
+
+    .player-inputs { display: flex; gap: 0.4rem; align-items: center; }
+    .player-input {
+      width: 70px;
+      font-family: var(--font-ui);
+      font-size: 0.88rem;
+      padding: 0.35rem 0.4rem;
+      text-align: center;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    .player-input:focus { outline: none; border-color: var(--gold-dim); }
+    .player-sep { font-family: var(--font-ui); font-size: 0.8rem; color: var(--text-muted); }
+    #player-range-inputs { display: none; }
+    #player-exact-inputs { display: flex; }
+
+    .player-hint {
+      font-family: var(--font-ui);
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      opacity: 0.75;
+    }
+
+    /* Category chips */
+    .chip-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .chip {
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.22rem 0.55rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s, border-color 0.12s;
+      user-select: none;
+    }
+    .chip:hover { border-color: var(--gold-dim); color: var(--text); }
+    .chip.active { background: var(--gold); color: var(--surface); border-color: var(--gold); }
+
+    /* Pack checkboxes */
+    .pack-check-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.25rem 0.5rem;
+    }
+    .pack-check-label {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: var(--font-ui);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.1rem 0;
+    }
+    .pack-check-label input[type=checkbox] { accent-color: var(--gold); width: 13px; height: 13px; flex-shrink: 0; }
+    .pack-check-label:hover { color: var(--text); }
+
+    /* Options toggles */
+    .option-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-ui);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.1rem 0;
+    }
+    .option-row input[type=checkbox] { accent-color: var(--gold); width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
+
+    /* Sort */
+    #sort-select {
+      width: 100%;
+      font-family: var(--font-ui);
+      font-size: 0.82rem;
+      padding: 0.35rem 0.5rem;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* Result count + clear */
+    #filter-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.25rem;
+      border-top: 1px solid var(--border);
+    }
+    #result-count { font-family: var(--font-ui); font-size: 0.78rem; color: var(--text-muted); }
+    #result-count strong { color: var(--gold); }
+    #btn-clear {
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    #btn-clear:hover { background: var(--border); color: var(--text); }
+
+    /* ── Results area ── */
+    #results { min-width: 0; }
+
+    #active-filter-bar {
+      font-family: var(--font-ui);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.85rem;
+      margin-bottom: 0.85rem;
+      display: none;
+    }
+    #active-filter-bar.visible { display: block; }
+    #active-filter-bar strong { color: var(--gold); }
+
+    #game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.85rem;
+    }
+
+    /* ── Game card ── */
+    .game-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      box-shadow: 0 1px 4px var(--shadow);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .game-card:hover { border-color: var(--gold-dim); box-shadow: 0 2px 10px var(--shadow); }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .card-badges { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+
+    .pack-badge {
+      font-family: var(--font-ui);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: var(--surface2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .pack-badge.standalone { background: rgba(180,140,60,0.12); color: var(--gold); border-color: var(--gold-dim); }
+    .pack-badge.naughty { background: rgba(192,57,43,0.1); color: #c0392b; border-color: rgba(192,57,43,0.25); }
+    .pack-badge.alternative { background: rgba(41,128,185,0.1); color: #2980b9; border-color: rgba(41,128,185,0.25); }
+    .pack-badge.pack-11 { background: rgba(142,68,173,0.1); color: #8e44ad; border-color: rgba(142,68,173,0.25); }
+
+    .adult-badge {
+      font-family: var(--font-ui);
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(192,57,43,0.1);
+      color: #c0392b;
+      border: 1px solid rgba(192,57,43,0.25);
+    }
+
+    .player-pill {
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .player-pill .player-num { color: var(--gold); }
+
+    .card-name {
+      font-family: var(--font-ui);
+      font-size: 0.97rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+    .cat-tag {
+      font-family: var(--font-ui);
+      font-size: 0.67rem;
+      font-weight: 600;
+      padding: 0.12rem 0.45rem;
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .card-desc {
+      font-family: var(--font-ui);
+      font-size: 0.79rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding-top: 0.35rem;
+      border-top: 1px solid var(--border);
+      font-family: var(--font-ui);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .card-footer-item { display: flex; align-items: center; gap: 0.25rem; }
+    .stream-badge { color: #27ae60; font-weight: 600; }
+    .stream-badge.high { color: #8e44ad; }
+    .family-badge { color: #2980b9; font-weight: 600; }
+    .platform-badge { font-style: italic; }
+
+    /* ── No results ── */
+    #no-results {
+      display: none;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+      font-family: var(--font-ui);
+    }
+    #no-results h3 { font-size: 1.1rem; color: var(--gold); margin-bottom: 0.5rem; }
+
+    /* ── Mobile filter toggle ── */
+    #mobile-filter-btn {
+      display: none;
+      font-family: var(--font-ui);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      margin: 0.75rem 0 0.5rem;
+      width: 100%;
+      text-align: left;
+    }
+    #mobile-filter-btn:hover { color: var(--text); }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      #app-layout { grid-template-columns: 1fr; }
+      #filters {
+        position: static;
+        max-height: none;
+        display: none;
+      }
+      #filters.open { display: flex; }
+      #mobile-filter-btn { display: block; }
+    }
+
+    @media (max-width: 560px) {
+      #game-grid { grid-template-columns: 1fr; }
+      nav { padding: 0.75rem 1rem; }
+      #page-header { padding: 1rem 1rem 0.75rem; }
+      #app-layout { padding: 0 1rem; }
+    }
+  </style>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png">
+</head>
+<body>
+
+<nav>
+  <a href="/boardgames/">← Board &amp; Tabletop Games</a>
+  <div id="theme-bar">
+    <button data-theme="light" class="active">Light</button>
+    <button data-theme="dark">Dark</button>
+    <button data-theme="os">OS</button>
+  </div>
+</nav>
+
+<div id="page-header">
+  <h1>Jackbox Game Picker</h1>
+  <p>Find the right game for your group — filter by player count, game type, and pack. Player count matching shows all games whose range <em>overlaps</em> your group size, not just exact matches.</p>
+</div>
+
+<div id="app-layout">
+
+  <!-- ── Filters ── -->
+  <button id="mobile-filter-btn" onclick="document.getElementById('filters').classList.toggle('open'); this.textContent = document.getElementById('filters').classList.contains('open') ? '▲ Hide Filters' : '▼ Show Filters';">▼ Show Filters</button>
+
+  <aside id="filters">
+
+    <div class="filter-section">
+      <div class="filter-label">Players</div>
+      <div class="player-mode-row">
+        <button class="player-mode-btn active" id="mode-exact" onclick="setPlayerMode('exact')">Exact count</button>
+        <button class="player-mode-btn" id="mode-range" onclick="setPlayerMode('range')">Range</button>
+      </div>
+      <div id="player-exact-inputs" class="player-inputs">
+        <input type="number" id="player-exact" class="player-input" placeholder="e.g. 6" min="1" max="100">
+      </div>
+      <div id="player-range-inputs" class="player-inputs">
+        <input type="number" id="player-min" class="player-input" placeholder="Min" min="1" max="100">
+        <span class="player-sep">to</span>
+        <input type="number" id="player-max" class="player-input" placeholder="Max" min="1" max="100">
+      </div>
+      <div class="player-hint" id="player-hint">Enter a number to see games that support that player count.</div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-label">Game Type</div>
+      <div class="chip-grid" id="category-chips"></div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-label">Pack / Source</div>
+      <div class="pack-check-grid" id="pack-checks"></div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-label">Options</div>
+      <label class="option-row">
+        <input type="checkbox" id="opt-audience"> Requires audience support
+      </label>
+      <label class="option-row">
+        <input type="checkbox" id="opt-family"> Has family-friendly mode
+      </label>
+      <label class="option-row">
+        <input type="checkbox" id="opt-stream"> Streamer-friendly only
+      </label>
+      <label class="option-row">
+        <input type="checkbox" id="opt-alternatives" checked> Include non-Jackbox alternatives
+      </label>
+      <label class="option-row">
+        <input type="checkbox" id="opt-naughty"> Show adult content (Naughty Pack)
+      </label>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-label">Sort by</div>
+      <select id="sort-select">
+        <option value="pack">Pack order (oldest first)</option>
+        <option value="pack-desc">Pack order (newest first)</option>
+        <option value="name">Name A–Z</option>
+        <option value="players-asc">Max players (low → high)</option>
+        <option value="players-desc">Max players (high → low)</option>
+      </select>
+    </div>
+
+    <div id="filter-footer">
+      <div id="result-count"><strong>—</strong> games</div>
+      <button id="btn-clear" onclick="clearFilters()">Clear all</button>
+    </div>
+
+  </aside>
+
+  <!-- ── Results ── -->
+  <div id="results">
+    <div id="active-filter-bar"></div>
+    <div id="game-grid"></div>
+    <div id="no-results">
+      <h3>No games found</h3>
+      <p>Try adjusting your filters — or clear them all to start over.</p>
+    </div>
+  </div>
+
+</div>
+
+<script src="/assets/js/theme.js" defer></script>
+<script>
+'use strict';
+
+const CATEGORIES = [
+  { id: 'trivia',           label: 'Trivia' },
+  { id: 'drawing',          label: 'Drawing' },
+  { id: 'fill-in-the-blank',label: 'Fill-in-the-Blank' },
+  { id: 'word',             label: 'Word' },
+  { id: 'social-deduction', label: 'Social Deduction' },
+  { id: 'bluffing',         label: 'Bluffing' },
+  { id: 'survey',           label: 'Survey / Poll' },
+  { id: 'cooperative',      label: 'Cooperative' },
+  { id: 'music',            label: 'Music' },
+  { id: 'action',           label: 'Action' },
+  { id: 'presentation',     label: 'Presentation' },
+  { id: 'guessing',         label: 'Guessing' },
+];
+
+const ALL_PACKS = [
+  'Pack 1','Pack 2','Pack 3','Pack 4','Pack 5','Pack 6',
+  'Pack 7','Pack 8','Pack 9','Pack 10','Pack 11',
+  'Standalone','Naughty Pack','Alternative',
+];
+
+let allGames = [];
+let state = {
+  playerMode: 'exact',
+  playerExact: '',
+  playerMin: '',
+  playerMax: '',
+  categories: [],
+  packs: [],
+  audience: false,
+  family: false,
+  stream: false,
+  alternatives: true,
+  naughty: false,
+  sort: 'pack',
+};
+
+// ── Build filter UI ──────────────────────────────────────────────────────────
+
+function buildCategoryChips() {
+  const wrap = document.getElementById('category-chips');
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.dataset.cat = cat.id;
+    btn.textContent = cat.label;
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('active');
+      if (btn.classList.contains('active')) {
+        state.categories.push(cat.id);
+      } else {
+        state.categories = state.categories.filter(c => c !== cat.id);
+      }
+      render();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function buildPackChecks() {
+  const wrap = document.getElementById('pack-checks');
+  ALL_PACKS.forEach(pack => {
+    const label = document.createElement('label');
+    label.className = 'pack-check-label';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.dataset.pack = pack;
+    cb.addEventListener('change', () => {
+      if (cb.checked) {
+        state.packs.push(pack);
+      } else {
+        state.packs = state.packs.filter(p => p !== pack);
+      }
+      render();
+    });
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(pack));
+    wrap.appendChild(label);
+  });
+}
+
+// ── Player mode toggle ───────────────────────────────────────────────────────
+
+function setPlayerMode(mode) {
+  state.playerMode = mode;
+  document.getElementById('mode-exact').classList.toggle('active', mode === 'exact');
+  document.getElementById('mode-range').classList.toggle('active', mode === 'range');
+  document.getElementById('player-exact-inputs').style.display = mode === 'exact' ? 'flex' : 'none';
+  document.getElementById('player-range-inputs').style.display = mode === 'range' ? 'flex' : 'none';
+  const hint = document.getElementById('player-hint');
+  hint.textContent = mode === 'exact'
+    ? 'Shows games whose player range includes this number.'
+    : 'Shows games whose player range overlaps with your range.';
+  render();
+}
+
+// ── Filtering ────────────────────────────────────────────────────────────────
+
+function applyFilters(games) {
+  let r = [...games];
+
+  // Player count
+  if (state.playerMode === 'exact' && state.playerExact !== '') {
+    const n = parseInt(state.playerExact);
+    if (!isNaN(n) && n > 0) {
+      r = r.filter(g => g.minPlayers <= n && g.maxPlayers >= n);
+    }
+  } else if (state.playerMode === 'range') {
+    const lo = parseInt(state.playerMin);
+    const hi = parseInt(state.playerMax);
+    const hasLo = !isNaN(lo) && lo > 0;
+    const hasHi = !isNaN(hi) && hi > 0;
+    if (hasLo || hasHi) {
+      const qMin = hasLo ? lo : 1;
+      const qMax = hasHi ? hi : 999;
+      if (qMin <= qMax) {
+        r = r.filter(g => g.minPlayers <= qMax && g.maxPlayers >= qMin);
+      }
+    }
+  }
+
+  // Categories (any match = show)
+  if (state.categories.length > 0) {
+    r = r.filter(g => state.categories.some(c => g.categories.includes(c)));
+  }
+
+  // Packs (any match = show)
+  if (state.packs.length > 0) {
+    r = r.filter(g => state.packs.includes(g.pack));
+  }
+
+  // Options
+  if (state.audience)      r = r.filter(g => g.audienceSupport);
+  if (state.family)        r = r.filter(g => g.hasFamilyFilter);
+  if (state.stream)        r = r.filter(g => g.streamerFriendly === 'very-high' || g.streamerFriendly === 'high');
+  if (!state.alternatives) r = r.filter(g => g.type === 'jackbox');
+  if (!state.naughty)      r = r.filter(g => !g.isNaughty);
+
+  // Sort
+  const packOrder = g => {
+    if (g.packNum !== null && g.packNum !== undefined) return g.packNum;
+    if (g.pack === 'Standalone') return 50;
+    if (g.pack === 'Naughty Pack') return 60;
+    if (g.pack === 'Alternative') return 70;
+    return 99;
+  };
+
+  switch (state.sort) {
+    case 'name':       r.sort((a,b) => a.name.localeCompare(b.name)); break;
+    case 'pack-desc':  r.sort((a,b) => packOrder(b) - packOrder(a)); break;
+    case 'players-asc':  r.sort((a,b) => a.maxPlayers - b.maxPlayers || a.minPlayers - b.minPlayers); break;
+    case 'players-desc': r.sort((a,b) => b.maxPlayers - a.maxPlayers || b.minPlayers - a.minPlayers); break;
+    default: r.sort((a,b) => packOrder(a) - packOrder(b));
+  }
+
+  return r;
+}
+
+// ── Card rendering ────────────────────────────────────────────────────────────
+
+function packBadgeClass(pack) {
+  if (pack === 'Standalone') return 'pack-badge standalone';
+  if (pack === 'Naughty Pack') return 'pack-badge naughty';
+  if (pack === 'Alternative') return 'pack-badge alternative';
+  if (pack === 'Pack 11') return 'pack-badge pack-11';
+  return 'pack-badge';
+}
+
+function packBadgeLabel(g) {
+  if (g.pack === 'Alternative') return '🌐 ' + (g.platform || 'Browser');
+  if (g.packYear) return g.pack + (g.pack !== 'Standalone' && g.pack !== 'Naughty Pack' ? ' · ' + g.packYear : ' · ' + g.packYear);
+  return g.pack;
+}
+
+function playerRangeLabel(g) {
+  if (g.minPlayers === g.maxPlayers) return g.minPlayers + ' players';
+  return g.minPlayers + '–' + g.maxPlayers + ' players';
+}
+
+function streamerLabel(level) {
+  if (level === 'very-high') return { cls: 'stream-badge', text: '📺 Best for streaming' };
+  if (level === 'high')      return { cls: 'stream-badge high', text: '📺 Stream-friendly' };
+  return null;
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderCard(g) {
+  const card = document.createElement('div');
+  card.className = 'game-card';
+
+  // Pack badge + player count
+  const top = document.createElement('div');
+  top.className = 'card-top';
+
+  const badges = document.createElement('div');
+  badges.className = 'card-badges';
+  badges.innerHTML = `<span class="${packBadgeClass(g.pack)}">${esc(packBadgeLabel(g))}</span>`;
+  if (g.isNaughty) badges.innerHTML += `<span class="adult-badge">18+</span>`;
+
+  const pill = document.createElement('div');
+  pill.className = 'player-pill';
+  const qn = state.playerMode === 'exact' && state.playerExact !== '' ? parseInt(state.playerExact) : null;
+  const qlo = state.playerMode === 'range' ? parseInt(state.playerMin) || null : null;
+  const qhi = state.playerMode === 'range' ? parseInt(state.playerMax) || null : null;
+  if (g.minPlayers === g.maxPlayers) {
+    pill.innerHTML = `<span class="player-num">${g.minPlayers}</span> player${g.minPlayers === 1 ? '' : 's'}`;
+  } else {
+    pill.innerHTML = `<span class="player-num">${g.minPlayers}–${g.maxPlayers}</span> players`;
+  }
+
+  top.appendChild(badges);
+  top.appendChild(pill);
+  card.appendChild(top);
+
+  // Name
+  const name = document.createElement('div');
+  name.className = 'card-name';
+  name.textContent = g.name;
+  card.appendChild(name);
+
+  // Category tags
+  if (g.categories && g.categories.length) {
+    const tags = document.createElement('div');
+    tags.className = 'card-tags';
+    g.categories.forEach(c => {
+      const cat = CATEGORIES.find(x => x.id === c);
+      const tag = document.createElement('span');
+      tag.className = 'cat-tag';
+      tag.textContent = cat ? cat.label : c;
+      tags.appendChild(tag);
+    });
+    card.appendChild(tags);
+  }
+
+  // Description
+  const desc = document.createElement('div');
+  desc.className = 'card-desc';
+  desc.textContent = g.description;
+  card.appendChild(desc);
+
+  // Footer
+  const footer = document.createElement('div');
+  footer.className = 'card-footer';
+
+  if (g.audienceSupport && g.audienceMax > 0) {
+    const aud = document.createElement('span');
+    aud.className = 'card-footer-item';
+    aud.textContent = '👥 Audience up to ' + (g.audienceMax >= 10000 ? '10,000' : g.audienceMax);
+    footer.appendChild(aud);
+  }
+
+  const sl = streamerLabel(g.streamerFriendly);
+  if (sl) {
+    const s = document.createElement('span');
+    s.className = 'card-footer-item ' + sl.cls;
+    s.textContent = sl.text;
+    footer.appendChild(s);
+  }
+
+  if (g.hasFamilyFilter) {
+    const f = document.createElement('span');
+    f.className = 'card-footer-item family-badge';
+    f.textContent = '👨‍👩‍👧 Family filter';
+    footer.appendChild(f);
+  }
+
+  if (footer.children.length) card.appendChild(footer);
+
+  return card;
+}
+
+// ── Main render ───────────────────────────────────────────────────────────────
+
+function render() {
+  const results = applyFilters(allGames);
+  const grid = document.getElementById('game-grid');
+  const noRes = document.getElementById('no-results');
+  const bar = document.getElementById('active-filter-bar');
+
+  grid.innerHTML = '';
+
+  if (results.length === 0) {
+    noRes.style.display = 'block';
+  } else {
+    noRes.style.display = 'none';
+    results.forEach(g => grid.appendChild(renderCard(g)));
+  }
+
+  // Result count
+  document.getElementById('result-count').innerHTML = `<strong>${results.length}</strong> game${results.length === 1 ? '' : 's'}`;
+
+  // Active filter summary
+  const parts = [];
+  if (state.playerMode === 'exact' && state.playerExact !== '') {
+    const n = parseInt(state.playerExact);
+    if (!isNaN(n)) parts.push(`<strong>${n} players</strong>`);
+  } else if (state.playerMode === 'range') {
+    const lo = parseInt(state.playerMin);
+    const hi = parseInt(state.playerMax);
+    if (!isNaN(lo) && !isNaN(hi)) parts.push(`<strong>${lo}–${hi} players</strong>`);
+    else if (!isNaN(lo)) parts.push(`<strong>${lo}+ players</strong>`);
+    else if (!isNaN(hi)) parts.push(`<strong>up to ${hi} players</strong>`);
+  }
+  if (state.categories.length > 0) parts.push(state.categories.map(c => CATEGORIES.find(x=>x.id===c)?.label || c).join(', '));
+  if (state.packs.length > 0) parts.push(state.packs.join(', '));
+  if (state.audience) parts.push('audience support');
+  if (state.family) parts.push('family-friendly mode');
+  if (state.stream) parts.push('streamer-friendly');
+  if (!state.alternatives) parts.push('Jackbox only');
+  if (state.naughty) parts.push('including adult');
+
+  if (parts.length > 0) {
+    bar.innerHTML = '🔍 Filtering by: ' + parts.join(' · ');
+    bar.classList.add('visible');
+  } else {
+    bar.classList.remove('visible');
+  }
+}
+
+// ── Clear filters ─────────────────────────────────────────────────────────────
+
+function clearFilters() {
+  state.playerExact = '';
+  state.playerMin = '';
+  state.playerMax = '';
+  state.categories = [];
+  state.packs = [];
+  state.audience = false;
+  state.family = false;
+  state.stream = false;
+  state.alternatives = true;
+  state.naughty = false;
+
+  document.getElementById('player-exact').value = '';
+  document.getElementById('player-min').value = '';
+  document.getElementById('player-max').value = '';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('#pack-checks input[type=checkbox]').forEach(cb => cb.checked = false);
+  document.getElementById('opt-audience').checked = false;
+  document.getElementById('opt-family').checked = false;
+  document.getElementById('opt-stream').checked = false;
+  document.getElementById('opt-alternatives').checked = true;
+  document.getElementById('opt-naughty').checked = false;
+  document.getElementById('sort-select').value = 'pack';
+  state.sort = 'pack';
+
+  render();
+}
+
+// ── Event wiring ──────────────────────────────────────────────────────────────
+
+function wireEvents() {
+  document.getElementById('player-exact').addEventListener('input', e => {
+    state.playerExact = e.target.value;
+    render();
+  });
+  document.getElementById('player-min').addEventListener('input', e => {
+    state.playerMin = e.target.value;
+    render();
+  });
+  document.getElementById('player-max').addEventListener('input', e => {
+    state.playerMax = e.target.value;
+    render();
+  });
+  document.getElementById('opt-audience').addEventListener('change', e => { state.audience = e.target.checked; render(); });
+  document.getElementById('opt-family').addEventListener('change', e => { state.family = e.target.checked; render(); });
+  document.getElementById('opt-stream').addEventListener('change', e => { state.stream = e.target.checked; render(); });
+  document.getElementById('opt-alternatives').addEventListener('change', e => { state.alternatives = e.target.checked; render(); });
+  document.getElementById('opt-naughty').addEventListener('change', e => { state.naughty = e.target.checked; render(); });
+  document.getElementById('sort-select').addEventListener('change', e => { state.sort = e.target.value; render(); });
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+async function init() {
+  try {
+    const resp = await fetch('data/games.json');
+    allGames = await resp.json();
+  } catch (e) {
+    allGames = [];
+    document.getElementById('no-results').style.display = 'block';
+    document.getElementById('no-results').innerHTML = '<h3>Could not load game data</h3><p>Try refreshing the page.</p>';
+    return;
+  }
+
+  buildCategoryChips();
+  buildPackChecks();
+  wireEvents();
+  render();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
