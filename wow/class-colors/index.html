@@ -824,6 +824,55 @@ let answerHistory     = []; // true = correct, false = wrong
 // ── Elements ──────────────────────────────────────────────────────────────
 const gametypeBtns = document.querySelectorAll('#gametype-bar button');
 const modeButtons  = document.querySelectorAll('#mode-bar button');
+const timerWrap    = document.getElementById('timer-wrap');
+const timerCount   = document.getElementById('timer-count');
+const timerBarFill = document.getElementById('timer-bar-fill');
+const scoreCorrect = document.getElementById('score-correct');
+const scoreWrong   = document.getElementById('score-wrong');
+const scoreStreak  = document.getElementById('score-streak');
+const streakDisp   = document.getElementById('streak-display');
+const qLabel       = document.getElementById('question-label');
+const colorSwatch  = document.getElementById('color-swatch');
+const classNameEl  = document.getElementById('class-name');
+const typeArea     = document.getElementById('type-area');
+const classInput   = document.getElementById('class-input');
+const submitBtn    = document.getElementById('submit-btn');
+const skipBtn      = document.getElementById('skip-btn');
+const hintToggle   = document.getElementById('hint-toggle');
+const hintBox      = document.getElementById('hint-box');
+const colorGrid    = document.getElementById('color-grid');
+const feedbackEl   = document.getElementById('feedback');
+const nextBtn      = document.getElementById('next-btn');
+const resetBtn     = document.getElementById('reset-btn');
+const refToggle    = document.getElementById('ref-toggle');
+const refTable     = document.getElementById('ref-table');
+const splash       = document.getElementById('splash');
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function normalize(s) {
+  return s.trim().toLowerCase().replace(/[^a-z]/g, '');
+}
+
+function refillDeck() {
+  deck = shuffle(CLASSES.map(c => ({ ...c })));
+}
+
+function pickQuestion() {
+  if (!deck.length) refillDeck();
+  current = deck.pop();
+  qtype = mode === 'mixed'
+    ? (Math.random() < 0.5 ? 'color-to-class' : 'class-to-color')
+    : mode;
+}
 
 // ── Timer ─────────────────────────────────────────────────────────────────
 function startTimer() {
@@ -1215,6 +1264,7 @@ buildRefTable();
 refillDeck();
 showQuestion();
 if (!localStorage.getItem('gpg-class-colors-help-seen')) openHowTo();
+</script>
 </script>
 
 <footer class="kofi-footer">
