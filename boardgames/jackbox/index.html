@@ -482,8 +482,8 @@
     <div class="filter-section">
       <div class="filter-label">Sort by</div>
       <select id="sort-select">
+        <option value="pack-desc" selected>Pack order (newest first)</option>
         <option value="pack">Pack order (oldest first)</option>
-        <option value="pack-desc">Pack order (newest first)</option>
         <option value="name">Name A–Z</option>
         <option value="players-asc">Max players (low → high)</option>
         <option value="players-desc">Max players (high → low)</option>
@@ -547,7 +547,7 @@ let state = {
   stream: false,
   alternatives: true,
   naughty: false,
-  sort: 'pack',
+  sort: 'pack-desc',
 };
 
 // ── Build filter UI ──────────────────────────────────────────────────────────
@@ -859,8 +859,8 @@ function clearFilters() {
   document.getElementById('opt-stream').checked = false;
   document.getElementById('opt-alternatives').checked = true;
   document.getElementById('opt-naughty').checked = false;
-  document.getElementById('sort-select').value = 'pack';
-  state.sort = 'pack';
+  document.getElementById('sort-select').value = 'pack-desc';
+  state.sort = 'pack-desc';
 
   render();
 }
