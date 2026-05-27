@@ -1,0 +1,178 @@
+[
+  {
+    "id": "base-game",
+    "name": "Base Game",
+    "year": 2019,
+    "platforms": ["pc", "console"],
+    "emoji": "🎮",
+    "notes": "PC launch Nov 5 2019. Console Edition launched Mar 26 2024. Anniversary updates added Black-and-White Ruffed Lemur (2nd), Red Deer (3rd), Collared Peccary (4th), and African Leopard (5th) as free additions."
+  },
+  {
+    "id": "deluxe-upgrade-pack",
+    "name": "Deluxe Upgrade Pack",
+    "year": 2019,
+    "platforms": ["pc", "console"],
+    "emoji": "⭐",
+    "notes": "PC: launched with the game Nov 2019, includes Komodo Dragon, Pygmy Hippopotamus, Thomson's Gazelle. Console: a different Deluxe Upgrade Pack was released Mar 2024 — it bundles the Wetlands Animal Pack and Southeast Asia Animal Pack animals (16 species) instead, with the original 3 PC deluxe animals not included."
+  },
+  {
+    "id": "arctic-pack",
+    "name": "Arctic Pack",
+    "year": 2019,
+    "platforms": ["pc", "console"],
+    "emoji": "🐻‍❄️",
+    "notes": "PC: Dec 2019. Console: included in Bundle 5, released Dec 3 2024."
+  },
+  {
+    "id": "south-america-pack",
+    "name": "South America Pack",
+    "year": 2020,
+    "platforms": ["pc", "console"],
+    "emoji": "🌿",
+    "notes": "PC: Apr 2020. Console: included in Bundle 6, released Jan 29 2025."
+  },
+  {
+    "id": "australia-pack",
+    "name": "Australia Pack",
+    "year": 2020,
+    "platforms": ["pc", "console"],
+    "emoji": "🦘",
+    "notes": "PC: Aug 2020. Console: included in Bundle 6, released Jan 29 2025."
+  },
+  {
+    "id": "aquatic-pack",
+    "name": "Aquatic Pack",
+    "year": 2020,
+    "platforms": ["pc", "console"],
+    "emoji": "🐧",
+    "notes": "PC: Dec 2020. Console: included in Bundle 2, released May 28 2024."
+  },
+  {
+    "id": "southeast-asia-animal-pack",
+    "name": "Southeast Asia Animal Pack",
+    "year": 2021,
+    "platforms": ["pc", "console"],
+    "emoji": "🌴",
+    "notes": "PC: Mar 30 2021. Console: bundled in the Deluxe Upgrade Pack (console version) at launch Mar 2024; not sold separately as a standalone DLC on console."
+  },
+  {
+    "id": "africa-pack",
+    "name": "Africa Pack",
+    "year": 2021,
+    "platforms": ["pc", "console"],
+    "emoji": "🦒",
+    "notes": "PC: Jun 2021. Console: included in Bundle 3, released Jul 30 2024."
+  },
+  {
+    "id": "north-america-animal-pack",
+    "name": "North America Animal Pack",
+    "year": 2021,
+    "platforms": ["pc", "console"],
+    "emoji": "🦌",
+    "notes": "PC: Sep 23 2021. Console: included in Bundle 1, released Mar 26 2024 (console launch day)."
+  },
+  {
+    "id": "europe-pack",
+    "name": "Europe Pack",
+    "year": 2021,
+    "platforms": ["pc", "console"],
+    "emoji": "🦔",
+    "notes": "PC: Dec 7 2021. Console: included in Bundle 1, released Mar 26 2024 (console launch day)."
+  },
+  {
+    "id": "wetlands-animal-pack",
+    "name": "Wetlands Animal Pack",
+    "year": 2022,
+    "platforms": ["pc", "console"],
+    "emoji": "🦦",
+    "notes": "PC: Mar 29 2022. Console: bundled in the Deluxe Upgrade Pack (console version) at launch Mar 2024; not sold separately as a standalone DLC on console."
+  },
+  {
+    "id": "conservation-pack",
+    "name": "Conservation Pack",
+    "year": 2022,
+    "platforms": ["pc", "console"],
+    "emoji": "🐎",
+    "notes": "PC: Jun 8 2022. Console: included in Bundle 5, released Dec 3 2024."
+  },
+  {
+    "id": "twilight-pack",
+    "name": "Twilight Pack",
+    "year": 2022,
+    "platforms": ["pc", "console"],
+    "emoji": "🦝",
+    "notes": "PC: Oct 8 2022. Console: included in Bundle 2, released May 28 2024."
+  },
+  {
+    "id": "grasslands-animal-pack",
+    "name": "Grasslands Animal Pack",
+    "year": 2022,
+    "platforms": ["pc", "console"],
+    "emoji": "🐺",
+    "notes": "PC: Dec 2 2022. Console: included in Bundle 3, released Jul 30 2024."
+  },
+  {
+    "id": "tropical-pack",
+    "name": "Tropical Pack",
+    "year": 2023,
+    "platforms": ["pc", "console"],
+    "emoji": "🦎",
+    "notes": "PC: Mar 23 2023. Console: included in Bundle 4, released Sep 25 2024."
+  },
+  {
+    "id": "arid-animal-pack",
+    "name": "Arid Animal Pack",
+    "year": 2023,
+    "platforms": ["pc", "console"],
+    "emoji": "🐪",
+    "notes": "PC: Jun 6 2023. Console: included in Bundle 4, released Sep 25 2024."
+  },
+  {
+    "id": "oceania-pack",
+    "name": "Oceania Pack",
+    "year": 2023,
+    "platforms": ["pc", "console"],
+    "emoji": "🥝",
+    "notes": "PC: Sep 19 2023. Console: included in Bundle 7, released Mar 26 2025."
+  },
+  {
+    "id": "eurasia-animal-pack",
+    "name": "Eurasia Animal Pack",
+    "year": 2023,
+    "platforms": ["pc", "console"],
+    "emoji": "🦬",
+    "notes": "PC: Dec 13 2023. Console: included in Bundle 7, released Mar 26 2025."
+  },
+  {
+    "id": "barnyard-animal-pack",
+    "name": "Barnyard Animal Pack",
+    "year": 2024,
+    "platforms": ["pc", "console"],
+    "emoji": "🐄",
+    "notes": "PC: Apr 30 2024. Console: included in Bundle 8, released May 14 2025."
+  },
+  {
+    "id": "zookeepers-animal-pack",
+    "name": "Zookeepers Animal Pack",
+    "year": 2024,
+    "platforms": ["pc", "console"],
+    "emoji": "🐆",
+    "notes": "PC: Oct 15 2024. Console: included in Bundle 8, released May 14 2025."
+  },
+  {
+    "id": "americas-animal-pack",
+    "name": "Americas Animal Pack",
+    "year": 2025,
+    "platforms": ["pc", "console"],
+    "emoji": "🦅",
+    "notes": "PC: Apr 15 2025. Console: included in Bundle 9, released Aug 5 2025."
+  },
+  {
+    "id": "asia-animal-pack",
+    "name": "Asia Animal Pack",
+    "year": 2025,
+    "platforms": ["pc", "console"],
+    "emoji": "🐘",
+    "notes": "PC: Jun 25 2025. Console: included in Bundle 9, released Aug 5 2025."
+  }
+]
